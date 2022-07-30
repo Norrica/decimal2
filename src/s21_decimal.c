@@ -313,6 +313,11 @@ void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     }
 }
 
+void mul10(uint32_t *x, uint32_t *tmp, int size) {
+    shiftl(x, size, 3);
+    shiftl(tmp, size, 1);
+    bit_add_arr(x, tmp, size);
+}
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t x[7] = {0};
     uint32_t y[7] = {0};
@@ -332,15 +337,11 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int exp_y = getBits(&value_2.bits[3], 23, 8);
     int max_exp = exp_x > exp_y ? exp_x : exp_y;
     for (int i = 0; i < max_exp; ++i) { // x * 10
-        shiftl(x, 7, 3);
-        shiftl(tmp, 7, 1);
-        bit_add_arr(x, tmp, 7);
+        mul10(x, tmp, 7);
     }
     copyArray(y, tmp, 7);
     for (int i = 0; i < max_exp; ++i) { // x * 10
-        shiftl(y, 7, 3);
-        shiftl(tmp, 7, 1);
-        bit_add_arr(y, tmp, 7);
+        mul10(y, tmp, 7);
     }
 
     bit_add_arr(z, x, 3);
