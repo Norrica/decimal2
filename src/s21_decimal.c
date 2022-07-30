@@ -10,11 +10,11 @@
 
 #define printDecimal (D)(printBits(sizeof(int) * 4, D))
 
-#define getDecimalExp(D) (getBits(&D[3], 16, 8))
-#define getDecimalSign(D) (getBits(&D[3], 31, 1))
+#define getDecimalExp(D) (getBits(&(D.bits[3]), 16, 8))
+#define getDecimalSign(D) (getBits(&(D.bits[3]), 31, 1))
 
 void printDecimalValue(s21_decimal d) {
-    char sign = getDecimalSign(d.bits) ? '-' : '+';
+    char sign = getDecimalSign(d) ? '-' : '+';
     printf("%c", sign);
     printf("%u+%u*4294967296+%u*4294967296**2/%ld\n", d.bits[0], d.bits[1], d.bits[2],
            (long int) pow(10, getBits(&d.bits[3], 16, 8)));
@@ -223,7 +223,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     if (getBits(src.bits, 31, 1)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
         return CE;
     }
-    if (getDecimalSign(src.bits)) {
+    if (getDecimalSign(src)) {
         *dst = -1 * src.bits[0];
     } else {
         *dst = src.bits[0];
@@ -353,4 +353,62 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
 
     return OK;
+}
+
+int s21_is_equal(s21_decimal num1, s21_decimal num2) {
+    s21_decimal tmp_num1 = num1, tmp_num2 = num2;
+    int ret;
+    int is_01 = is_0(num1.bits, 3);
+    int is_02 = is_0(num2.bits, 3);
+    if (is_01 && is_02) {
+        ret = 1;
+    } else if (is_01 || is_02) {
+        ret = 0;
+    } else {
+        ret = tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 :
+              tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
+              tmp_num1.bits[2] != tmp_num2.bits[2] ? 0 :
+              tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 : 1;
+    }
+    return ret;
+}
+
+int s21_is_not_equal(s21_decimal num1, s21_decimal num2) {
+    return s21_is_equal(num1, num2) ? 0 : 1;
+}
+
+int s21_is_greater_or_equal(s21_decimal num1, s21_decimal num2) {
+    return s21_is_equal(num1, num2) || s21_is_greater(num1, num2);
+}
+
+int s21_is_greater(s21_decimal x, s21_decimal y) {
+    int res = 0;
+    check_scale(&x, &y);
+    if (getDecimalSign(x) == 0 && getDecimalSign(y) == 1)
+        res = 1;
+    if (getDecimalSign(x) == 0 && getDecimalSign(y) == 0) {
+        for (int i = 2; i >= 0; i--) {
+            if (x.bits[i] > y.bits[i]) {
+                res = 1;
+                break;
+            }
+        }
+    }
+    if (getDecimalSign(x) == 1 && getDecimalSign(y) == 1) {
+        for (int i = 2; i >= 0; i--) {
+            if (x.bits[i] < y.bits[i]) {
+                res = 1;
+                break;
+            }
+        }
+    }
+    return res;
+}
+
+int s21_is_less(s21_decimal num1, s21_decimal num2) {
+    return !s21_is_greater_or_equal(num1, num2);
+}
+
+int s21_is_less_or_equal(s21_decimal num1, s21_decimal num2) {
+    return !s21_is_greater(num1, num2);
 }
