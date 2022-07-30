@@ -16,23 +16,19 @@ int main() {
     decimal aa;
     decimal bb;
     decimal rr;
-    init_0(&rr.bits,4);
-    printBits(sizeof(decimal),&rr,4);
-    setDecimalExp(&rr,0b11111111);
-    printBits(sizeof(decimal),&rr,4);
-    int exp = getDecimalExp(rr);
-    printBits(4,&exp,4);
-    //s21_from_int_to_decimal(a, &aa);
-    //s21_from_decimal_to_int(aa, &a);
-    //s21_from_int_to_decimal(b, &bb);
-    //s21_from_decimal_to_int(bb, &b);
-
-
-
-    printBits(sizeof(decimal),&rr,4);
-//    s21_from_decimal_to_int(rr, &r);
-//
-//    printf("a - %d\n",a);
-//    printf("b - %d\n",b);
-//    printf("r - %d\n",r);
+    //init_0(&rr.bits,4);
+    //printBits(sizeof(decimal),&rr,4);
+    //setDecimalExp(&rr,0b11111111);
+    //printBits(sizeof(decimal),&rr,4);
+    //int exp = getDecimalExp(rr);
+    //printBits(4,&exp,4);
+    s21_from_int_to_decimal(a, &aa);
+    s21_from_decimal_to_int(aa, &a);
+    s21_from_int_to_decimal(b, &bb);
+    s21_from_decimal_to_int(bb, &b);
+    s21_add(aa,bb,&rr);
+    s21_from_decimal_to_int(rr, &r);
+    printf("a - %d\n",a);
+    printf("b - %d\n",b);
+    printf("r - %d\n",r);
 }
