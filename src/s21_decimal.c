@@ -11,7 +11,7 @@
 #define printDecimal (D)(printBits(sizeof(int) * 4, D))
 
 int getDecimalExp(decimal d) {
-    return (d.bits[3] << 1) >> 16;
+    return (d.bits[3] << 1) >> 17;
 }
 
 void setDecimalExp(decimal *d, int exp) {
@@ -253,17 +253,18 @@ int move_scale(int cycles, s21_decimal *num) {
         return CE;
     }
     copyArray(x, num->bits, 3);
-    setBits(&(num->bits[3]), new_scale, 16, 8);
+    setDecimalExp(num,new_scale);
+    //setBits(&(num->bits[3]), new_scale, 16, 8);
     return OK;
 }
 
 int eq_scale(decimal *x, decimal *y) {
     int scale1 = getDecimalExp(*x);
     int scale2 = getDecimalExp(*y);
-    int ret;
+    int ret = 0;
     if (scale1 > scale2) {
         ret = move_scale(scale1 - scale2, y);
-    } else {
+    } else if (scale2 > scale1) {
         ret = move_scale(scale2 - scale1, x);
     }
     return ret;
@@ -385,40 +386,52 @@ void mul10(uint32_t *x, int size) {
     free(tmp);
 }
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
-    uint32_t x[7] = {0};
-    uint32_t y[7] = {0};
-
-    copyArray(value_1.bits, x, 3);
-    copyArray(value_2.bits, y, 3);
-    int exp_x = getBits(&value_1.bits[3], 23, 8);
-    int exp_y = getBits(&value_2.bits[3], 23, 8);
-    int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
-    if (exp_x < exp_y) {
-        for (int i = 0; i < exp_delta; ++i) { // x * 10
-            mul10(x, 7);
-        }
+    int s1 = getDecimalSign(value_1);
+    int s2 = getDecimalSign(value_2);
+    if (!s1 && s2) {
+        s21_negate(value_2, &value_2);
+        return s21_sub(value_1, value_2, result);
+    } else if (s1 && !s2) {
+        s21_negate(value_1, &value_1);
+        return s21_sub(value_2, value_1, result);
     } else {
-        for (int i = 0; i < exp_delta; ++i) { // y * 10
-            mul10(y, 7);
+        uint32_t x[7] = {0};
+        uint32_t y[7] = {0};
+
+        copyArray(value_1.bits, x, 3);
+        copyArray(value_2.bits, y, 3);
+        int exp_x = getBits(&value_1.bits[3], 23, 8);
+        int exp_y = getBits(&value_2.bits[3], 23, 8);
+        int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
+        if (exp_x < exp_y) {
+            for (int i = 0; i < exp_delta; ++i) { // x * 10
+                mul10(x, 7);
+            }
+        } else {
+            for (int i = 0; i < exp_delta; ++i) { // y * 10
+                mul10(y, 7);
+            }
         }
+        bit_add_arr(x, y, 3);
+        while (exp_delta > 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
+            shiftr(x, 7, 1);
+            exp_delta--;
+        }
+
+        setDecimalSign(result, s1 & s2);
+        if (exp_delta > 0b11111111 || x[3] > 0) {
+            if (getDecimalSign(*result)) {
+                return TOOSMALL;
+            } else {
+                return TOOLARGE;
+            }
+        } else {
+            for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
+            setBits(&result->bits[3], exp_delta, 23, 8);
+        }
+
+        return OK;
     }
-    bit_add_arr(x, y, 3);
-    while (exp_delta > 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
-        shiftr(x, 7, 1);
-        exp_delta--;
-    }
-
-    if (x[3] > 0) return CE;
-
-    for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
-
-    if (exp_delta > 0b11111111) {
-        return CE;
-    } else {
-        setBits(&result->bits[3], exp_delta, 23, 8);
-    }
-
-    return OK;
 }
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
@@ -461,7 +474,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         s21_negate(value_2, &value_2);
         s21_add(value_1, value_2, result);
     }
-    return ret; // TODO (bryceaet) коды на переполнение
+    return OK; // TODO (bryceaet) коды на переполнение
 }
 int s21_negate(s21_decimal value, s21_decimal *result) {
     setDecimalSign(result, !getDecimalSign(value));

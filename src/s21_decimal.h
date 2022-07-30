@@ -14,46 +14,19 @@
 #define OK 0
 #define CE 1  // Conversion Error
 
+#define TOOLARGE 1
+#define TOOSMALL 2
+#define DIVBY0 3
+
 typedef struct s21_decimal {
-    int bits[4];
+  int bits[4];
 } s21_decimal;
-
-typedef struct bits1 {
-    uint32_t bits0;
-    uint32_t bits1;
-    uint32_t bits2;
-} bits32;
-
-typedef struct bits2 {
-    uint64_t bits0;
-    uint32_t bits1;
-} bits64_32;
-
-typedef struct bits3 {
-    uint32_t bits0;
-    uint64_t bits1;
-} bits32_64;
-
-typedef union {
-    uint32_t bits[3];
-    s21_decimal d;
-    bits32 b32;
-    bits32_64 b32_64;
-    bits64_32 b64_32;
-} ultimate;
-
-typedef union {
-    float f;
-    int i;
-    struct {
-        uint32_t mantisa : 23;
-        uint32_t exponent : 8;
-        uint32_t sign : 1;
-    } parts;
-} float_cast;
-
 #define decimal s21_decimal
-
+int getDecimalSign(decimal d);
+int getDecimalExp(decimal d);
+void setDecimalExp(decimal *d, int exp);
+void setDecimalSign(decimal *d, int sign);
+void init_0(uint32_t *arr, int size);
 void printDecimalValue(s21_decimal d);
 
 void printBits(const size_t size, const void *ptr, int sep_n);
