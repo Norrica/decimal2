@@ -14,8 +14,14 @@ int getDecimalExp(decimal d) {
     return (d.bits[3] << 1) >> 16;
 }
 
+void setDecimalExp(decimal *d, int exp) {
+    setBits(&d->bits[3], exp, 16, 8);
+}
 int getDecimalSign(decimal d) {
     return d.bits[3] >> 31;
+}
+void setDecimalSign(decimal *d, int sign) {
+    setBits(&d->bits[3], sign, 31, 1);
 }
 void printDecimalValue(s21_decimal d) {
     char sign = getDecimalSign(d) ? '-' : '+';
@@ -396,6 +402,49 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
 
     return OK;
+}
+
+int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    eq_scale(&value_1, &value_2);
+    init_0(result->bits, 4);
+    if (getDecimalSign(value_1) == getDecimalSign(value_2)
+        && s21_is_greater(value_1, value_2)) { // одинаковый знак
+        if (s21_is_equal(value_1, value_2)) {
+            return 0;
+        } else if (s21_is_greater(value_1, value_2)) {
+            int num1, num2, minus = 0;
+            for (int i = 0; i < 96; i++) {
+                num1 = s21_get_bit(value_1, i);
+                num2 = s21_get_bit(value_2, i);
+                if (num1 == num2 && !minus) continue;
+                if (num2 > num1 && !minus) {
+                    s21_set_bit(result, i, 1);
+                    minus = 1;
+                } else if (num1 == num2 && minus) {
+                    s21_set_bit(result, i, 1);
+                } else if (num1 > num2 && minus) {
+                    minus = 0;
+                }
+            }
+            result->bits[SUPPORT] = value_1.bits[SUPPORT];
+            if (minus && !getDecimalSign(value_1)) { //постановка знака, при остатке еденицы в minus
+                s21_set_sign(result, 1);
+            } else if (minus && s21_get_sign(value_1)) {
+                s21_set_sign(result, 0);
+            }
+        } else {
+            s21_sub(value_2, value_1, result);
+            s21_negate(*result, result);
+        }
+    } else if (s21_get_sign(value_1) && !s21_get_sign(value_2)) { //отрицательное, минус положительное
+        s21_negate(value_1, &value_1);
+        s21_add(value_1, value_2, result);
+        s21_negate(*result, result);
+    } else { //положительное минус отрицательное
+        s21_negate(value_2, &value_2);
+        s21_add(value_1, value_2, result);
+    }
+    return res;
 }
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
