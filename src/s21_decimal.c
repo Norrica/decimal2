@@ -62,27 +62,6 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     *(uint32_t *) dest |= bits;
 }
 
-uint64_t getBits64(const void *ptr, int offset, int n) {
-    uint64_t num = *(uint64_t *) ptr;
-    uint64_t mask = 0xFFFFFFFFFFFFFFFF >> (64 - n);
-    mask <<= offset;
-    num &= mask;
-    return num >> offset;
-}
-
-void copyBits64(const void *dest, const void *src, int offset, int n) {
-    uint64_t src_num = getBits64(src, offset, n);
-    setBits64(dest, src_num, offset, n);
-}
-
-void setBits64(const void *dest, uint64_t bits, int offset, int n) {
-    uint64_t mask = 0xFFFFFFFFFFFFFFFF >> (64 - n);
-    mask <<= offset;
-    bits <<= offset;
-    bits &= mask;  // Зануляет ненужные биты
-    *(uint64_t *) dest &= ~mask;
-    *(uint64_t *) dest |= bits;
-}
 
 void flipBits(uint32_t *i) {
     uint32_t j = 0;
@@ -242,7 +221,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     if (src.bits[1] || src.bits[2]) {
         return CE;
     }
-    if (getBits(src.bits, 31, 31)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
+    if (getBits(src.bits, 31, 1)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
         return CE;
     }
     if (getDecimalSign(src.bits)) {
@@ -313,56 +292,46 @@ void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     }
 }
 
-void mul10(uint32_t *x, uint32_t *tmp, int size) {
+void mul10(uint32_t *x, int size) {
+    uint32_t *tmp = malloc(size * sizeof(uint32_t));
+    copyArray(x, tmp, size);
     shiftl(x, size, 3);
     shiftl(tmp, size, 1);
     bit_add_arr(x, tmp, size);
+    free(tmp);
 }
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t x[7] = {0};
     uint32_t y[7] = {0};
-    uint32_t z[7] = {0};
-    uint32_t tmp[7] = {0};
-
-    /*memset(x, 0, sizeof(x)); // Иначе забивается мусор
-    memset(y, 0, sizeof(y)); // Иначе забивается мусор
-    memset(z, 0, sizeof(z)); // Иначе забивается мусор
-    memset(tmp, 0, sizeof(tmp)); // Иначе забивается мусор*/
 
     copyArray(value_1.bits, x, 3);
     copyArray(value_2.bits, y, 3);
-    copyArray(x, tmp, 3);
-
     int exp_x = getBits(&value_1.bits[3], 23, 8);
     int exp_y = getBits(&value_2.bits[3], 23, 8);
-    int max_exp = exp_x > exp_y ? exp_x : exp_y;
-    for (int i = 0; i < max_exp; ++i) { // x * 10
-        mul10(x, tmp, 7);
+    int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
+    if (exp_x < exp_y) {
+        for (int i = 0; i < exp_delta; ++i) { // x * 10
+            mul10(x, 7);
+        }
+    } else {
+        for (int i = 0; i < exp_delta; ++i) { // y * 10
+            mul10(y, 7);
+        }
     }
-    copyArray(y, tmp, 7);
-    for (int i = 0; i < max_exp; ++i) { // x * 10
-        mul10(y, tmp, 7);
-    }
-
-    bit_add_arr(z, x, 3);
-    bit_add_arr(z, y, 3);
-
-    while (max_exp > 0 && !getBits(z, 0, 1)) { //TODO optimize(jarrusab)
-        shiftr(z, 7, 1);
-        max_exp--;
-    }
-
-    if (z[3] > 0) {
-        return CE;
-    }
-    for (int i = 0; i < 3; ++i) {
-        result->bits[i] = z[i];
+    bit_add_arr(x, y, 3);
+    while (exp_delta > 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
+        shiftr(x, 7, 1);
+        exp_delta--;
     }
 
-    if (max_exp > 0b11111111) {
+    if (x[3] > 0) return CE;
+
+    for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
+
+    if (exp_delta > 0b11111111) {
         return CE;
     } else {
-        setBits(&result->bits[3], max_exp, 23, 8);
+        setBits(&result->bits[3], exp_delta, 23, 8);
     }
 
     return OK;

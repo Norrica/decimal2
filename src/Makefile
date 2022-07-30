@@ -50,7 +50,7 @@ graph:
 	python3 ./graph.py
 buf:
 	gcc  s21_decimal.c buf.c -lm
-	python3 printDec.py `./a.out`
+	#python3 printDec.py `./a.out`
 
 fub:
 	gcc -g s21_decimal.c fub.c -lm -o fub.out
