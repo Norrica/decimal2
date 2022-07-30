@@ -49,6 +49,23 @@ void printBits(const size_t size, const void *ptr, int sep_n) {
 // offset - место начала среза
 // n = длина среза
 //
+
+int s21_get_bit(s21_decimal d, int i) {
+    int bit = 0;
+    unsigned int mask = 1u << (i % 32);
+    if ((d.bits[i / 32] & mask) != 0)
+        bit = 1;
+    return bit;
+}
+void s21_set_bit(s21_decimal *value, int place, int bit) {
+    unsigned int mask = 1u << (place % 32);
+    if (bit) {
+        value->bits[place / 32] |= mask;
+    } else {
+        value->bits[place / 32] &= ~mask;
+    }
+}
+
 uint32_t getBits(const void *ptr, int offset, int n) {
     uint32_t num = *(uint32_t *) ptr;
     uint32_t buf = num;
@@ -351,7 +368,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     return OK;
 }
 
-int s21_from_decimal_to_float(s21_decimal src, float *dst) { return 0; }
+//  int s21_from_decimal_to_float(s21_decimal src, float *dst) { return 0; }
 
 void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
@@ -367,7 +384,7 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
-int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
     uint32_t x[7] = {0};
     uint32_t y[7] = {0};
 
@@ -409,9 +426,9 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     init_0(result->bits, 4);
     if (getDecimalSign(value_1) == getDecimalSign(value_2)
         && s21_is_greater(value_1, value_2)) { // одинаковый знак
-        if (s21_is_equal(value_1, value_2)) {
-            return 0;
-        } else if (s21_is_greater(value_1, value_2)) {
+        if (s21_is_equal(value_1, value_2)) {              // TODO
+            return 0;                                      // TODO
+        } else if (s21_is_greater(value_1, value_2)) {     // TODO
             int num1, num2, minus = 0;
             for (int i = 0; i < 96; i++) {
                 num1 = s21_get_bit(value_1, i);
@@ -426,17 +443,17 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                     minus = 0;
                 }
             }
-            result->bits[SUPPORT] = value_1.bits[SUPPORT];
+            result->bits[3] = value_1.bits[3];
             if (minus && !getDecimalSign(value_1)) { //постановка знака, при остатке еденицы в minus
-                s21_set_sign(result, 1);
-            } else if (minus && s21_get_sign(value_1)) {
-                s21_set_sign(result, 0);
+                setDecimalSign(result, 1);
+            } else if (minus && getDecimalSign(value_1)) {
+                setDecimalSign(result, 0);
             }
         } else {
             s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
         }
-    } else if (s21_get_sign(value_1) && !s21_get_sign(value_2)) { //отрицательное, минус положительное
+    } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) { //отрицательное, минус положительное
         s21_negate(value_1, &value_1);
         s21_add(value_1, value_2, result);
         s21_negate(*result, result);
@@ -444,7 +461,11 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         s21_negate(value_2, &value_2);
         s21_add(value_1, value_2, result);
     }
-    return res;
+    return ret; // TODO (bryceaet) коды на переполнение
+}
+int s21_negate(s21_decimal value, s21_decimal *result) {
+    setDecimalSign(result, !getDecimalSign(value));
+    return OK;
 }
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {

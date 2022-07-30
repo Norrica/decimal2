@@ -97,7 +97,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst);
 
 int s21_floor(s21_decimal value, s21_decimal *result);     // 0.5 -> 0
 int s21_round(s21_decimal value, s21_decimal *result);     // 0.5 -> 0, 0.6 ->1
-int s21_truncate(s21_decimal value, s21_decimal *result);  // 0.5 -> 1
+int s21_truncate(s21_decimal value, s21_decimal *result);  // 0.5 -> 0
 int s21_negate(s21_decimal value, s21_decimal *result);    // 0.5 -> -0.5
 
 #endif  // SRC_S21_DECIMAL_H_
