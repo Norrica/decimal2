@@ -10,9 +10,13 @@
 
 #define printDecimal (D)(printBits(sizeof(int) * 4, D))
 
-#define getDecimalExp(D) (getBits(&(D.bits[3]), 16, 8))
-#define getDecimalSign(D) (getBits(&(D.bits[3]), 31, 1))
+int getDecimalExp(decimal d) {
+    return (d.bits[3] << 1) >> 16;
+}
 
+int getDecimalSign(decimal d) {
+    return d.bits[3] >> 31;
+}
 void printDecimalValue(s21_decimal d) {
     char sign = getDecimalSign(d) ? '-' : '+';
     printf("%c", sign);
@@ -203,6 +207,45 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(sum);
 }
 
+void init_0(uint32_t *arr, int size) {
+    for (int i = 0; i < size; ++i) {
+        arr[i] = 0;
+    }
+}
+
+int move_scale(int cycles, s21_decimal *num) {
+    uint32_t x[4] = {0};
+    for (int i = 0; i < cycles; ++i) {
+        //init_0(tmp, 4);
+        //copyArray(num->bits, x, 4);
+        //shiftl(x, 4, 1);
+        //bit_add_arr(tmp, x, 4);
+        //shiftl(x, 4, 2);
+        //bit_add_arr(tmp, x, 4);
+        //copyArray(tmp, num->bits, 3);
+        mul10(x, 4);
+    }
+    int new_scale = getDecimalExp(*num) + cycles;
+    if (x[3] > 0 || new_scale > 28) {
+        return CE;
+    }
+    copyArray(x, num->bits, 3);
+    setBits(&(num->bits[3]), new_scale, 16, 8);
+    return OK;
+}
+
+int eq_scale(decimal *x, decimal *y) {
+    int scale1 = getDecimalExp(*x);
+    int scale2 = getDecimalExp(*y);
+    int ret;
+    if (scale1 > scale2) {
+        ret = move_scale(scale1 - scale2, y);
+    } else {
+        ret = move_scale(scale2 - scale1, x);
+    }
+    return ret;
+}
+
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
     memset(dst, 0, sizeof(s21_decimal)); // Иначе забивается мусор
 
@@ -383,7 +426,7 @@ int s21_is_greater_or_equal(s21_decimal num1, s21_decimal num2) {
 
 int s21_is_greater(s21_decimal x, s21_decimal y) {
     int res = 0;
-    check_scale(&x, &y);
+    eq_scale(&x, &y);
     if (getDecimalSign(x) == 0 && getDecimalSign(y) == 1)
         res = 1;
     if (getDecimalSign(x) == 0 && getDecimalSign(y) == 0) {

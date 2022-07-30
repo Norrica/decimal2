@@ -64,6 +64,8 @@ void copyBits(const void *dest, const void *src, int start, int end);
 uint64_t getBits64(const void *ptr, int offset, int n);
 void copyBits64(const void *dest, const void *src, int offset, int n);
 void setBits64(const void *dest, uint64_t bits, int offset, int n);
+void mul10(uint32_t *x, int size);
+void copyArray(uint32_t *from, uint32_t *to, size_t len);
 
 void flipBits(uint32_t *i);
 int shiftl(void *object, size_t size, int n);
