@@ -62,7 +62,6 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     *(uint32_t *) dest |= bits;
 }
 
-
 void flipBits(uint32_t *i) {
     uint32_t j = 0;
     for (int k = 0; k < 32; k++) {
@@ -234,7 +233,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-    memset(dst, 0, sizeof(s21_decimal));
+    /*memset(dst, 0, sizeof(s21_decimal));
     uint32_t mant = getBits(&src, 0, 23);
     uint32_t exp = getBits(&src, 23, 8);
     uint32_t sign = getBits(&src, 31, 1);
@@ -281,6 +280,25 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     bit_add(dst->bits, result, 3);
     setBits(&dst->bits[3], dec_exp, 16, 8); // Todo - Вынести это в отдельные функции
     setBits(&dst->bits[3], sign, 31, 1); // Todo - Вынести это в отдельные функции
+    return OK;*/
+    int sign = getBits(&src, 31, 1);
+    if (sign) {
+        src *= -1;
+    }
+    char ch[100];
+    sprintf(ch, "%.5f", src);
+    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
+    if (exp > 28)
+        return CE;
+    for (int i = strlen(ch) - exp - 1; i < strlen(ch); ++i) {
+        ch[i] = ch[i + 1];
+    }
+    int res = atoi(ch);
+    s21_from_int_to_decimal(res, dst);
+    setBits(&(dst->bits[3]), exp, 16, 8);
+    if (sign)
+        setBits(&(dst->bits[3]), sign, 31, 1);
+
     return OK;
 }
 
