@@ -10,8 +10,8 @@
 #include <float.h>
 
 int main() {
-    int a = -10;
-    int b = 1;
+    int a = 120;
+    int b = 12;
     int r = 0;
     decimal aa;
     decimal bb;
@@ -26,7 +26,12 @@ int main() {
     s21_from_decimal_to_int(aa, &a);
     s21_from_int_to_decimal(b, &bb);
     s21_from_decimal_to_int(bb, &b);
-    s21_add(aa,bb,&rr);
+    s21_sub(aa,bb,&rr);
+
+
+    printDecimal(&aa);
+    printDecimal(&bb);
+    printDecimal(&rr);
     s21_from_decimal_to_int(rr, &r);
     printf("a - %d\n",a);
     printf("b - %d\n",b);

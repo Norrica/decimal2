@@ -22,6 +22,7 @@ typedef struct s21_decimal {
   int bits[4];
 } s21_decimal;
 #define decimal s21_decimal
+#define printDecimal(D) (printBits(sizeof(int) * 4, D,4))
 int getDecimalSign(decimal d);
 int getDecimalExp(decimal d);
 void setDecimalExp(decimal *d, int exp);

@@ -8,8 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define printDecimal (D)(printBits(sizeof(int) * 4, D))
-
 int getDecimalExp(decimal d) {
     return (d.bits[3] << 1) >> 17;
 }
@@ -18,7 +16,7 @@ void setDecimalExp(decimal *d, int exp) {
     setBits(&d->bits[3], exp, 16, 8);
 }
 int getDecimalSign(decimal d) {
-    return d.bits[3] >> 31;
+    return getBits(&d.bits[3], 31, 1);
 }
 void setDecimalSign(decimal *d, int sign) {
     setBits(&d->bits[3], sign, 31, 1);
@@ -98,17 +96,17 @@ void flipBits(uint32_t *i) {
 }
 int shiftl(void *object, size_t size, int n) {
     size_t len = size * 32;
-    if ((size_t)n >= len) {
+    if ((size_t) n >= len) {
         return CE;
     }
     uint32_t *arr = (uint32_t *) object;
     uint32_t *tmp = (uint32_t *) malloc(len);
     memset(tmp, 0, len);
-    for (int i = 0; (size_t)i < len - n; ++i) {
+    for (int i = 0; (size_t) i < len - n; ++i) {
         int bit = getBits(&arr[i / 32], i % 32, 1);
         setBits(&tmp[(i + n) / 32], bit, (i + n) % 32, 1);
     }
-    for (int i = 0; (size_t)i < size; ++i) {
+    for (int i = 0; (size_t) i < size; ++i) {
         arr[i] = tmp[i];
     }
     free(tmp);
@@ -117,16 +115,16 @@ int shiftl(void *object, size_t size, int n) {
 
 int shiftr(void *object, size_t size, int n) {
     size_t len = size * 32;
-    if ((size_t)n >= len)
+    if ((size_t) n >= len)
         return CE;
     uint32_t *arr = (uint32_t *) object;
     uint32_t *tmp = (uint32_t *) malloc(len);
     memset(tmp, 0, sizeof(*tmp) * size);
-    for (size_t i = len - 1; i >= (size_t)n; --i) {
+    for (size_t i = len - 1; i >= (size_t) n; --i) {
         int bit = getBits(&arr[i / 32], i % 32, 1);
         setBits(&tmp[(i - n) / 32], bit, (i - n) % 32, 1);
     }
-    for (int i = 0; (size_t)i < size; ++i) {
+    for (int i = 0; (size_t) i < size; ++i) {
         arr[i] = tmp[i];
     }
     free(tmp);
@@ -252,8 +250,8 @@ int move_scale(int cycles, s21_decimal *num) {
     if (x[3] > 0 || new_scale > 28) {
         return CE;
     }
-    copyArray(x, (uint32_t*)num->bits, 3);
-    setDecimalExp(num,new_scale);
+    copyArray(x, (uint32_t *) num->bits, 3);
+    setDecimalExp(num, new_scale);
     return OK;
 }
 
@@ -356,7 +354,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
     if (exp > 28)
         return CE;
-    for (int i = strlen(ch) - exp - 1; (size_t)i < strlen(ch); ++i) {
+    for (int i = strlen(ch) - exp - 1; (size_t) i < strlen(ch); ++i) {
         ch[i] = ch[i + 1];
     }
     int res = atoi(ch);
@@ -385,20 +383,30 @@ void mul10(uint32_t *x, int size) {
     free(tmp);
 }
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
+    init_0((uint32_t*)result->bits,4);
     int s1 = getDecimalSign(value_1);
     int s2 = getDecimalSign(value_2);
+    int sign_diff = 0;
     if (!s1 && s2) {
+        sign_diff = 1;
         s21_negate(value_2, &value_2);
-        return s21_sub(value_1, value_2, result);
-    } else if (s1 && !s2) {
+    }
+    if (s1 && !s2) {
+        sign_diff = 1;
         s21_negate(value_1, &value_1);
-        return s21_sub(value_2, value_1, result);
-    } else {
-        uint32_t x[7] = {0};
-        uint32_t y[7] = {0};
+    }
+    if (sign_diff) {
+        if (s21_is_greater(value_1, value_2)) {
+            return s21_sub(value_1, value_2, result);
+        } else if (s21_is_greater(value_2, value_1)) {
+            return s21_sub(value_2, value_1, result);
+        }
+    }
+    uint32_t x[7] = {0};
+    uint32_t y[7] = {0};
 
-    copyArray((uint32_t*)value_1.bits, x, 3);
-    copyArray((uint32_t*)value_2.bits, y, 3);
+    copyArray((uint32_t *) value_1.bits, x, 3);
+    copyArray((uint32_t *) value_2.bits, y, 3);
     int exp_x = getBits(&value_1.bits[3], 23, 8);
     int exp_y = getBits(&value_2.bits[3], 23, 8);
     int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
@@ -417,26 +425,25 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
         exp_delta--;
     }
 
-        setDecimalSign(result, s1 & s2);
-        if (exp_delta > 0b11111111 || x[3] > 0) {
-            if (getDecimalSign(*result)) {
-                return TOOSMALL;
-            } else {
-                return TOOLARGE;
-            }
+    setDecimalSign(result, s1 & s2);
+    if (exp_delta > 0b11111111 || x[3] > 0) {
+        if (getDecimalSign(*result)) {
+            return TOOSMALL;
         } else {
-            for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
-            setBits(&result->bits[3], exp_delta, 23, 8);
+            return TOOLARGE;
         }
-
-        return OK;
+    } else {
+        for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
+        setBits(&result->bits[3], exp_delta, 23, 8);
     }
+
+    return OK;
 }
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
     eq_scale(&value_1, &value_2);
-    init_0((uint32_t*)result->bits, 4);
+    init_0((uint32_t *) result->bits, 4);
     if (getDecimalSign(value_1) == getDecimalSign(value_2)) { // одинаковый знак
         if (s21_is_equal(value_1, value_2)) {
             return 0;
@@ -571,7 +578,7 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
         if (sign) setDecimalSign(result, 0);
         s21_truncate(*result, result);
         if (sign) {
-            s21_decimal tmp = {{1,0,0,0}};
+            s21_decimal tmp = {{1, 0, 0, 0}};
             s21_add(*result, tmp, result);
         }
         if (sign) setDecimalSign(result, 0);
@@ -590,7 +597,7 @@ int s21_round(s21_decimal value, s21_decimal *result) {
         if (result->bits[0] & 1) {
             result->bits[3] += 1 << 15;
             s21_truncate(*result, result);
-            s21_decimal tmp = {{1,0,0,0}};
+            s21_decimal tmp = {{1, 0, 0, 0}};
             s21_add(*result, tmp, result);
         }
         if (sign) setDecimalSign(result, 0);
