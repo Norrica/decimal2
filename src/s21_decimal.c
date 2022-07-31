@@ -98,17 +98,17 @@ void flipBits(uint32_t *i) {
 }
 int shiftl(void *object, size_t size, int n) {
     size_t len = size * 32;
-    if (n >= len) {
+    if ((size_t)n >= len) {
         return CE;
     }
     uint32_t *arr = (uint32_t *) object;
     uint32_t *tmp = (uint32_t *) malloc(len);
     memset(tmp, 0, len);
-    for (int i = 0; i < len - n; ++i) {
+    for (int i = 0; (size_t)i < len - n; ++i) {
         int bit = getBits(&arr[i / 32], i % 32, 1);
         setBits(&tmp[(i + n) / 32], bit, (i + n) % 32, 1);
     }
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; (size_t)i < size; ++i) {
         arr[i] = tmp[i];
     }
     free(tmp);
@@ -117,16 +117,16 @@ int shiftl(void *object, size_t size, int n) {
 
 int shiftr(void *object, size_t size, int n) {
     size_t len = size * 32;
-    if (n >= len)
+    if ((size_t)n >= len)
         return CE;
     uint32_t *arr = (uint32_t *) object;
     uint32_t *tmp = (uint32_t *) malloc(len);
     memset(tmp, 0, sizeof(*tmp) * size);
-    for (size_t i = len - 1; i >= n; --i) {
+    for (size_t i = len - 1; i >= (size_t)n; --i) {
         int bit = getBits(&arr[i / 32], i % 32, 1);
         setBits(&tmp[(i - n) / 32], bit, (i - n) % 32, 1);
     }
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; (size_t)i < size; ++i) {
         arr[i] = tmp[i];
     }
     free(tmp);
@@ -252,7 +252,7 @@ int move_scale(int cycles, s21_decimal *num) {
     if (x[3] > 0 || new_scale > 28) {
         return CE;
     }
-    copyArray(x, num->bits, 3);
+    copyArray(x, (uint32_t*)num->bits, 3);
     setBits(&(num->bits[3]), new_scale, 16, 8);
     return OK;
 }
@@ -356,7 +356,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
     if (exp > 28)
         return CE;
-    for (int i = strlen(ch) - exp - 1; i < strlen(ch); ++i) {
+    for (int i = strlen(ch) - exp - 1; (size_t)i < strlen(ch); ++i) {
         ch[i] = ch[i + 1];
     }
     int res = atoi(ch);
@@ -388,8 +388,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     uint32_t x[7] = {0};
     uint32_t y[7] = {0};
 
-    copyArray(value_1.bits, x, 3);
-    copyArray(value_2.bits, y, 3);
+    copyArray((uint32_t*)value_1.bits, x, 3);
+    copyArray((uint32_t*)value_2.bits, y, 3);
     int exp_x = getBits(&value_1.bits[3], 23, 8);
     int exp_y = getBits(&value_2.bits[3], 23, 8);
     int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
@@ -422,13 +422,13 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
 }
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    int ret = 0;
     eq_scale(&value_1, &value_2);
-    init_0(result->bits, 4);
-    if (getDecimalSign(value_1) == getDecimalSign(value_2)
-        && s21_is_greater(value_1, value_2)) { // одинаковый знак
-        if (s21_is_equal(value_1, value_2)) {              // TODO
-            return 0;                                      // TODO
-        } else if (s21_is_greater(value_1, value_2)) {     // TODO
+    init_0((uint32_t*)result->bits, 4);
+    if (getDecimalSign(value_1) == getDecimalSign(value_2)) { // одинаковый знак
+        if (s21_is_equal(value_1, value_2)) {
+            return 0;
+        } else if (s21_is_greater(value_1, value_2)) {
             int num1, num2, minus = 0;
             for (int i = 0; i < 96; i++) {
                 num1 = s21_get_bit(value_1, i);
@@ -455,13 +455,14 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         }
     } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) { //отрицательное, минус положительное
         s21_negate(value_1, &value_1);
-        s21_add(value_1, value_2, result);
+        ret = s21_add(value_1, value_2, result);
         s21_negate(*result, result);
     } else { //положительное минус отрицательное
         s21_negate(value_2, &value_2);
-        s21_add(value_1, value_2, result);
+        ret = s21_add(value_1, value_2, result);
     }
-    return ret; // TODO (bryceaet) коды на переполнение
+    ret = (ret != 0 && getDecimalSign(*result)) ? 2 : 1;
+    return ret;
 }
 int s21_negate(s21_decimal value, s21_decimal *result) {
     setDecimalSign(result, !getDecimalSign(value));
@@ -495,22 +496,19 @@ int s21_is_greater_or_equal(s21_decimal num1, s21_decimal num2) {
 }
 
 int s21_is_greater(s21_decimal x, s21_decimal y) {
-    int res = 0;
+    int res;
     eq_scale(&x, &y);
-    if (getDecimalSign(x) == 0 && getDecimalSign(y) == 1)
+    if (getDecimalSign(x) == 1 && getDecimalSign(y) == 0) {
+        res = 0;
+    } else if (getDecimalSign(x) == 0 && getDecimalSign(y) == 1) {
         res = 1;
-    if (getDecimalSign(x) == 0 && getDecimalSign(y) == 0) {
+    } else {
         for (int i = 2; i >= 0; i--) {
             if (x.bits[i] > y.bits[i]) {
-                res = 1;
+                res = getDecimalSign(x) ? 0 : 1;
                 break;
-            }
-        }
-    }
-    if (getDecimalSign(x) == 1 && getDecimalSign(y) == 1) {
-        for (int i = 2; i >= 0; i--) {
-            if (x.bits[i] < y.bits[i]) {
-                res = 1;
+            } else if (y.bits[i] > x.bits[i]) {
+                res = getDecimalSign(y) ? 1 : 0;
                 break;
             }
         }
@@ -524,4 +522,66 @@ int s21_is_less(s21_decimal num1, s21_decimal num2) {
 
 int s21_is_less_or_equal(s21_decimal num1, s21_decimal num2) {
     return !s21_is_greater(num1, num2);
+}
+
+int s21_truncate(s21_decimal value, s21_decimal *result) {
+    int exp = getDecimalExp(value);
+    int sign = getDecimalSign(value);
+    *result = value;
+    if (exp != 0) {
+        unsigned long long u_num;  // 18,446,744,073,709,551,615
+        int tmp_int = 0;
+        for (int i = 0; i < exp; i++) {
+            u_num = result->bits[2];
+            int j = 2;
+            for (; j >= 0; j--) {
+                if (j == 0) {
+                    result->bits[j] = u_num / 10;
+                } else {
+                    tmp_int = u_num % 10;
+                    result->bits[j] = u_num / 10;
+                    u_num = tmp_int * (4294967296) + result->bits[j - 1];
+                }
+            }
+        }
+        result->bits[3] = 0;
+    }
+
+    if (sign) setDecimalSign(result, 1);
+    return OK;
+}
+
+int s21_floor(s21_decimal value, s21_decimal *result) {
+    int exp = getDecimalExp(value);
+    *result = value;
+    if (exp > 0) {
+        int sign = getDecimalSign(*result);
+        if (sign) setDecimalSign(result, 0);
+        s21_truncate(*result, result);
+        if (sign) {
+            s21_decimal tmp = {{1,0,0,0}};
+            s21_add(*result, tmp, result);
+        }
+        if (sign) setDecimalSign(result, 0);
+    }
+    return 0;
+}
+
+int s21_round(s21_decimal value, s21_decimal *result) {
+    int exp = getDecimalExp(value);
+    *result = value;
+    if (exp > 0) {
+        int sign = getDecimalSign(*result);
+        if (sign) setDecimalSign(result, 0);
+        result->bits[3] -= 1 << 15;
+        s21_truncate(*result, result);
+        if (result->bits[0] & 1) {
+            result->bits[3] += 1 << 15;
+            s21_truncate(*result, result);
+            s21_decimal tmp = {{1,0,0,0}};
+            s21_add(*result, tmp, result);
+        }
+        if (sign) setDecimalSign(result, 0);
+    }
+    return 0;
 }

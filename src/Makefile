@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = #-Wall -Werror -Wextra -std=c11
+CFLAGS = -Wall -Werror -Wextra -std=c11
 TEST_LIBS = -lcheck -lm -lpthread #-lsubunit
 OBJECTS = s21_decimal.o
 SOURSES = s21_decimal.c
