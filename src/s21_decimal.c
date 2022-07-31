@@ -383,7 +383,7 @@ void mul10(uint32_t *x, int size) {
     free(tmp);
 }
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
-    init_0((uint32_t*)result->bits,4);
+    init_0((uint32_t *) result->bits, 4);
     int s1 = getDecimalSign(value_1);
     int s2 = getDecimalSign(value_2);
     int sign_diff = 0;
@@ -420,9 +420,9 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
         }
     }
     bit_add_arr(x, y, 3);
-    while (exp_delta > 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
+    while (exp_delta > 0 && exp_delta % 2 == 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
         shiftr(x, 7, 1);
-        exp_delta--;
+        exp_delta /= 2;
     }
 
     setDecimalSign(result, s1 & s2);
@@ -440,37 +440,53 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     return OK;
 }
 
+//int reduce_scale(decimal *d) {
+//    int exp = getDecimalExp(*d);
+//
+//    return OK;
+//}
+
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
     eq_scale(&value_1, &value_2);
     init_0((uint32_t *) result->bits, 4);
-    if (getDecimalSign(value_1) == getDecimalSign(value_2)) { // одинаковый знак
+    if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) { // одинаковый +
         if (s21_is_equal(value_1, value_2)) {
             return 0;
         } else if (s21_is_greater(value_1, value_2)) {
-            int num1, num2, minus = 0;
-            for (int i = 0; i < 96; i++) {
-                num1 = s21_get_bit(value_1, i);
-                num2 = s21_get_bit(value_2, i);
-                if (num1 == num2 && !minus) continue;
-                if (num2 > num1 && !minus) {
-                    s21_set_bit(result, i, 1);
-                    minus = 1;
-                } else if (num1 == num2 && minus) {
-                    s21_set_bit(result, i, 1);
-                } else if (num1 > num2 && minus) {
-                    minus = 0;
-                }
+            // https://iq.opengenus.org/bitwise-subtraction/
+            uint32_t borrow[7] = {0};
+            uint32_t x[7] = {0};
+            uint32_t y[7] = {0};
+            uint32_t tmp[7] = {0};
+            copyArray((uint32_t *) value_1.bits, x, 3);
+            copyArray((uint32_t *) value_2.bits, y, 3);
+            while (!is_0(y, 7)) {
+                // step 1: get the borrow bit
+                NOT(x, tmp, 7);
+                AND(tmp, y, borrow, 7);
+                // step 2: get the difference using XOR
+                XOR(x, y, x, 7);
+                // step 3: left shift borrow by 1
+                copyArray(borrow, y, 7);
+                shiftl(y, 7, 1);
             }
-            result->bits[3] = value_1.bits[3];
-            if (minus && !getDecimalSign(value_1)) { //постановка знака, при остатке еденицы в minus
-                setDecimalSign(result, 1);
-            } else if (minus && getDecimalSign(value_1)) {
-                setDecimalSign(result, 0);
-            }
+            copyArray(x, (uint32_t *) result->bits, 3);
         } else {
             s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
+        }
+    } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) { //одинаковый -
+        // -1 - (-10)
+        if (s21_is_greater(value_1, value_2)) {
+            s21_negate(value_2, &value_2);
+            s21_negate(value_1, &value_1);
+            return s21_sub(value_2, value_1, result);
+        } else if (s21_is_greater(value_2, value_1)) { // -10 - (-1)
+            s21_negate(value_2, &value_2);
+            s21_negate(value_1, &value_1);
+            s21_sub(value_1, value_2, result);
+            setDecimalSign(result, 1);
         }
     } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) { //отрицательное, минус положительное
         s21_negate(value_1, &value_1);

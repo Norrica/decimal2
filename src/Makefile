@@ -17,8 +17,8 @@ clean:
 	rm -rf ./*.o ./*.a ./a.out gcov_test *.html *.css ./GcovReport ./*.gcno ./*.gcda ./report ./*.info ./s21_decimal.so ./*.dSYM ./s21_decimal_test ./CPPLINT* test
 
 test: test.c s21_decimal.a
-	$(CC) $(CFLAGS) -c test.c $(TEST_LIBS) -o test.o
-	$(CC) $(CFLAGS) -g test.o s21_decimal.a $(TEST_LIBS) -o test
+	$(CC) -c test.c $(TEST_LIBS) -o test.o
+	$(CC) -g test.o s21_decimal.a $(TEST_LIBS) -o test
 
 gcov_report: s21_decimal.a
 	$(CC) $(CFLAGS) --coverage test.c s21_decimal.c s21_decimal.a $(TEST_LIBS) -o gcov_test

@@ -10,8 +10,8 @@
 #include <float.h>
 
 int main() {
-    int a = 120;
-    int b = 12;
+    int a = -39;
+    int b = -7;
     int r = 0;
     decimal aa;
     decimal bb;
