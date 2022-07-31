@@ -49,8 +49,7 @@ graph:
 	gcc -shared -o s21_decimal.so -fPIC s21_decimal.c
 	python3 ./graph.py
 buf:
-	gcc  s21_decimal.c buf.c -lm
-	#python3 printDec.py `./a.out`
+	gcc -g s21_decimal.c buf.c -lm -o buf.out
 
 fub:
 	gcc -g s21_decimal.c fub.c -lm -o fub.out

@@ -3,36 +3,32 @@
 //
 
 #include <stdlib.h>
+#include "s21_decimal.h"
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include <float.h>
 
 int main() {
-    //printf("%d\n",INT32_MAX);
-    //printf("%f\n",FLT_MAX_10_EXP);
-    //def fun():
-    //    a = 340282346638528859811704183484516925440.000000
-    //    b =           79228162514264337593543950335
-    //    if(convert_to_int(a))
-    //        decimal+=a
-    //    else
-    //        return fun(a/2)+fun(a/2)
-
-    double d = 0;
-    float num = 56.67;
-    printf("%.5f\n", num);
-    char ch[100];
-    sprintf(ch, "%.5f", num);
-    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1;
-    //puts(ch);
-    //printf("%d\n",exp);
-    for (int i = strlen(ch) - exp - 1; i < strlen(ch); ++i) {
-        ch[i] = ch[i + 1];
-    }
-    puts(ch);
-    int res = atoi(ch);
-
-    printf("%d\n",exp);
-    printf("%d\n",res);
+    int a = -10;
+    int b = 1;
+    int r = 0;
+    decimal aa;
+    decimal bb;
+    decimal rr;
+    //init_0(&rr.bits,4);
+    //printBits(sizeof(decimal),&rr,4);
+    //setDecimalExp(&rr,0b11111111);
+    //printBits(sizeof(decimal),&rr,4);
+    //int exp = getDecimalExp(rr);
+    //printBits(4,&exp,4);
+    s21_from_int_to_decimal(a, &aa);
+    s21_from_decimal_to_int(aa, &a);
+    s21_from_int_to_decimal(b, &bb);
+    s21_from_decimal_to_int(bb, &b);
+    s21_add(aa,bb,&rr);
+    s21_from_decimal_to_int(rr, &r);
+    printf("a - %d\n",a);
+    printf("b - %d\n",b);
+    printf("r - %d\n",r);
 }
