@@ -404,6 +404,54 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
+//unsigned divu10(unsigned n) {
+//    unsigned q, r;
+//    q = (n >> 1) + (n >> 2);
+//    q = q + (q >> 4);
+//    q = q + (q >> 8);
+//    q = q + (q >> 16);
+//    q = q >> 3;
+//    r = n - (((q << 2) + q) << 1);
+//    return q + (r > 9);
+//}
+uint32_t *make_arr(size_t size) {
+    uint32_t *q = malloc(sizeof(uint32_t) * size);
+    memset(q, 0, sizeof(uint32_t) * size);
+    return q;
+}
+void div10(uint32_t *x, int size) {
+    uint32_t *q = make_arr(size);
+    uint32_t *q4 = make_arr(size);
+    uint32_t *q8 = make_arr(size);
+    uint32_t *q16 = make_arr(size);
+    uint32_t *q3 = make_arr(size);
+    uint32_t *r = make_arr(size);
+    uint32_t *x1 = make_arr(size);
+    uint32_t *x2 = make_arr(size);
+    copyArray(x, x1, size);
+    copyArray(x, x2, size);
+    shiftr(x1, size, 1);
+    shiftr(x2, size, 2);
+    bit_add_arr(x2, x1, size);
+    copyArray(x2, q, size);
+    copyArray(q, q4, size);
+    shiftr(q4, size, 4);
+    bit_add_arr(q, q4, size);
+    copyArray(q, q8, size);
+    shiftr(q8, size, 8);
+    bit_add_arr(q, q8, size);
+    copyArray(q, q16, size);
+    shiftr(q16, size, 16);
+    bit_add_arr(q, q16, size);
+    copyArray(q, q3, size);
+    shiftr(q3, size, 3);
+    bit_add_arr(q, q3, size);
+    //TODO bit sub
+    //printBits(4*size,q,4);
+    //printBits(4*size,r,4);
+
+}
+
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
     init_0((uint32_t *) result->bits, 4);
     int s1 = getDecimalSign(value_1);

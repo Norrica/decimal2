@@ -9,8 +9,8 @@
 #include <limits.h>
 #include <float.h>
 
-unsigned divu10(unsigned n) {
-    unsigned q, r;
+unsigned long divu10(unsigned long n) {
+    unsigned long q, r;
     q = (n >> 1) + (n >> 2);
     q = q + (q >> 4);
     q = q + (q >> 8);
@@ -20,12 +20,15 @@ unsigned divu10(unsigned n) {
     return q + (r > 9);
 }
 int main() {
-    for (uint32_t i = 0; i < 100; ++i) {
+    for (uint64_t i = 0; i < 1000; ++i) {
 
 
-        printf("%u\t%u\n", divu10(i) , i / 10);
+        //printf("%lu\t%lu\n", divu10(i) , i / 10);
         printf("%u\n", divu10(i) == i / 10);
     }
+
+    //uint32_t x[7] = {0};
+    //div10(x,7);
     //uint32_t a = 60;
     //a -= a >> 1;
     //a -= a >> 1;
