@@ -255,6 +255,12 @@ int move_scale(int cycles, s21_decimal *num) {
     return OK;
 }
 
+void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
+    for (size_t i = 0; i < cycles; ++i) {
+        mul10(arr, size);
+    }
+}
+
 int eq_scale(decimal *x, decimal *y) {
     int scale1 = getDecimalExp(*x);
     int scale2 = getDecimalExp(*y);
@@ -265,6 +271,17 @@ int eq_scale(decimal *x, decimal *y) {
         ret = move_scale(scale2 - scale1, x);
     }
     return ret;
+}
+int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) {
+    int maxscale = 0;
+    if (scalex > scaley) {
+        maxscale = scalex;
+        move_scale_arr(scalex - scaley, y, size);
+    } else if (scaley > scalex) {
+        maxscale = scaley;
+        move_scale_arr(scaley - scalex, x, size);
+    }
+    return maxscale;
 }
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
