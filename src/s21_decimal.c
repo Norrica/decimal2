@@ -432,24 +432,11 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     copyArray((uint32_t *) value_2.bits, y, 3);
     int exp_x = getBits(&value_1.bits[3], 23, 8);
     int exp_y = getBits(&value_2.bits[3], 23, 8);
-    int exp_delta = exp_x > exp_y ? exp_x - exp_y : exp_y - exp_x;
-    if (exp_x < exp_y) {
-        for (int i = 0; i < exp_delta; ++i) { // x * 10
-            mul10(x, 7);
-        }
-    } else {
-        for (int i = 0; i < exp_delta; ++i) { // y * 10
-            mul10(y, 7);
-        }
-    }
+    int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
+    // TODO scale reduction
     bit_add_arr(x, y, 3);
-    while (exp_delta > 0 && exp_delta % 2 == 0 && !getBits(x, 0, 1)) { //TODO optimize(jarrusab)
-        shiftr(x, 7, 1);
-        exp_delta /= 2;
-    }
-
     setDecimalSign(result, s1 & s2);
-    if (exp_delta > 0b11111111 || x[3] > 0) {
+    if (max_scale > 0b11111111 || x[3] > 0) {
         if (getDecimalSign(*result)) {
             return TOOSMALL;
         } else {
@@ -457,7 +444,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
         }
     } else {
         for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
-        setBits(&result->bits[3], exp_delta, 23, 8);
+        setBits(&result->bits[3], max_scale, 23, 8);
     }
 
     return OK;
@@ -471,19 +458,23 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
-    eq_scale(&value_1, &value_2);
     init_0((uint32_t *) result->bits, 4);
     if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) { // одинаковый +
         if (s21_is_equal(value_1, value_2)) {
             return 0;
         } else if (s21_is_greater(value_1, value_2)) {
             // https://iq.opengenus.org/bitwise-subtraction/
+
             uint32_t borrow[7] = {0};
             uint32_t x[7] = {0};
             uint32_t y[7] = {0};
             uint32_t tmp[7] = {0};
             copyArray((uint32_t *) value_1.bits, x, 3);
             copyArray((uint32_t *) value_2.bits, y, 3);
+            int max_scale = eq_scale_arr(x, y,
+                                         getDecimalExp(value_1),
+                                         getDecimalExp(value_2),
+                                         7);
             while (!is_0(y, 7)) {
                 // step 1: get the borrow bit
                 NOT(x, tmp, 7);
@@ -494,9 +485,13 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                 copyArray(borrow, y, 7);
                 shiftl(y, 7, 1);
             }
-            copyArray(x, (uint32_t *) result->bits, 3);
+            copyArray(x, (uint32_t *) result->bits, 3); // result!!
+            setDecimalExp(result, max_scale); // result!!
+            return ret;
+            // TODO scale reduction
+            // TODO error codes
         } else {
-            s21_sub(value_2, value_1, result);
+            ret = s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
         }
     } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) { //одинаковый -
@@ -504,11 +499,11 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         if (s21_is_greater(value_1, value_2)) {
             s21_negate(value_2, &value_2);
             s21_negate(value_1, &value_1);
-            return s21_sub(value_2, value_1, result);
+            ret = s21_sub(value_2, value_1, result);
         } else if (s21_is_greater(value_2, value_1)) { // -10 - (-1)
             s21_negate(value_2, &value_2);
             s21_negate(value_1, &value_1);
-            s21_sub(value_1, value_2, result);
+            ret = s21_sub(value_1, value_2, result);
             setDecimalSign(result, 1);
         }
     } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) { //отрицательное, минус положительное
@@ -519,7 +514,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         s21_negate(value_2, &value_2);
         ret = s21_add(value_1, value_2, result);
     }
-    ret = (ret != 0 && getDecimalSign(*result)) ? 2 : 1;
+    if (ret != 0)
+        ret = getDecimalSign(*result) ? 2 : 1;
     return ret;
 }
 int s21_negate(s21_decimal value, s21_decimal *result) {
