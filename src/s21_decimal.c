@@ -95,42 +95,41 @@ void flipBits(uint32_t *i) {
     *i = j;
 }
 int shiftl(void *object, size_t size, int n) {
-    size_t len = size * 32;
-    if ((size_t) n >= len) {
-        return CE;
+    if (n > 32 * size) {
+        puts("dont shift more than arr size");
+        return 1;
     }
-    uint32_t *arr = (uint32_t *) object;
-    uint32_t *tmp = (uint32_t *) malloc(len);
-    memset(tmp, 0, len);
-    for (int i = 0; (size_t) i < len - n; ++i) {
-        int bit = getBits(&arr[i / 32], i % 32, 1);
-        setBits(&tmp[(i + n) / 32], bit, (i + n) % 32, 1);
+    for (int i = 0; i < n; ++i) {
+        shiftl1(object, size);
     }
-    for (int i = 0; (size_t) i < size; ++i) {
-        arr[i] = tmp[i];
-    }
-    free(tmp);
-    return OK;
+    return 0;
 }
 
 int shiftr(void *object, size_t size, int n) {
-    size_t len = size * 32;
-    if ((size_t) n >= len)
-        return CE;
-    uint32_t *arr = (uint32_t *) object;
-    uint32_t *tmp = (uint32_t *) malloc(len);
-    memset(tmp, 0, sizeof(*tmp) * size);
-    for (size_t i = len - 1; i >= (size_t) n; --i) {
-        int bit = getBits(&arr[i / 32], i % 32, 1);
-        setBits(&tmp[(i - n) / 32], bit, (i - n) % 32, 1);
+    if (n * 32 * size) {
+        puts("fuk you from shiftr");
+        return 1;
     }
-    for (int i = 0; (size_t) i < size; ++i) {
-        arr[i] = tmp[i];
+    for (int i = 0; i < n; ++i) {
+        shiftr1(object, size);
     }
-    free(tmp);
-    return OK;
+    return 0;
 }
 
+void shiftl1(uint32_t *arr, size_t size) {
+    for (int i = size; i >= 1; --i) {
+        arr[i] <<= 1;
+        arr[i] += (arr[i - 1] & (1u << 31)) >> 31;
+    }
+    arr[0] <<= 1;
+}
+void shiftr1(uint32_t *arr, size_t size) {
+    for (int i = 0; i < size - 1; ++i) {
+        arr[i] >>= 1;
+        arr[i] += (arr[i + 1] & (1u)) << 31;
+    }
+    arr[size - 1] >>= 1;
+}
 void OR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;

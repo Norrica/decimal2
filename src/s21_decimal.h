@@ -44,6 +44,8 @@ void copyArray(uint32_t *from, uint32_t *to, size_t len);
 void flipBits(uint32_t *i);
 int shiftl(void *object, size_t size, int n);
 int shiftr(void *object, size_t size, int n);
+void shiftl1(uint32_t *object, size_t size);
+void shiftr1(uint32_t *object, size_t size);
 int is_0(void *arr, size_t size);
 void bit_add(void *value_1, uint32_t number, size_t arr_size);
 void OR(void *arr1, void *arr2, void *res, size_t size);
