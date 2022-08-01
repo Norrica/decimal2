@@ -49,6 +49,7 @@ START_TEST(SUB_TEST) {
             }
         }
 
+
         //printf("a - %d\n",a);
         //printf("b - %d\n",b);
         //printf("r - %d\n",r);
@@ -86,8 +87,8 @@ Suite *f_example_suite_create() {
 
     TCase *p_case = tcase_create("Core");
 
-    tcase_add_test(p_case, SUB_TEST);
     tcase_set_timeout(p_case, 0);
+    tcase_add_test(p_case, SUB_TEST);
     //tcase_add_test(p_case, NEGATE_TEST) ;
     //tcase_add_test(p_case, TO_FROM_INT);
     suite_add_tcase(s1, p_case);

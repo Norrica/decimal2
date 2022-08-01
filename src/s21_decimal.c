@@ -366,7 +366,13 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     return OK;
 }
 
-//  int s21_from_decimal_to_float(s21_decimal src, float *dst) { return 0; }
+int s21_from_decimal_to_float(s21_decimal src, float *dst) {
+    // decimal d
+    // t = truncate(d)
+    // res +=t
+    // d -= t
+    // res +=d
+}
 
 void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
@@ -564,12 +570,11 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
     int sign = getDecimalSign(value);
     *result = value;
     if (exp != 0) {
-        unsigned long long u_num;  // 18,446,744,073,709,551,615
+        uint64_t u_num;  // 18,446,744,073,709,551,615
         int tmp_int = 0;
         for (int i = 0; i < exp; i++) {
             u_num = result->bits[2];
-            int j = 2;
-            for (; j >= 0; j--) {
+            for (int j = 2; j >= 0; j--) {
                 if (j == 0) {
                     result->bits[j] = u_num / 10;
                 } else {
