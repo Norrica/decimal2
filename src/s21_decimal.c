@@ -117,7 +117,7 @@ int shiftr(void *object, size_t size, int n) {
 }
 
 void shiftl1(uint32_t *arr, size_t size) {
-    for (int i = size; i >= 1; --i) {
+    for (int i = size - 1; i >= 1; --i) {
         arr[i] <<= 1;
         arr[i] += (arr[i - 1] & (1u << 31)) >> 31;
     }
