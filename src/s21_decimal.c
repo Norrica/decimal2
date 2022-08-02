@@ -25,7 +25,7 @@ void setDecimalSign(decimal *d, int sign) {
 void printDecimalValue(s21_decimal d) {
     char sign = getDecimalSign(d) ? '-' : '+';
     printf("%c", sign);
-    printf("%u+%u*4294967296+%u*4294967296**2/%ld\n", d.bits[0], d.bits[1], d.bits[2],
+    printf("%d+%d*4294967296+%d*4294967296**2/%ld\n", d.bits[0], d.bits[1], d.bits[2],
            (long int) pow(10, getBits(&d.bits[3], 16, 8)));
 }
 // 79228162514264337593543950335
@@ -97,7 +97,7 @@ void flipBits(uint32_t *i) {
 }
 
 int shiftl(void *object, size_t size, int n) {
-    if (n > 32 * size) {
+    if ((size_t) n > 32 * size) {
         puts("dont shift more than arr size");
         return 1;
     }
@@ -108,7 +108,7 @@ int shiftl(void *object, size_t size, int n) {
 }
 
 int shiftr(void *object, size_t size, int n) {
-    if (n * 32 * size) {
+    if ((size_t) n * 32 > size) {
         puts("fuk you from shiftr");
         return 1;
     }
@@ -119,7 +119,7 @@ int shiftr(void *object, size_t size, int n) {
 }
 
 void shiftl1(uint32_t *arr, size_t size) {
-    for (int i = size - 1; i >= 1; --i) {
+    for (size_t i = size - 1; i >= 1; --i) {
         arr[i] <<= 1;
         arr[i] += (arr[i - 1] & (1u << 31)) >> 31;
     }
@@ -127,7 +127,7 @@ void shiftl1(uint32_t *arr, size_t size) {
 }
 
 void shiftr1(uint32_t *arr, size_t size) {
-    for (int i = 0; i < size - 1; ++i) {
+    for (size_t i = 0; i < size - 1; ++i) {
         arr[i] >>= 1;
         arr[i] += (arr[i + 1] & (1u)) << 31;
     }
@@ -278,7 +278,7 @@ int move_scale(int cycles, s21_decimal *num) {
 }
 
 void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
-    for (size_t i = 0; i < cycles; ++i) {
+    for (int i = 0; i < cycles; ++i) {
         mul10(arr, size);
     }
 }
@@ -405,13 +405,13 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     return OK;
 }
 
-int s21_from_decimal_to_float(s21_decimal src, float *dst) {
-    // decimal d
-    // t = truncate(d)
-    // res +=t
-    // d -= t
-    // res +=d
-}
+//int s21_from_decimal_to_float(s21_decimal src, float *dst) {
+//    // decimal d
+//    // t = truncate(d)
+//    // res +=t
+//    // d -= t
+//    // res +=d
+//}
 
 void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
@@ -443,38 +443,38 @@ uint32_t *make_arr(size_t size) {
     return q;
 }
 
-void div10(uint32_t *x, int size) {
-    uint32_t *q = make_arr(size);
-    uint32_t *q4 = make_arr(size);
-    uint32_t *q8 = make_arr(size);
-    uint32_t *q16 = make_arr(size);
-    uint32_t *q3 = make_arr(size);
-    uint32_t *r = make_arr(size);
-    uint32_t *x1 = make_arr(size);
-    uint32_t *x2 = make_arr(size);
-    copyArray(x, x1, size);
-    copyArray(x, x2, size);
-    shiftr(x1, size, 1);
-    shiftr(x2, size, 2);
-    bit_add_arr(x2, x1, size);
-    copyArray(x2, q, size);
-    copyArray(q, q4, size);
-    shiftr(q4, size, 4);
-    bit_add_arr(q, q4, size);
-    copyArray(q, q8, size);
-    shiftr(q8, size, 8);
-    bit_add_arr(q, q8, size);
-    copyArray(q, q16, size);
-    shiftr(q16, size, 16);
-    bit_add_arr(q, q16, size);
-    copyArray(q, q3, size);
-    shiftr(q3, size, 3);
-    bit_add_arr(q, q3, size);
-    //TODO bit sub
-    //printBits(4*size,q,4);
-    //printBits(4*size,r,4);
-
-}
+//void div10(uint32_t *x, int size) {
+//    uint32_t *q = make_arr(size);
+//    uint32_t *q4 = make_arr(size);
+//    uint32_t *q8 = make_arr(size);
+//    uint32_t *q16 = make_arr(size);
+//    uint32_t *q3 = make_arr(size);
+//    uint32_t *r = make_arr(size);
+//    uint32_t *x1 = make_arr(size);
+//    uint32_t *x2 = make_arr(size);
+//    copyArray(x, x1, size);
+//    copyArray(x, x2, size);
+//    shiftr(x1, size, 1);
+//    shiftr(x2, size, 2);
+//    bit_add_arr(x2, x1, size);
+//    copyArray(x2, q, size);
+//    copyArray(q, q4, size);
+//    shiftr(q4, size, 4);
+//    bit_add_arr(q, q4, size);
+//    copyArray(q, q8, size);
+//    shiftr(q8, size, 8);
+//    bit_add_arr(q, q8, size);
+//    copyArray(q, q16, size);
+//    shiftr(q16, size, 16);
+//    bit_add_arr(q, q16, size);
+//    copyArray(q, q3, size);
+//    shiftr(q3, size, 3);
+//    bit_add_arr(q, q3, size);
+//    //TODO bit sub
+//    //printBits(4*size,q,4);
+//    //printBits(4*size,r,4);
+//
+//}
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
     init_0((uint32_t *) result->bits, 4);
@@ -667,16 +667,19 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
 
 int s21_floor(s21_decimal value, s21_decimal *result) {
     int exp = getDecimalExp(value);
-    *result = value;
+    *result=value;
     if (exp > 0) {
         int sign = getDecimalSign(*result);
-        if (sign) setDecimalSign(result, 0);
+        if (sign)
+            setDecimalSign(result, 0);
         s21_truncate(*result, result);
-        if (sign) {
+        //TODO
+        if (sign){
             s21_decimal tmp = {{1, 0, 0, 0}};
             s21_add(*result, tmp, result);
         }
-        if (sign) setDecimalSign(result, 0);
+        if (sign)
+            setDecimalSign(result, 0);
     }
     return 0;
 }
@@ -702,21 +705,26 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     init_0((uint32_t *) result->bits, 4);
-    uint32_t val1[7] = {0}, res[7] = {0};
+    uint32_t val1[7] = {0};
+    uint32_t val2[7] = {0};
+    uint32_t res[7] = {0};
     copyArray((uint32_t *) value_1.bits, val1, 3);
-    for (int i = 0; i < 96; i++) {
-        if (s21_get_bit(value_2, i))
-            bit_add_arr(&res, &val1, 7);
+    copyArray((uint32_t *) value_2.bits, val2, 3);
+    while (!is_0(val2, 7)) {
+        if (getBits(val2, 0, 1)) {
+            bit_add_arr(res, val1, 7);
+        }
         shiftl1(val1, 7);
+        shiftr1(val2, 7);
     }
-    if (res[3] || res[4] || res[5] || res[6]) {
-        return getDecimalSign(*result) ? 2 : 1;
-    } else {
-        copyArray(res, (uint32_t *) result, 3);
-    }
-    setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
     if (getDecimalSign(value_1) != getDecimalSign(value_2))
         setDecimalSign(result, 1);
+    if (res[3] || res[4] || res[5] || res[6]) {
+        return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
+    } else {
+        copyArray(res, (uint32_t *) result->bits, 3);
+    }
+    setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
     return 0;
 }
 
