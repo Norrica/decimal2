@@ -53,7 +53,7 @@ void shiftr1(uint32_t *object, size_t size);
 int is_0(void *arr, size_t size);
 void bit_add(void *value_1, uint32_t number, size_t arr_size);
 void bit_add_arr(void *res_arr, void *number, size_t arr_size);
-void bit_sub_arr(uint32_t *x, uint32_t *y);
+void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size);
 void OR(void *arr1, void *arr2, void *res, size_t size);
 void XOR(void *arr1, void *arr2, void *res, size_t size);
 void AND(void *arr1, void *arr2, void *res, size_t size);

@@ -213,7 +213,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
     copyArray(number, y, arr_size);
-    uint32_t *sum = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    uint32_t *sum   = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     uint32_t *carry = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
 
     XOR(x, y, sum, arr_size);
@@ -236,19 +236,26 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(sum);
 }
 
-void bit_sub_arr(uint32_t *x, uint32_t *y) {
-    uint32_t borrow[7] = {0};
-    uint32_t tmp[7] = {0};
-    while (!is_0(y, 7)) {
+void bit_sub_arr(uint32_t *res_arr, uint32_t *number,size_t arr_size) {
+    uint32_t *x = (uint32_t *) res_arr;
+    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
+    copyArray(number, y, arr_size);
+    uint32_t *borrow = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    uint32_t *tmp = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    while (!is_0(y, arr_size)) {
+        // https://iq.opengenus.org/bitwise-subtraction/
         // step 1: get the borrow bit
-        NOT(x, tmp, 7);
-        AND(tmp, y, borrow, 7);
+        NOT(x, tmp, arr_size);
+        AND(tmp, y, borrow, arr_size);
         // step 2: get the difference using XOR
-        XOR(x, y, x, 7);
+        XOR(x, y, x, arr_size);
         // step 3: left shift borrow by 1
-        copyArray(borrow, y, 7);
-        shiftl(y, 7, 1);
+        copyArray(borrow, y, arr_size);
+        shiftl(y, arr_size, 1);
     }
+    free(y);
+    free(borrow);
+    free(tmp);
 }
 void init_0(uint32_t *arr, int size) {
     for (int i = 0; i < size; ++i) {
@@ -534,8 +541,6 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         if (s21_is_equal(value_1, value_2)) {
             return 0;
         } else if (s21_is_greater(value_1, value_2)) {
-            // https://iq.opengenus.org/bitwise-subtraction/
-
             uint32_t x[7] = {0};
             uint32_t y[7] = {0};
             copyArray((uint32_t *) value_1.bits, x, 3);
@@ -544,7 +549,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                          getDecimalExp(value_1),
                                          getDecimalExp(value_2),
                                          7);
-            bit_sub_arr(x, y);
+            bit_sub_arr(x, y,7);
             copyArray(x, (uint32_t *) result->bits, 3); // result!!
             setDecimalExp(result, max_scale); // result!!
             return ret;
