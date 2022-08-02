@@ -211,10 +211,10 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
 
 void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
-    uint32_t *y = (uint32_t *) number;
-
-    uint32_t *sum = (uint32_t *) malloc(sizeof(uint32_t) * arr_size);
-    uint32_t *carry = (uint32_t *) malloc(sizeof(uint32_t) * arr_size);
+    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
+    copyArray(number, y, arr_size);
+    uint32_t *sum = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    uint32_t *carry = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
 
     XOR(x, y, sum, arr_size);
     AND(x, y, carry, arr_size);
@@ -231,6 +231,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
     }
+    free(y);
     free(carry);
     free(sum);
 }
