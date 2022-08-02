@@ -704,17 +704,24 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     init_0((uint32_t *) result->bits, 4);
-    uint32_t val1[7] = {0}, res[7] = {0};
+    uint32_t val1[7] = {0};
+    uint32_t val2[7] = {0};
+    uint32_t res[7] = {0};
     copyArray((uint32_t *) value_1.bits, val1, 3);
-    for (int i = 0; i < 96; i++) {
-        if (s21_get_bit(value_2, i))
-            bit_add_arr(&res, &val1, 7);
+    copyArray((uint32_t *) value_2.bits, val2, 3);
+    while (!is_0(val2, 7)) {
+        if (getBits(val2, 0, 1)) {
+            bit_add_arr(res, val1, 7);
+        }
         shiftl1(val1, 7);
+        shiftr1(val2, 7);
     }
+    if (getDecimalSign(value_1) != getDecimalSign(value_2))
+        setDecimalSign(result, 1);
     if (res[3] || res[4] || res[5] || res[6]) {
-        return getDecimalSign(*result) ? 2 : 1;
+        return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
     } else {
-        copyArray(res, (uint32_t *) result, 3);
+        copyArray(res, (uint32_t *) result->bits, 3);
     }
     setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
     return 0;
