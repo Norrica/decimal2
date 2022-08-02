@@ -683,22 +683,22 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 }
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    init_0((uint32_t*)result->bits, 4);
-    uint32_t nval1[7], nval2[7];
-    init_0(nval1, 7);
-    init_0(nval2, 7);
-    copyArray(value_1, nval1, 3);
+    init_0((uint32_t *) result->bits, 4);
+    uint32_t val1[7] = {0}, res[7] = {0};
+    copyArray((uint32_t *) value_1.bits, val1, 3);
     for (int i = 0; i < 96; i++) {
-        if (s21_get_bit(value_2, i)) bit_add_arr(&nval2, &nval1, 7);
-        shiftl1(nval1, 7);
+        if (s21_get_bit(value_2, i))
+            bit_add_arr(&res, &val1, 7);
+        shiftl1(val1, 7);
     }
-    if (nval2[3] || nval2[4] || nval2[5] || nval2[6]) {
+    if (res[3] || res[4] || res[5] || res[6]) {
         return getDecimalSign(*result) ? 2 : 1;
     } else {
-        copyArray(nval2, (uint32_t *) result, 3);
+        copyArray(res, (uint32_t *) result, 3);
     }
     setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
-    if (getDecimalSign(value_1) != getDecimalSign(value_2)) setDecimalSign(result, 1);
+    if (getDecimalSign(value_1) != getDecimalSign(value_2))
+        setDecimalSign(result, 1);
     return 0;
 }
 
