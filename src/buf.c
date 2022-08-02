@@ -8,7 +8,6 @@
 #include <string.h>
 #include <limits.h>
 #include <float.h>
-#define N 79228162514264337593543950336
 
 unsigned long divu10(unsigned long n) {
     unsigned long q, r;
@@ -20,44 +19,14 @@ unsigned long divu10(unsigned long n) {
     r = n - (((q << 2) + q) << 1);
     return q + (r > 9);
 }
-void print_binary(int *arr, int size) {
-    unsigned int tmp = 0;
-    for (int i = size - 1; i >= 0; i--) {
-        for (int j = 31; j >= 0; j--) {
-	    tmp = arr[i] & (1 << j);
-	    tmp >>= j;
-            printf("%u", tmp);
-        }
-	printf(" ");
-    }
-    puts("");
-}
-
 int main() {
+    for (uint64_t i = 0; i < 1000; ++i) {
 
-    uint32_t a[4];
-    a[0] = 0;
-    a[1] = 1;
-    a[2] = 0xFFFFFFFF;
-    a[3] = 2;
-    print_binary(a, 4);
-    a[0] = 0xFFFFFFFE;
-    a[1] = 0xF0000000;
-    a[2] = 0xFFFFFFFE;
-    a[3] = 0xFFFFFFFE;
-    print_binary(a, 4);
-    int x = 31;
-    printf("%u\n", (a[3] & (1 << x)) >> x);
-    /* FOR (int i = 0; i < 4; i++) { */
-    /* 	printf("%u\n", a[i]); */
-    /* } */
-    shiftl1(a, 4);
-    printf("%u\n", 0xFFFFFFFF & (1 << 31));
-    printf("%u\n", 2147483648 >> 31);
-    s21_decimal aa = {1, 0, 0, 0};
-    s21_decimal b = {0, 0, 0, 0};
-    printf("is less%d\n", s21_is_less(aa, b));
-    printf("is less%d\n", s21_is_less(b, aa));
+
+        //printf("%lu\t%lu\n", divu10(i) , i / 10);
+        printf("%u\n", divu10(i) == i / 10);
+    }
+
     //uint32_t x[7] = {0};
     //div10(x,7);
     //uint32_t a = 60;

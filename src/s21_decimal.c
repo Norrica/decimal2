@@ -35,7 +35,7 @@ void printBits(const size_t size, const void *ptr, int sep_n) {
     int i, j;
 
     for (i = size - 1; i >= 0; i--) {
-        for (j = 31; j >= 0; j--) {
+        for (j = 7; j >= 0; j--) {
             byte = (b[i] >> j) & 1;
             printf("%u", byte);
         }
@@ -106,8 +106,8 @@ int shiftl(void *object, size_t size, int n) {
 }
 
 int shiftr(void *object, size_t size, int n) {
-    if (n > 32 * size) {
-        puts("fuck you from shiftr");
+    if (n * 32 * size) {
+        puts("fuk you from shiftr");
         return 1;
     }
     for (int i = 0; i < n; ++i) {
@@ -119,8 +119,7 @@ int shiftr(void *object, size_t size, int n) {
 void shiftl1(uint32_t *arr, size_t size) {
     for (int i = size; i >= 1; --i) {
         arr[i] <<= 1;
-        /* arr[i] += (arr[i - 1] & (1u << 31)) >> 31; */
-	arr[i] += (arr[i - 1] & 0x80000000) ? 1 : 0;
+        arr[i] += (arr[i - 1] & (1u << 31)) >> 31;
     }
     arr[0] <<= 1;
 }
@@ -171,15 +170,6 @@ int is_0(void *arr, size_t size) {
         }
     }
     return 1;
-}
-
-int is_decimal_0(s21_decimal value) {
-    for (int i = 0; i < 3; i++) {
-	if (value.bits[i] != 0) {
-	    return 1;
-	}
-    }
-    return 0;
 }
 
 void bit_add(void *value_1, uint32_t number, size_t arr_size) {
@@ -694,28 +684,4 @@ int s21_round(s21_decimal value, s21_decimal *result) {
         if (sign) setDecimalSign(result, 0);
     }
     return 0;
-}
-
-int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    int exp = 0;
-    s21_decimal numerator = value_1;
-    s21_decimal separator = value_2;
-    int n = 0;
-    while ((exp < 28) || (is_decimal_0(value_1))) {
-	n = 0;
-	separator = value_2;
-	if (s21_is_less(numerator, separator)) {
-	    while (s21_is_less(numerator, shiftl(separator))) {
-		
-	    }
-	} else {
-	    while (s21_is_less(numerator, shiftl1(separator))) {
-		n++;
-	    }
-	    shiftr1(separator);
-	    n--;
-	}
-	s21_sub(numerator, separator, numerator);
-	s21_set_bit(result, n, 1);
-    }
 }
