@@ -683,7 +683,6 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 }
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    int ret;
     init_0((uint32_t*)result->bits, 4);
     uint32_t nval1[7], nval2[7];
     init_0(nval1, 7);
