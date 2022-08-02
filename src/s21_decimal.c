@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 int getDecimalExp(decimal d) {
     return (d.bits[3] << 1) >> 17;
 }
@@ -94,6 +95,7 @@ void flipBits(uint32_t *i) {
     }
     *i = j;
 }
+
 int shiftl(void *object, size_t size, int n) {
     if (n > 32 * size) {
         puts("dont shift more than arr size");
@@ -123,6 +125,7 @@ void shiftl1(uint32_t *arr, size_t size) {
     }
     arr[0] <<= 1;
 }
+
 void shiftr1(uint32_t *arr, size_t size) {
     for (int i = 0; i < size - 1; ++i) {
         arr[i] >>= 1;
@@ -130,6 +133,7 @@ void shiftr1(uint32_t *arr, size_t size) {
     }
     arr[size - 1] >>= 1;
 }
+
 void OR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -138,6 +142,7 @@ void OR(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] | a2[i];
     }
 }
+
 void XOR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -146,6 +151,7 @@ void XOR(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] ^ a2[i];
     }
 }
+
 void AND(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -154,6 +160,7 @@ void AND(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] & a2[i];
     }
 }
+
 void NOT(void *arr, void *res, size_t size) {
     uint32_t *a = (uint32_t *) arr;
     uint32_t *r = (uint32_t *) res;
@@ -201,6 +208,7 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
     free(sum);
     free(y);
 }
+
 void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) number;
@@ -227,6 +235,20 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(sum);
 }
 
+void bit_sub_arr(uint32_t *x, uint32_t *y) {
+    uint32_t borrow[7] = {0};
+    uint32_t tmp[7] = {0};
+    while (!is_0(y, 7)) {
+        // step 1: get the borrow bit
+        NOT(x, tmp, 7);
+        AND(tmp, y, borrow, 7);
+        // step 2: get the difference using XOR
+        XOR(x, y, x, 7);
+        // step 3: left shift borrow by 1
+        copyArray(borrow, y, 7);
+        shiftl(y, 7, 1);
+    }
+}
 void init_0(uint32_t *arr, int size) {
     for (int i = 0; i < size; ++i) {
         arr[i] = 0;
@@ -419,6 +441,7 @@ uint32_t *make_arr(size_t size) {
     memset(q, 0, sizeof(uint32_t) * size);
     return q;
 }
+
 void div10(uint32_t *x, int size) {
     uint32_t *q = make_arr(size);
     uint32_t *q4 = make_arr(size);
@@ -512,26 +535,15 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         } else if (s21_is_greater(value_1, value_2)) {
             // https://iq.opengenus.org/bitwise-subtraction/
 
-            uint32_t borrow[7] = {0};
             uint32_t x[7] = {0};
             uint32_t y[7] = {0};
-            uint32_t tmp[7] = {0};
             copyArray((uint32_t *) value_1.bits, x, 3);
             copyArray((uint32_t *) value_2.bits, y, 3);
             int max_scale = eq_scale_arr(x, y,
                                          getDecimalExp(value_1),
                                          getDecimalExp(value_2),
                                          7);
-            while (!is_0(y, 7)) {
-                // step 1: get the borrow bit
-                NOT(x, tmp, 7);
-                AND(tmp, y, borrow, 7);
-                // step 2: get the difference using XOR
-                XOR(x, y, x, 7);
-                // step 3: left shift borrow by 1
-                copyArray(borrow, y, 7);
-                shiftl(y, 7, 1);
-            }
+            bit_sub_arr(x, y);
             copyArray(x, (uint32_t *) result->bits, 3); // result!!
             setDecimalExp(result, max_scale); // result!!
             return ret;
@@ -565,6 +577,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         ret = getDecimalSign(*result) ? 2 : 1;
     return ret;
 }
+
 int s21_negate(s21_decimal value, s21_decimal *result) {
     setDecimalSign(result, !getDecimalSign(value));
     return OK;
