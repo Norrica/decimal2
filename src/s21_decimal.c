@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 int getDecimalExp(decimal d) {
     return (d.bits[3] << 1) >> 17;
 }
@@ -213,7 +212,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
     copyArray(number, y, arr_size);
-    uint32_t *sum   = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    uint32_t *sum = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     uint32_t *carry = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
 
     XOR(x, y, sum, arr_size);
@@ -236,7 +235,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(sum);
 }
 
-void bit_sub_arr(uint32_t *res_arr, uint32_t *number,size_t arr_size) {
+void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
     copyArray(number, y, arr_size);
@@ -396,6 +395,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         src *= -1;
     }
     char ch[100];
+    // TODO inf & nan
     sprintf(ch, "%.5f", src);
     int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
     if (exp > 28)
@@ -412,13 +412,38 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     return OK;
 }
 
-//int s21_from_decimal_to_float(s21_decimal src, float *dst) {
-//    // decimal d
-//    // t = truncate(d)
-//    // res +=t
-//    // d -= t
-//    // res +=d
-//}
+int s21_from_decimal_to_float(s21_decimal src, float *dst) {
+    
+    uint32_t x[3];
+    copyArray((uint32_t *) src.bits, x, 3);
+    int p = 0;
+    double res = 0;
+    while (!is_0(x, 3)) {
+        float d = getBits(x, 0, 1) * powf(2, p);
+        res += d;
+        shiftr1(x, 3);
+        if (res >= MAXFLOAT && !is_0(x, 3)) {
+            *dst = 0;
+            return getDecimalSign(src) ? TOOSMALL : TOOLARGE;
+        }
+        p++;
+    }
+    res -= 1; // я не знаю почему, но так надо.
+    int _exp = getDecimalExp(src);
+    res /= pow(10.0, _exp);
+    if (res > MAXFLOAT) {
+        *dst = 0;
+        return getDecimalSign(src) ? TOOSMALL : TOOLARGE;
+    }
+    res *= getDecimalSign(src) ? -1 : 1;
+    *dst = (float) res;
+    // decimal d
+    // t = truncate(d)
+    // res +=t
+    // d -= t
+    // res +=d
+    return OK;
+}
 
 void copyArray(uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
@@ -549,7 +574,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                          getDecimalExp(value_1),
                                          getDecimalExp(value_2),
                                          7);
-            bit_sub_arr(x, y,7);
+            bit_sub_arr(x, y, 7);
             copyArray(x, (uint32_t *) result->bits, 3); // result!!
             setDecimalExp(result, max_scale); // result!!
             return ret;
@@ -672,14 +697,14 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
 
 int s21_floor(s21_decimal value, s21_decimal *result) {
     int exp = getDecimalExp(value);
-    *result=value;
+    *result = value;
     if (exp > 0) {
         int sign = getDecimalSign(*result);
         if (sign)
             setDecimalSign(result, 0);
         s21_truncate(*result, result);
         //TODO
-        if (sign){
+        if (sign) {
             s21_decimal tmp = {{1, 0, 0, 0}};
             s21_add(*result, tmp, result);
         }
