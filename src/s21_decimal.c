@@ -4,10 +4,6 @@
 
 #include "s21_decimal.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
 int getDecimalExp(decimal d) {
     return (d.bits[3] << 1) >> 17;
 }
@@ -685,3 +681,25 @@ int s21_round(s21_decimal value, s21_decimal *result) {
     }
     return 0;
 }
+
+int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    int ret;
+    init_0((uint32_t*)result->bits, 4);
+    uint32_t nval1[7], nval2[7];
+    init_0(nval1, 7);
+    init_0(nval2, 7);
+    copyArray(value_1, nval1, 3);
+    for (int i = 0; i < 96; i++) {
+        if (s21_get_bit(value_2, i)) bit_add_arr(&nval2, &nval1, 7);
+        shiftl1(nval1, 7);
+    }
+    setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
+    if (getDecimalSign(value_1) != getDecimalSign(value_2)) setDecimalSign(result, 1);
+    if (nval2[3] || nval2[4] || nval2[5] || nval2[6]) {
+        ret = getDecimalSign(*result) ? 2 : 1;
+    } else {
+        copyArray(nval2, (uint32_t *) result, 3);
+    }
+    return 0;
+}
+

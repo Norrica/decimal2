@@ -7,6 +7,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 #define signMask INT32_MIN
 /*#define signMaskPos 0*/
