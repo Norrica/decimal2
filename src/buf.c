@@ -11,11 +11,37 @@
 
 void Foo();
 
+void tofromint(){
+    decimal d;
+    int check;
+    for (int i = INT32_MIN; i <= INT32_MAX; i+=1000) {
+        s21_from_int_to_decimal(i, &d);
+        s21_from_decimal_to_int(d, &check);
+        if (check != i) {
+            printf("%d != %d\n", check, i);
+        }
+    }
+}
+
+void Bar(){
+    int i = INT32_MAX;
+    printBits(4,&i,4);
+    decimal d;
+    int check;
+    s21_from_int_to_decimal(i, &d);
+    s21_from_decimal_to_int(d, &check);
+    if (check != i) {
+        printf("%d != %d\n", check, i);
+    }
+}
+
 int main() {
     //check();
     //sizes();
     //t_ds();
-    Foo();
+    //tofromint();
+    Bar();
+    //Foo();
     //t_f();
     //test();
 }

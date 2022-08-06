@@ -10,7 +10,7 @@
 
 int getDecimalExp(decimal d) {
     int i = d.bits[3] << 1;
-    int j = i>>17;
+    int j = i >> 17;
     return j;
 }
 
@@ -266,7 +266,7 @@ void init_0(uint32_t *arr, int size) {
 
 int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
-    copyArray((uint32_t*)num->bits,x,3);
+    copyArray((uint32_t *) num->bits, x, 3);
     for (int i = 0; i < cycles; ++i) {
         //init_0(tmp, 4);
         //copyArray(num->bits, x, 4);
@@ -321,10 +321,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
     memset(dst, 0, sizeof(s21_decimal)); // Иначе забивается мусор
 
     if (src < 0) {
-        dst->bits[3] = signMask;  // Задаст 31й бит в 1
-        if (src == INT32_MIN) {   // abs не работает на минимальном значении.
-            src = 0;  // Поэтому убираем знаковый бит. остальные итак 0
-        }
+        dst->bits[3] = INT32_MIN;  // Задаст 31й бит в 1
     }
     dst->bits[0] = abs(src);
 
@@ -334,13 +331,18 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     if (src.bits[1] || src.bits[2]) {
         return CE;
     }
-    if (getBits(src.bits, 31, 1)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
-        return CE;
-    }
+
+    int value = src.bits[0];
     if (getDecimalSign(src)) {
-        *dst = -1 * src.bits[0];
+        if (value == INT32_MIN)
+            *dst = INT32_MIN;
+        else
+            *dst = -1 * value;
     } else {
-        *dst = src.bits[0];
+        if (getBits(src.bits, 31, 1)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
+            return CE;
+        }
+        *dst = value;
     }
 
     return OK;
@@ -521,7 +523,7 @@ uint32_t *make_arr(size_t size) {
 //}
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
-    eq_scale(&value_1,&value_2);
+    eq_scale(&value_1, &value_2);
     init_0((uint32_t *) result->bits, 4);
     int s1 = getDecimalSign(value_1);
     int s2 = getDecimalSign(value_2);
@@ -559,10 +561,10 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
             return TOOLARGE;
         }
     } else {
-        copyArray(x,(uint32_t*)result->bits,3);
+        copyArray(x, (uint32_t *) result->bits, 3);
         //for (int i = 0; i < 3; ++i)
         //    result->bits[i] = x[i];
-        setDecimalExp(result,max_scale);
+        setDecimalExp(result, max_scale);
     }
 
     return OK;
