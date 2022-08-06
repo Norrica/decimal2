@@ -264,6 +264,7 @@ void init_0(uint32_t *arr, int size) {
 
 int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
+    copyArray((uint32_t*)num->bits,x,3);
     for (int i = 0; i < cycles; ++i) {
         //init_0(tmp, 4);
         //copyArray(num->bits, x, 4);
@@ -308,6 +309,8 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) 
     } else if (scaley > scalex) {
         maxscale = scaley;
         move_scale_arr(scaley - scalex, x, size);
+    } else {
+        maxscale = scalex;
     }
     return maxscale;
 }
@@ -395,15 +398,23 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         src *= -1;
     }
     char ch[100];
-    // TODO inf & nan
-    sprintf(ch, "%.5f", src);
-    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
-    if (exp > 28)
+
+    sprintf(ch, "%.6f", src);
+    if (strcmp("inf", ch) == 0 || strcmp("nan", ch) == 0 || strcmp("-inf", ch) == 0)
         return CE;
+    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
     for (int i = strlen(ch) - exp - 1; (size_t) i < strlen(ch); ++i) {
         ch[i] = ch[i + 1];
     }
-    int res = atoi(ch);
+    // exponent-- ch/=10
+    for (size_t i = strlen(ch) - 1; i > 0 && ch[i] == '0' && exp > 0; --i) {
+        exp--;
+        ch[i] = '\0';
+    }
+    if (exp > 28 || fabsf(src) > powf(2, 96) - 1)
+        return CE;
+    char *end;
+    int res = strtol(ch, &end, 10);
     s21_from_int_to_decimal(res, dst);
     setBits(&(dst->bits[3]), exp, 16, 8);
     if (sign)
@@ -413,7 +424,6 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 }
 
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
-    
     uint32_t x[3];
     copyArray((uint32_t *) src.bits, x, 3);
     int p = 0;
@@ -428,7 +438,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
         }
         p++;
     }
-    res -= 1; // я не знаю почему, но так надо.
+    //res -= 1; // я не знаю почему, но так надо. Но не всегда.
     int _exp = getDecimalExp(src);
     res /= pow(10.0, _exp);
     if (res > MAXFLOAT) {
@@ -509,6 +519,7 @@ uint32_t *make_arr(size_t size) {
 //}
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
+    eq_scale(&value_1,&value_2);
     init_0((uint32_t *) result->bits, 4);
     int s1 = getDecimalSign(value_1);
     int s2 = getDecimalSign(value_2);

@@ -28,32 +28,30 @@ START_TEST(SUB_TEST) {
         }
     }
 
-    //for (float i = -10; i < 10; i += 0.3) {
-    //    for (float j = -10; j < 10; j += 0.3) {
-    //        float a = i;
-    //        float b = j;
-    //        float r;
-    //        decimal aa;
-    //        decimal bb;
-    //        decimal rr;
-    //
-    //        s21_from_float_to_decimal(a, &aa);
-    //        //s21_from_decimal_to_float(aa, &a);
-    //        s21_from_float_to_decimal(b, &bb);
-    //        //s21_from_decimal_to_float(bb, &b);
-    //        s21_sub(aa, bb, &rr);
-    //        s21_from_decimal_to_float(rr, &r);
-    //        if (fabsf(r - (a - b)) > 0.1) {
-    //            printf("%f != (%f) - (%f) == (%f)\n", r, a, b, a - b);
-    //            ck_assert_int_eq(r, a - b);
-    //        }
-    //    }
-    //
-    //
-    //    //printf("a - %d\n",a);
-    //    //printf("b - %d\n",b);
-    //    //printf("r - %d\n",r);
-    //}
+    for (float i = -10; i < 10; i += 0.3) {
+        for (float j = -10; j < 10; j += 0.3) {
+            float a = i;
+            float b = j;
+            float r;
+            decimal aa;
+            decimal bb;
+            decimal rr;
+
+            s21_from_float_to_decimal(a, &aa);
+            //s21_from_decimal_to_float(aa, &a);
+            s21_from_float_to_decimal(b, &bb);
+            //s21_from_decimal_to_float(bb, &b);
+            s21_sub(aa, bb, &rr);
+            s21_from_decimal_to_float(rr, &r);
+            if (fabsf(r - (a - b)) > 0.1) {
+                printf("%f != (%f) - (%f) == (%f)\n", r, a, b, a - b);
+                ck_assert_float_eq_tol(r, a - b, 0.1);
+            }
+            //printf("a - %d\n",a);
+            //printf("b - %d\n",b);
+            //printf("r - %d\n",r);
+        }
+    }
 }
 END_TEST
 
@@ -83,7 +81,7 @@ START_TEST(NEGATE_TEST) {
 }
 END_TEST
 
-START_TEST(MUL_TEST){
+START_TEST(MUL_TEST) {
     for (int i = -100; i < 100; ++i) {
         for (int j = -100; j < 100; ++j) {
             int a = i;
@@ -113,8 +111,8 @@ Suite *f_example_suite_create() {
     TCase *p_case = tcase_create("Core");
 
     tcase_set_timeout(p_case, 0);
-    //tcase_add_test(p_case, SUB_TEST);
-    tcase_add_test(p_case, MUL_TEST);
+    tcase_add_test(p_case, SUB_TEST);
+    //tcase_add_test(p_case, MUL_TEST);
     //tcase_add_test(p_case, NEGATE_TEST) ;
     //tcase_add_test(p_case, TO_FROM_INT);
     suite_add_tcase(s1, p_case);
