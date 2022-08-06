@@ -45,11 +45,6 @@ void printBits(const size_t size, const void *ptr, int sep_n) {
     }
     puts("");
 }
-// Возвращает новый срез битов из 32х других,
-// offset - место начала среза
-// n = длина среза
-//
-
 int s21_get_bit(s21_decimal d, int i) {
     int bit = 0;
     unsigned int mask = 1u << (i % 32);
@@ -331,7 +326,6 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     if (src.bits[1] || src.bits[2]) {
         return CE;
     }
-
     int value = src.bits[0];
     if (getDecimalSign(src)) {
         if (value == INT32_MIN)

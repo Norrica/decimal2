@@ -58,7 +58,7 @@ END_TEST
 START_TEST(TO_FROM_INT) {
     decimal d;
     int check;
-    for (int i = INT32_MIN; i <= INT32_MAX; ++i) {
+    for (int i = -100; i < 100; i++) {
         s21_from_int_to_decimal(i, &d);
         s21_from_decimal_to_int(d, &check);
         if (check != i) {
@@ -99,7 +99,7 @@ START_TEST(MUL_TEST) {
             s21_from_decimal_to_int(rr, &r);
             if (r != a * b) {
                 printf("%d != (%d) * (%d) == (%d)\n", r, a, b, a * b);
-                //ck_assert_int_eq(r, a * b);
+                ck_assert_int_eq(r, a * b);
             }
         }
     }
@@ -118,9 +118,9 @@ START_TEST(MUL_TEST) {
             //s21_from_decimal_to_float(bb, &b);
             s21_mul(aa, bb, &rr);
             s21_from_decimal_to_float(rr, &r);
-            if (fabsf(r - (a * b)) > 0.0001) {
-                printf("%f != (%f) & (%f) == (%f)\n", r, a, b, a * b);
-                //ck_assert_float_eq_tol(r, a * b, 0.0001);
+            if (fabsf(r - (a * b)) > 0.001) {
+                printf("%f != (%f) * (%f) == (%f)\n", r, a, b, a * b);
+                ck_assert_float_eq_tol(r, a * b, 0.001);
             }
             //printf("a - %d\n",a);
             //printf("b - %d\n",b);
@@ -135,9 +135,9 @@ Suite *f_example_suite_create() {
     TCase *p_case = tcase_create("Core");
 
     tcase_set_timeout(p_case, 0);
-    //tcase_add_test(p_case, SUB_TEST);
-    //tcase_add_test(p_case, MUL_TEST);
-    //tcase_add_test(p_case, NEGATE_TEST) ;
+    tcase_add_test(p_case, SUB_TEST);
+    tcase_add_test(p_case, MUL_TEST);
+    tcase_add_test(p_case, NEGATE_TEST) ;
     tcase_add_test(p_case, TO_FROM_INT);
     suite_add_tcase(s1, p_case);
     return s1;
