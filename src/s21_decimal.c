@@ -9,7 +9,9 @@
 #include <string.h>
 
 int getDecimalExp(decimal d) {
-    return (d.bits[3] << 1) >> 17;
+    int i = d.bits[3] << 1;
+    int j = i>>17;
+    return j;
 }
 
 void setDecimalExp(decimal *d, int exp) {
@@ -544,8 +546,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
 
     copyArray((uint32_t *) value_1.bits, x, 3);
     copyArray((uint32_t *) value_2.bits, y, 3);
-    int exp_x = getBits(&value_1.bits[3], 23, 8);
-    int exp_y = getBits(&value_2.bits[3], 23, 8);
+    int exp_x = getDecimalExp(value_1);
+    int exp_y = getDecimalExp(value_2);
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
     // TODO scale reduction
     bit_add_arr(x, y, 3);
@@ -557,8 +559,10 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
             return TOOLARGE;
         }
     } else {
-        for (int i = 0; i < 3; ++i) result->bits[i] = x[i];
-        setBits(&result->bits[3], max_scale, 23, 8);
+        copyArray(x,(uint32_t*)result->bits,3);
+        //for (int i = 0; i < 3; ++i)
+        //    result->bits[i] = x[i];
+        setDecimalExp(result,max_scale);
     }
 
     return OK;
