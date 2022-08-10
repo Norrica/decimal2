@@ -175,6 +175,26 @@ END_TEST
 
 
 START_TEST(MUL_TEST) {
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal result;
+    int res = s21_mul(test1, test2, &result);
+    ck_assert_int_eq(res, 2);
+
+    s21_negate(test1, &test1);
+    res = s21_mul(test1, test2, &result);
+    ck_assert_int_eq(res, 1);
+
+    init_0((uint32_t *)test2.bits, 3);
+    test2.bits[0] = 1;
+    setDecimalExp(&test2, 28);
+    res = s21_mul(test1, test2, &result);
+    ck_assert_int_eq(result.bits[3], 28 << 15);
+    ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
+    ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
+    ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
+    ck_assert_int_eq(res, 0);
+
     for (int i = -100; i < 100; ++i) {
         for (int j = -100; j < 100; ++j) {
             int a = i;
@@ -222,6 +242,7 @@ START_TEST(MUL_TEST) {
     }
 }
 END_TEST
+
 Suite *f_example_suite_create() {
     Suite *s1 = suite_create("Test_decimal");
 
