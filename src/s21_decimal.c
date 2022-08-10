@@ -634,6 +634,8 @@ int s21_is_equal(s21_decimal num1, s21_decimal num2) {
         ret = 1;
     } else if (is_01 || is_02) {
         ret = 0;
+    } else if (getDecimalSign(num1) != getDecimalSign(num2)) {
+        ret = 0;
     } else {
         ret = tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 :
               tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
@@ -652,7 +654,7 @@ int s21_is_greater_or_equal(s21_decimal num1, s21_decimal num2) {
 }
 
 int s21_is_greater(s21_decimal x, s21_decimal y) {
-    int res;
+    int res = 0;
     eq_scale(&x, &y);
     if (getDecimalSign(x) == 1 && getDecimalSign(y) == 0) {
         res = 0;
