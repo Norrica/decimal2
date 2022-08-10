@@ -344,53 +344,53 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     /*memset(dst, 0, sizeof(s21_decimal));
-    uint32_t mant = getBits(&src, 0, 23);
-    uint32_t exp = getBits(&src, 23, 8);
-    uint32_t sign = getBits(&src, 31, 1);
-    int bin_exp = exp - 127;
-    if (bin_exp > 96 || bin_exp < -96) {
-        return CE;
-    }
-    int curr_bit_pos = 0;
-    uint64_t result;
+      uint32_t mant = getBits(&src, 0, 23);
+      uint32_t exp = getBits(&src, 23, 8);
+      uint32_t sign = getBits(&src, 31, 1);
+      int bin_exp = exp - 127;
+      if (bin_exp > 96 || bin_exp < -96) {
+      return CE;
+      }
+      int curr_bit_pos = 0;
+      uint64_t result;
 
-    result = 1 * pow(2, bin_exp--);
-    printf("%lu\n", result);
-    bit_add(dst->bits, result, 3);
-    while (bin_exp >= 0) {
-        uint32_t bit = getBits(&mant, 22 - curr_bit_pos++, 1);
-        result = bit * pow(2, bin_exp);
-        printf("%lu\n", result);
-        // TODO Проверить что использовать 3 вместо 4 можно
-        bit_add(dst->bits, result, 3);
-        bin_exp--;
-    }
-    //result = 0;
-    int last_whole_bit_pos = curr_bit_pos;
-    int last_dec_bit_pos = curr_bit_pos;
-    int dec_exp;
-    double buf_res;
-    int power = 10;
-    for (; curr_bit_pos <= 23; ++curr_bit_pos) { // Проверить , < or <=.
-        uint32_t bit = getBits(&mant, 23 - curr_bit_pos, 1);
-        if (bit == 1) {
-            last_dec_bit_pos = curr_bit_pos;
-        }
-        buf_res = bit * pow(2, bin_exp);
-        buf_res *= power; //Todo 10,100,1000...
-        result *= 10; //Todo 10,100,1000...
+      result = 1 * pow(2, bin_exp--);
+      printf("%lu\n", result);
+      bit_add(dst->bits, result, 3);
+      while (bin_exp >= 0) {
+      uint32_t bit = getBits(&mant, 22 - curr_bit_pos++, 1);
+      result = bit * pow(2, bin_exp);
+      printf("%lu\n", result);
+      // TODO Проверить что использовать 3 вместо 4 можно
+      bit_add(dst->bits, result, 3);
+      bin_exp--;
+      }
+      //result = 0;
+      int last_whole_bit_pos = curr_bit_pos;
+      int last_dec_bit_pos = curr_bit_pos;
+      int dec_exp;
+      double buf_res;
+      int power = 10;
+      for (; curr_bit_pos <= 23; ++curr_bit_pos) { // Проверить , < or <=.
+      uint32_t bit = getBits(&mant, 23 - curr_bit_pos, 1);
+      if (bit == 1) {
+      last_dec_bit_pos = curr_bit_pos;
+      }
+      buf_res = bit * pow(2, bin_exp);
+      buf_res *= power; //Todo 10,100,1000...
+      result *= 10; //Todo 10,100,1000...
 
-        result += (uint64_t) buf_res;
-        printf("%lu\n", result);
-        power *= 10;
-        bin_exp--;
-    }
-    //bit_add(dst->bits, result, 3);
-    dec_exp = last_dec_bit_pos - last_whole_bit_pos;
-    bit_add(dst->bits, result, 3);
-    setBits(&dst->bits[3], dec_exp, 16, 8); // Todo - Вынести это в отдельные функции
-    setBits(&dst->bits[3], sign, 31, 1); // Todo - Вынести это в отдельные функции
-    return OK;*/
+      result += (uint64_t) buf_res;
+      printf("%lu\n", result);
+      power *= 10;
+      bin_exp--;
+      }
+      //bit_add(dst->bits, result, 3);
+      dec_exp = last_dec_bit_pos - last_whole_bit_pos;
+      bit_add(dst->bits, result, 3);
+      setBits(&dst->bits[3], dec_exp, 16, 8); // Todo - Вынести это в отдельные функции
+      setBits(&dst->bits[3], sign, 31, 1); // Todo - Вынести это в отдельные функции
+      return OK;*/
     int sign = getBits(&src, 31, 1);
     if (sign) {
         src *= -1;
@@ -636,9 +636,9 @@ int s21_is_equal(s21_decimal num1, s21_decimal num2) {
         ret = 0;
     } else {
         ret = tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 :
-              tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
-              tmp_num1.bits[2] != tmp_num2.bits[2] ? 0 :
-              tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 : 1;
+	    tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
+	    tmp_num1.bits[2] != tmp_num2.bits[2] ? 0 :
+	    tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 : 1;
     }
     return ret;
 }
@@ -769,3 +769,26 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return 0;
 }
 
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    setDecimalExp(result, 0);
+    s21_decimal tmp;
+    int count = 0;
+    while (!is_0(&value_1.bits, 3)) {
+	if (s21_is_less(value_1, value_2)) {
+	    if (getDecimalExp(*result) > 28) {
+		/* bank round and abort */
+	    } else {
+		s21_from_int_to_decimal(10, &tmp);
+		s21_mul(value_1, tmp, &value_1);
+		count++;
+		continue;
+	    }
+	} else {
+	    while (s21_is_less(value_2, value_1)) {
+		shiftl1(value_2.bits, 3);
+	    }
+	    s21_sub(value_1, value_2, &value_1);
+	}
+    }
+    return 0;
+}

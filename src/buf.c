@@ -40,7 +40,13 @@ int main() {
     //sizes();
     //t_ds();
     //tofromint();
-    Bar();
+    //Bar();
+    s21_decimal tmp1;
+    s21_decimal tmp2;
+    s21_decimal tmp3;
+    s21_from_int_to_decimal(1, &tmp1);
+    s21_from_int_to_decimal(5, &tmp2);
+    s21_div(tmp1, tmp2, &tmp3);
     //Foo();
     //t_f();
     //test();
