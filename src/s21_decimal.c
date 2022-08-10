@@ -765,7 +765,12 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     } else {
         copyArray(res, (uint32_t *) result->bits, 3);
     }
-    setDecimalExp(result, getDecimalExp(value_1) + getDecimalExp(value_2));
-    return 0;
+    int exp = getDecimalExp(value_1) + getDecimalExp(value_2);
+    if (exp > 28) {
+        return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
+    } else {
+        setDecimalExp(result, exp);
+    }
+    return OK;
 }
 
