@@ -511,6 +511,7 @@ void div10(uint32_t *x, int size) {
     shiftr(x2, size, 2);
     bit_add_arr(x2, x1, size);
     copyArray(x2, q, size);
+    // TODO цикл до 48:
     // q += (q >> 4);
     copyArray(q, q4, size);
     shiftr(q4, size, 4);
