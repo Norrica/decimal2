@@ -522,19 +522,36 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     int s1 = getDecimalSign(value_1);
     int s2 = getDecimalSign(value_2);
     int sign_diff = 0;
+    int res = OK;
     if (!s1 && s2) {
         sign_diff = 1;
+        //puts("neg");
+        //printBits(16,&value_2,4);
         s21_negate(value_2, &value_2);
+        //puts("after neg");
+        //printBits(16,&value_2,4);
     }
     if (s1 && !s2) {
         sign_diff = 1;
         s21_negate(value_1, &value_1);
+        puts("DBG");
     }
     if (sign_diff) {
         if (s21_is_greater(value_1, value_2)) {
-            return s21_sub(value_1, value_2, result);
+            //printBits(16,result,4);
+            res =  s21_sub(value_1, value_2, result);
+            //printBits(16,result,4);
+            s21_negate(*result, result);
+            //printBits(16,result,4);
+            return res;
+
         } else if (s21_is_greater(value_2, value_1)) {
-            return s21_sub(value_2, value_1, result);
+            res = s21_sub(value_2, value_1, result);
+            s21_negate(*result, result);
+            return res;
+        } else{
+            init_0(result->bits,4);
+            return OK;
         }
     }
     uint32_t x[7] = {0};
@@ -561,7 +578,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
         setDecimalExp(result, max_scale);
     }
 
-    return OK;
+    return res;
 }
 
 //int reduce_scale(decimal *d) {
@@ -613,6 +630,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     } else { //положительное минус отрицательное
         s21_negate(value_2, &value_2);
         ret = s21_add(value_1, value_2, result);
+        s21_negate(*result, result);
     }
     if (ret != 0)
         ret = getDecimalSign(*result) ? 2 : 1;
