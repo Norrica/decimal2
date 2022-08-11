@@ -11,10 +11,10 @@
 
 void Foo();
 
-void tofromint(){
+void tofromint() {
     decimal d;
     int check;
-    for (int i = INT32_MIN; i <= INT32_MAX; i+=1000) {
+    for (int i = INT32_MIN; i <= INT32_MAX; i += 1000) {
         s21_from_int_to_decimal(i, &d);
         s21_from_decimal_to_int(d, &check);
         if (check != i) {
@@ -23,15 +23,31 @@ void tofromint(){
     }
 }
 
-void Bar(){
-    int i = INT32_MAX;
-    printBits(4,&i,4);
-    decimal d;
-    int check;
-    s21_from_int_to_decimal(i, &d);
-    s21_from_decimal_to_int(d, &check);
-    if (check != i) {
-        printf("%d != %d\n", check, i);
+void Bar() {
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
+    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
+    s21_decimal result;
+
+    int res = s21_sub(test1, test2, &result);
+    if (res == 0) {
+        puts("OK 0");
+    } else {
+        puts("FAIL 0");
+    }
+
+    test2.bits[3] = 0;
+    res = s21_sub(test1, test2, &result);
+    if (res == 2) {
+        puts("OK 2");
+    } else {
+        puts("FAIL 2");
+    }
+
+    res = s21_sub(test2, test1, &result);
+    if (res == 1) {
+        puts("OK 1");
+    } else {
+        puts("FAIL 1");
     }
 }
 

@@ -546,7 +546,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     int exp_y = getDecimalExp(value_2);
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
     // TODO scale reduction
-    bit_add_arr(x, y, 3);
+    bit_add_arr(x, y, 7);
     setDecimalSign(result, s1 & s2);
     if (max_scale > 0b11111111 || x[3] > 0) {
         if (getDecimalSign(*result)) {

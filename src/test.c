@@ -6,8 +6,8 @@
 #include "s21_decimal.h"
 
 START_TEST(SUB_TEST) {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
-    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
+    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
     s21_decimal result;
 
     int res = s21_sub(test1, test2, &result);
@@ -20,8 +20,8 @@ START_TEST(SUB_TEST) {
     res = s21_sub(test2, test1, &result);
     ck_assert_int_eq(res, 1);
 
-    init_0((uint32_t*)test1.bits, 3);
-    init_0((uint32_t*)test2.bits, 3);
+    init_0((uint32_t *) test1.bits, 3);
+    init_0((uint32_t *) test2.bits, 3);
     test1.bits[0] = 1;
     test2.bits[2] = 1;
     s21_sub(test2, test1, &result);
@@ -31,10 +31,9 @@ START_TEST(SUB_TEST) {
     s21_sub(test1, test2, &result);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF - 1);
-    ck_assert_int_eq(result.bits[3], 1 << 31);
+    ck_assert_int_eq(result.bits[3], 1u << 31);
 
-
-        for (int i = -100; i < 100; ++i) {
+    for (int i = -100; i < 100; ++i) {
         for (int j = -100; j < 100; ++j) {
             int a = i;
             int b = j;
@@ -84,8 +83,8 @@ START_TEST(SUB_TEST) {
 END_TEST
 
 START_TEST(ADD_TEST) {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
-    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
+    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
     s21_decimal result;
     int res = s21_add(test1, test2, &result);
     ck_assert_int_eq(res, 2);
@@ -94,15 +93,14 @@ START_TEST(ADD_TEST) {
     s21_add(test1, test2, &result);
     for (int i = 0; i < 3; ++i) ck_assert_int_eq(result.bits[i], 0);
 
-
     test1.bits[3] = 0;
     res = s21_add(test1, test2, &result);
     ck_assert_int_eq(res, 1);
 
-    init_0((uint32_t*)test1.bits, 3);
-    init_0((uint32_t*)test2.bits, 3);
+    init_0((uint32_t *) test1.bits, 3);
+    init_0((uint32_t *) test2.bits, 3);
     test1.bits[0] = 1;
-    test1.bits[3] = 1 << 31;
+    test1.bits[3] = 1u << 31;
     test2.bits[2] = 1;
     s21_add(test2, test1, &result);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
@@ -112,7 +110,7 @@ START_TEST(ADD_TEST) {
     s21_negate(test2, &test2);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
-    ck_assert_int_eq(result.bits[3], 1 << 31);
+    ck_assert_int_eq(result.bits[3], 1u << 31);
 }
 END_TEST
 
@@ -143,7 +141,7 @@ START_TEST(NEGATE_TEST) {
 END_TEST
 
 START_TEST(GREATER_TEST) {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
     s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     int res = s21_is_greater(test1, test2);
     ck_assert_int_eq(res, 0);
@@ -158,7 +156,7 @@ START_TEST(GREATER_TEST) {
 END_TEST
 
 START_TEST(EQUAL_TEST) {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
     s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     int res = s21_is_equal(test1, test2);
     ck_assert_int_eq(res, 0);
@@ -171,9 +169,8 @@ START_TEST(EQUAL_TEST) {
 }
 END_TEST
 
-
 START_TEST(MUL_TEST) {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1<<31}};
+    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
     s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     s21_decimal result;
     int res = s21_mul(test1, test2, &result);
@@ -183,7 +180,7 @@ START_TEST(MUL_TEST) {
     res = s21_mul(test1, test2, &result);
     ck_assert_int_eq(res, 1);
 
-    init_0((uint32_t *)test2.bits, 3);
+    init_0((uint32_t *) test2.bits, 3);
     test2.bits[0] = 1;
     setDecimalExp(&test2, 28);
     res = s21_mul(test1, test2, &result);
@@ -254,7 +251,7 @@ Suite *f_example_suite_create() {
     //tcase_add_test(p_case, DIV_TEST);
     //tcase_add_test(p_case, MOD_TEST);
     tcase_add_test(p_case, MUL_TEST);
-    tcase_add_test(p_case, NEGATE_TEST) ;
+    tcase_add_test(p_case, NEGATE_TEST);
     tcase_add_test(p_case, TO_FROM_INT);
     suite_add_tcase(s1, p_case);
     return s1;
