@@ -298,6 +298,16 @@ int eq_scale(decimal *x, decimal *y) {
     }
     return ret;
 }
+
+int reduce_scale(decimal *x){
+    int scale = getDecimalExp(*x);
+    //while ()
+    //TODO check x mod 10
+    div10(x,3);
+    scale--;
+    return 1;
+}
+
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) {
     int maxscale = 0;
     if (scalex > scaley) {
@@ -511,7 +521,6 @@ void div10(uint32_t *x, int size) {
     shiftr(x2, size, 2);
     bit_add_arr(x2, x1, size);
     copyArray(x2, q, size);
-    // TODO цикл до 48:
     // q += (q >> 4);
     copyArray(q, q4, size);
     shiftr(q4, size, 4);
