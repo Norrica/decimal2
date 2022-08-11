@@ -534,17 +534,12 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     if (s1 && !s2) {
         sign_diff = 1;
         s21_negate(value_1, &value_1);
-        puts("DBG");
     }
     if (sign_diff) {
         if (s21_is_greater(value_1, value_2)) {
-            //printBits(16,result,4);
             res =  s21_sub(value_1, value_2, result);
-            //printBits(16,result,4);
             s21_negate(*result, result);
-            //printBits(16,result,4);
             return res;
-
         } else if (s21_is_greater(value_2, value_1)) {
             res = s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
