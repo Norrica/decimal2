@@ -104,7 +104,7 @@ int shiftl(void *object, size_t size, int n) {
 }
 
 int shiftr(void *object, size_t size, int n) {
-    if ((size_t) n * 32 > size) {
+    if ((size_t) n > (size * 32)) {
         puts("fuk you from shiftr");
         return 1;
     }
@@ -483,38 +483,85 @@ uint32_t *make_arr(size_t size) {
     return q;
 }
 
-//void div10(uint32_t *x, int size) {
-//    uint32_t *q = make_arr(size);
-//    uint32_t *q4 = make_arr(size);
-//    uint32_t *q8 = make_arr(size);
-//    uint32_t *q16 = make_arr(size);
-//    uint32_t *q3 = make_arr(size);
-//    uint32_t *r = make_arr(size);
-//    uint32_t *x1 = make_arr(size);
-//    uint32_t *x2 = make_arr(size);
-//    copyArray(x, x1, size);
-//    copyArray(x, x2, size);
-//    shiftr(x1, size, 1);
-//    shiftr(x2, size, 2);
-//    bit_add_arr(x2, x1, size);
-//    copyArray(x2, q, size);
-//    copyArray(q, q4, size);
-//    shiftr(q4, size, 4);
-//    bit_add_arr(q, q4, size);
-//    copyArray(q, q8, size);
-//    shiftr(q8, size, 8);
-//    bit_add_arr(q, q8, size);
-//    copyArray(q, q16, size);
-//    shiftr(q16, size, 16);
-//    bit_add_arr(q, q16, size);
-//    copyArray(q, q3, size);
-//    shiftr(q3, size, 3);
-//    bit_add_arr(q, q3, size);
-//    //TODO bit sub
-//    //printBits(4*size,q,4);
-//    //printBits(4*size,r,4);
-//
-//}
+void div10(uint32_t *x, int size) {
+    //    unsigned q, r,tmp;
+    //    q = (x >> 1) + (x >> 2);
+    //    q += (q >> 4);
+    //    q += (q >> 8);
+    //    q += (q >> 16);
+    //    q = q >> 3;
+    //    tmp = q + (q << 2);
+    //    r = x - (tmp << 1);
+    //    //printf("%u\n",r);
+    //    return q + (r > 9);
+
+    uint32_t *q = make_arr(size);
+    uint32_t *q2 = make_arr(size);
+    uint32_t *q4 = make_arr(size);
+    uint32_t *q8 = make_arr(size);
+    uint32_t *q16 = make_arr(size);
+    uint32_t *q3 = make_arr(size);
+    uint32_t *r = make_arr(size);
+    uint32_t *x1 = make_arr(size);
+    uint32_t *x2 = make_arr(size);
+    // q = (n >> 1) + (n >> 2);
+    copyArray(x, x1, size);
+    copyArray(x, x2, size);
+    shiftr(x1, size, 1);
+    shiftr(x2, size, 2);
+    bit_add_arr(x2, x1, size);
+    copyArray(x2, q, size);
+    // q += (q >> 4);
+    copyArray(q, q4, size);
+    shiftr(q4, size, 4);
+    bit_add_arr(q, q4, size);
+    // q += (q >> 8);
+    copyArray(q, q8, size);
+    shiftr(q8, size, 8);
+    bit_add_arr(q, q8, size);
+    // q += (q >> 16);
+    copyArray(q, q16, size);
+    shiftr(q16, size, 16);
+    bit_add_arr(q, q16, size);
+    // q = q >> 3;
+    shiftr(q, size, 3);
+    // tmp = q + (q << 2);
+    uint32_t *tmp = make_arr(size);
+    copyArray(q, q2, size);
+    shiftl(q2, size, 2);
+    bit_add_arr(tmp, q, size);
+    bit_add_arr(tmp, q2, size);
+    // r = x - (tmp << 1);
+    uint32_t *tmp1l = make_arr(size);
+    copyArray(tmp, tmp1l, size);
+    shiftl1(tmp1l, size);
+    copyArray(x, r, size);
+    bit_sub_arr(r, tmp1l, size);
+    //return q + (r > 9);
+    int more9 = 0;
+    for (size_t i = size - 1; i >= 1; --i) {
+        if (r[i] > 0) {
+            more9 = 1;
+        }
+    }
+    if (r[0] > 9) {
+        more9 = 1;
+    }
+    if (more9)
+        bit_add(q, 1, size);
+    copyArray(q, x, size);
+    free(q);
+    free(q2);
+    free(q4);
+    free(q8);
+    free(q16);
+    free(q3);
+    free(r);
+    free(x1);
+    free(x2);
+    free(tmp);
+    free(tmp1l);
+}
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
     eq_scale(&value_1, &value_2);
@@ -525,11 +572,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     int res = OK;
     if (!s1 && s2) {
         sign_diff = 1;
-        //puts("neg");
-        //printBits(16,&value_2,4);
         s21_negate(value_2, &value_2);
-        //puts("after neg");
-        //printBits(16,&value_2,4);
     }
     if (s1 && !s2) {
         sign_diff = 1;
@@ -537,15 +580,15 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     }
     if (sign_diff) {
         if (s21_is_greater(value_1, value_2)) {
-            res =  s21_sub(value_1, value_2, result);
+            res = s21_sub(value_1, value_2, result);
             s21_negate(*result, result);
             return res;
         } else if (s21_is_greater(value_2, value_1)) {
             res = s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
             return res;
-        } else{
-            init_0(result->bits,4);
+        } else {
+            init_0(result->bits, 4);
             return OK;
         }
     }
