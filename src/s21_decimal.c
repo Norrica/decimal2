@@ -636,9 +636,9 @@ int s21_is_equal(s21_decimal num1, s21_decimal num2) {
         ret = 0;
     } else {
         ret = tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 :
-	    tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
-	    tmp_num1.bits[2] != tmp_num2.bits[2] ? 0 :
-	    tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 : 1;
+              tmp_num1.bits[1] != tmp_num2.bits[1] ? 0 :
+              tmp_num1.bits[2] != tmp_num2.bits[2] ? 0 :
+              tmp_num1.bits[0] != tmp_num2.bits[0] ? 0 : 1;
     }
     return ret;
 }
@@ -769,26 +769,43 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return 0;
 }
 
+int s21_bank_round(decimal *value) {
+    int res = OK;
+    // Банковское только для ровно х.5
+    if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
+        res = s21_truncate(*value, value);
+        if (value->bits[0] % 2 == 1 && !res) {
+            decimal one = {{1, 0, 0, 0}};
+            res = s21_add(*value, one,value);
+        }
+    } else {
+        res = s21_round(*value, value);
+    }
+    return res;
+}
+
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     setDecimalExp(result, 0);
-    s21_decimal tmp;
+    s21_decimal tmp = {{0}};
     int count = 0;
     while (!is_0(&value_1.bits, 3)) {
-	if (s21_is_less(value_1, value_2)) {
-	    if (getDecimalExp(*result) > 28) {
-		/* bank round and abort */
-	    } else {
-		s21_from_int_to_decimal(10, &tmp);
-		s21_mul(value_1, tmp, &value_1);
-		count++;
-		continue;
-	    }
-	} else {
-	    while (s21_is_less(value_2, value_1)) {
-		shiftl1(value_2.bits, 3);
-	    }
-	    s21_sub(value_1, value_2, &value_1);
-	}
+        if (s21_is_less(value_1, value_2)) {
+            if (getDecimalExp(*result) > 28) {
+                /* bank round and abort */
+                s21_bank_round(result);
+                // only abort
+            } else {
+                s21_from_int_to_decimal(10, &tmp);
+                s21_mul(value_1, tmp, &value_1);
+                count++;
+                continue;
+            }
+        } else {
+            while (s21_is_less(value_2, value_1)) {
+                shiftl1(value_2.bits, 3);
+            }
+            s21_sub(value_1, value_2, &value_1);
+        }
     }
     return 0;
 }
