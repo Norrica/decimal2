@@ -14,6 +14,7 @@ START_TEST(SUB_TEST) {
     ck_assert_int_eq(res, 0);
 
     test2.bits[3] = 0;
+    //test1.bits[3] = 0;
     res = s21_sub(test1, test2, &result);
     ck_assert_int_eq(res, 2);
 

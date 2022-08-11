@@ -24,31 +24,38 @@ void tofromint() {
 }
 
 void Bar() {
-    s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
-    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
+    s21_decimal test1 = {{1, 0, 0, 0}};
+    s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF-1, 0xFFFFFFFF, 1u << 31}};
     s21_decimal result;
 
-    int res = s21_sub(test1, test2, &result);
-    if (res == 0) {
-        puts("OK 0");
-    } else {
-        puts("FAIL 0");
-    }
+    //init_0((uint32_t *) test1.bits, 3);
+    //init_0((uint32_t *) test2.bits, 3);
+    //test1.bits[0] = 1;
+    //test1.bits[1] = 0;
+    //test1.bits[2] = 0;
+    //setDecimalSign(&test1,1);
+    //
+    //test2.bits[1] = 1;
+    //test2.bits[2] = 1;
+    //test2.bits[3] = 0;
+    //setDecimalSign(&test2,1);
+    //test2.bits[3] = 0;
+    //test1.bits[3] = 0;
+    printDecimalValue(test1);
+    printDecimalValue(test2);
+    printBits(16, &test1, 4);
+    printBits(16, &test2, 4);
+    s21_add(test1, test2, &result);
+    printDecimalValue(result);
+    printBits(16, &result, 4);
+}
 
-    test2.bits[3] = 0;
-    res = s21_sub(test1, test2, &result);
-    if (res == 2) {
-        puts("OK 2");
-    } else {
-        puts("FAIL 2");
-    }
-
-    res = s21_sub(test2, test1, &result);
-    if (res == 1) {
-        puts("OK 1");
-    } else {
-        puts("FAIL 1");
-    }
+void Baz(){
+    int s = -1;
+    uint32_t u = UINT32_MAX;
+    printf("%d\n", s==u);
+    //printf("%d\n", s);
+    //printf("%u\n", u);
 }
 
 int main() {

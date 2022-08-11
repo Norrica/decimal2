@@ -26,7 +26,7 @@ void setDecimalSign(decimal *d, int sign) {
 void printDecimalValue(s21_decimal d) {
     char sign = getDecimalSign(d) ? '-' : '+';
     printf("%c", sign);
-    printf("%d+%d*4294967296+%d*4294967296**2/%ld\n", d.bits[0], d.bits[1], d.bits[2],
+    printf("%u+%u*4294967296+%u*4294967296**2/%lu\n", d.bits[0], d.bits[1], d.bits[2],
            (long int) pow(10, getBits(&d.bits[3], 16, 8)));
 }
 // 79228162514264337593543950335
@@ -596,8 +596,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
             s21_negate(*result, result);
         }
     } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) { //одинаковый -
-        // -1 - (-10)
-        if (s21_is_greater(value_1, value_2)) {
+        if (s21_is_greater(value_1, value_2)) { // -1 - (-10)
             s21_negate(value_2, &value_2);
             s21_negate(value_1, &value_1);
             ret = s21_sub(value_2, value_1, result);
