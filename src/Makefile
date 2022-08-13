@@ -45,9 +45,12 @@ prosto:
 mini_grind:test
 	valgrind -q --leak-check=full --track-origins=yes ./test
 
-graph:
-	gcc -shared -o s21_decimal.so -fPIC s21_decimal.c
-	python3 ./graph.py
+python_test:
+	gcc -c -fPIC s21_decimal.c --coverage -o s21_decimal.o
+	gcc s21_decimal.o --coverage -shared -o s21_decimallib.so
+	python3 test.py
+	lcov -t "python_test" -o gcov_test.info --no-external -c -d .
+	genhtml -o report/ gcov_test.info
 buf:
 	gcc -g s21_decimal.c buf.c -lm -o buf.out
 

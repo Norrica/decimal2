@@ -16,6 +16,7 @@ void test(){
     uint32_t check= UINT32_MAX/2-1;
     uint32_t res = check*2+1;
     printf("%u\n",res);
+    char a = 255
 }
 
 
