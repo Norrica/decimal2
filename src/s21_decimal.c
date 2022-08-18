@@ -299,12 +299,17 @@ int eq_scale(decimal *x, decimal *y) {
     return ret;
 }
 
-int reduce_scale(decimal *x){
-    int scale = getDecimalExp(*x);
-    //while ()
-    //TODO check x mod 10
-    div10(x,3);
-    scale--;
+int reduce_scale(decimal *x) {
+    uint32_t scale = getDecimalExp(*x);
+    uint32_t buf[3];
+    copyArray(x->bits,buf,3);
+
+    while (buf[0] % 10 == 0 && scale>0) {
+        div10(buf, 3);
+        scale--;
+    }
+    copyArray(buf,x->bits,3);
+    setDecimalExp(x,scale);
     return 1;
 }
 
