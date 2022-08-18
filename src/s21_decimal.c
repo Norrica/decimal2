@@ -302,19 +302,23 @@ int eq_scale(decimal *x, decimal *y) {
 int reduce_scale(decimal *x) {
     uint32_t scale = getDecimalExp(*x);
     uint32_t buf[3];
-    copyArray(x->bits,buf,3);
+    copyArray(x->bits, buf, 3);
 
-    while (buf[0] % 10 == 0 && scale>0) {
-        div10(buf, 3);
-        scale--;
+    reduce_scale_arr(buf, 3, &scale);
+    copyArray(buf, x->bits, 3);
+    setDecimalExp(x, scale);
+    return 0;
+}
+int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
+    while (arr[0] % 10 == 0 && *scale > 0) {
+        div10(arr, size);
+        (*scale)--;
     }
-    copyArray(buf,x->bits,3);
-    setDecimalExp(x,scale);
-    return 1;
+    return 0;
 }
 
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) {
-    int maxscale = 0;
+    int maxscale;
     if (scalex > scaley) {
         maxscale = scalex;
         move_scale_arr(scalex - scaley, y, size);
@@ -498,7 +502,7 @@ uint32_t *make_arr(size_t size) {
     return q;
 }
 
-void div10(uint32_t *x, int size) {
+void div10(uint32_t *x, size_t size) {
     //    unsigned q, r,tmp;
     //    q = (x >> 1) + (x >> 2);
     //    q += (q >> 4);
@@ -617,6 +621,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
     // TODO scale reduction
     bit_add_arr(x, y, 7);
+    reduce_scale_arr(x, 7, &max_scale);
     setDecimalSign(result, s1 & s2);
     if (max_scale > 0b11111111 || x[3] > 0) {
         if (getDecimalSign(*result)) {
@@ -656,11 +661,11 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                          getDecimalExp(value_2),
                                          7);
             bit_sub_arr(x, y, 7);
+            reduce_scale_arr(x, 7, &max_scale);
             copyArray(x, (uint32_t *) result->bits, 3); // result!!
             setDecimalExp(result, max_scale); // result!!
+
             return ret;
-            // TODO scale reduction
-            // TODO error codes
         } else {
             ret = s21_sub(value_2, value_1, result);
             s21_negate(*result, result);

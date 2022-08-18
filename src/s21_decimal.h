@@ -39,13 +39,13 @@ void setBits(const void *dest, uint32_t bits, int offset, int n);
 void copyBits(const void *dest, const void *src, int start, int end);
 
 void mul10(uint32_t *x, int size);
-void div10(uint32_t *x, int size);
+void div10(uint32_t *x, size_t size);
 void copyArray(uint32_t *from, uint32_t *to, size_t len);
 int move_scale(int cycles, s21_decimal *num);
 void move_scale_arr(int cycles, uint32_t *arr, size_t size);
 int eq_scale(decimal *x, decimal *y);
 int reduce_scale(decimal *x);
-
+int reduce_scale_arr(uint32_t *arr, size_t size, int *scale);
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size);
 void flipBits(uint32_t *i);
 int shiftl(void *object, size_t size, int n);
