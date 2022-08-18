@@ -13,10 +13,15 @@ void Foo();
 
 
 void test(){
-    uint32_t check= UINT32_MAX/2-1;
-    uint32_t res = check*2+1;
-    printf("%u\n",res);
-    char a = 255
+
+    decimal d={{0}};
+    printBits(16,&d,4);
+    setDecimalSign(&d,1);
+    printBits(16,&d,4);
+    setDecimalExp(&d,28);
+    printBits(16,&d,4);
+
+
 }
 
 
@@ -62,47 +67,16 @@ void d10(){
     printf("%lu\n",*(d.bits));
 }
 
-
-uint64_t div5exact(uint64_t n)
-{
-    // returns n/5 as long as n actually divides 5
-    // (because 'n * (INV5 * 5)' == 'n * 1' mod 2^32
-
-#define INV5 0xcccccccccccccccd
-
-    return n * INV5;
-
+void check_test(){
+    decimal d1 = {{UINT32_MAX,UINT32_MAX,UINT32_MAX,0}};
+    setDecimalExp(&d1,20);
+    decimal d2 = {{UINT32_MAX,UINT32_MAX,0,0}};
+    setDecimalExp(&d2,20);
+    decimal d3;
+    s21_add(d1,d2,&d3);
+    printBits(16,&d3,4);
 }
 
-unsigned int divides5(unsigned int n)
-{
-    unsigned int q = div5exact(n);
-    if (q <= 0x33333333) /* q*5 < 2^32? */
-    {
-        /* q*5 doesn't overflow, so n == q*5 */
-        return 1;
-    }
-    else
-    {
-        /* q*5 overflows, so n != q*5 */
-        return 0;
-    }
-}
-
-int divides2(unsigned int n)
-{
-    /* easy divisibility by 2 test */
-    return (n & 1) == 0;
-}
-
-int divides10(unsigned int n)
-{
-    return divides2(n) && divides5(n);
-}
-
-
-/* fast one-liner: */
-#define DIVIDES10(n) ( ((n) & 1) == 0 && ((n) * 0xcccccccd) <= 0x33333333 )
 
 int main() {
     test();

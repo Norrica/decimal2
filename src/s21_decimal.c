@@ -300,12 +300,12 @@ int eq_scale(decimal *x, decimal *y) {
 }
 
 int reduce_scale(decimal *x) {
-    uint32_t scale = getDecimalExp(*x);
+    int scale = getDecimalExp(*x);
     uint32_t buf[3];
-    copyArray(x->bits, buf, 3);
+    copyArray((uint32_t*)x->bits, buf, 3);
 
     reduce_scale_arr(buf, 3, &scale);
-    copyArray(buf, x->bits, 3);
+    copyArray(buf, (uint32_t*)x->bits, 3);
     setDecimalExp(x, scale);
     return 0;
 }
@@ -607,7 +607,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
             s21_negate(*result, result);
             return res;
         } else {
-            init_0(result->bits, 4);
+            init_0((uint32_t*)result->bits, 4);
             return OK;
         }
     }
@@ -664,7 +664,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
             reduce_scale_arr(x, 7, &max_scale);
             copyArray(x, (uint32_t *) result->bits, 3); // result!!
             setDecimalExp(result, max_scale); // result!!
-
+            //reduce_scale(result);
             return ret;
         } else {
             ret = s21_sub(value_2, value_1, result);
