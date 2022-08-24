@@ -24,15 +24,19 @@
 #define TOOLARGE 1
 #define TOOSMALL 2
 #define DIVBY0 3
-typedef union {
+//typedef union {
+//  uint32_t bits[4];
+//  struct {
+//    uint32_t mntsa[3];  // 96bit
+//    uint32_t zeros : 16;
+//    uint32_t exp : 8;  // mntsa*10^-exp
+//    uint32_t zeros2 : 7;
+//    uint32_t sign : 1;
+//  };
+//} s21_decimal;
+
+typedef struct {
   uint32_t bits[4];
-  struct {
-    uint32_t mntsa[3];  // 96bit
-    uint32_t zeros : 16;
-    uint32_t exp : 8;  // mntsa*10^-exp
-    uint32_t zeros2 : 7;
-    uint32_t sign : 1;
-  };
 } s21_decimal;
 
 #define decimal s21_decimal

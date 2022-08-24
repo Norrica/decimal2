@@ -933,8 +933,32 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return OK;
 }
 
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    size_t size = 12;
+    uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    uint32_t *res = calloc(size, sizeof(uint32_t));
+    copyArray((uint32_t *) &(value_1.bits), a1, 3);
+    copyArray((uint32_t *) &(value_2.bits), a2, 3);
+    int new_scale = eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
+    bit_div_arr(a1, a2, res, 12);
+    //алгоритм
+    // делим целые
+    // записываем целое в res
+    // берем остаток
+    // while остаток !=0 или count<96(наверное){
+    // остаток*=10
+    // остаток = остаток/делитель
+    // res += остаток
+    // res.exp +=1
+    // }
+
+    // 1234 13
+    // 94 1222 12
+    // 9 120 13
+}
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result){
-
+    //TODO забить на отрицательные, вертеру насрать
 }
 
