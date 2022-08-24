@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//#ifndef uint32_t
+//#define uint32_t unsigned int
+//#endif
+
 #define signMask INT32_MIN
 /*#define signMaskPos 0*/
 
@@ -20,9 +24,15 @@
 #define TOOLARGE 1
 #define TOOSMALL 2
 #define DIVBY0 3
-
-typedef struct s21_decimal {
-  int bits[4];
+typedef union {
+  uint32_t bits[4];
+  struct {
+    uint32_t mntsa[3];  // 96bit
+    uint32_t zeros : 16;
+    uint32_t exp : 8;  // mntsa*10^-exp
+    uint32_t zeros2 : 7;
+    uint32_t sign : 1;
+  };
 } s21_decimal;
 
 #define decimal s21_decimal

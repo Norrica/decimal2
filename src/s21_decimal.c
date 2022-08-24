@@ -298,7 +298,7 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     one[0] = 1;
     init_0(res, size);
     setBits(&(rb[size - 1]), 1, 31, 1);  /*rb = 0x80000000*/
-    while (!is_0(rb, size)) {
+    while (!is_0(rb, size)) { /*for*/
         shiftl1(acc, size);
         AND(rb, arr1, buf, size);
         if (!is_0(buf, size))
@@ -576,6 +576,7 @@ uint32_t *make_arr(size_t size) {
 }
 
 void div10(uint32_t *x, size_t size) {
+    //TODO use bit_div_arr
     //    unsigned q, r,tmp;
     //    q = (x >> 1) + (x >> 2);
     //    q += (q >> 4);
@@ -901,7 +902,7 @@ int s21_bank_round(decimal *value) {
         res = s21_truncate(*value, value);
         if (value->bits[0] % 2 == 1 && !res) {
             decimal one = {{1, 0, 0, 0}};
-            res = s21_add(*value, one,value);
+            res = s21_add(*value, one, value);
         }
     } else {
         res = s21_round(*value, value);
@@ -932,4 +933,8 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return OK;
 }
 
+
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result){
+
+}
 
