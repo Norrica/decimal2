@@ -107,6 +107,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
+int s21_bank_round(s21_decimal *value);
+
 int s21_is_less(s21_decimal value_1, s21_decimal value_2);
 
 int s21_is_less_or_equal(s21_decimal value_1, s21_decimal value_2);

@@ -23,13 +23,7 @@ int getDecimalSign(decimal d) {
 void setDecimalSign(decimal *d, int sign) {
     setBits(&d->bits[3], sign, 31, 1);
 }
-void printDecimalValue(s21_decimal d) {
-    char sign = getDecimalSign(d) ? '-' : '+';
-    printf("%c", sign);
-    printf("%u+%u*4294967296+%u*4294967296**2/%lu\n", d.bits[0], d.bits[1], d.bits[2],
-           (long int) pow(10, getBits(&d.bits[3], 16, 8)));
-}
-// 79228162514264337593543950335
+
 /*Поможет смотреть внутрь массива*/
 void printBits(const size_t size, const void *ptr, int sep_n) {
     unsigned char *b = (unsigned char *) ptr;
@@ -899,7 +893,21 @@ int s21_round(s21_decimal value, s21_decimal *result) {
     }
     return 0;
 }
-
+int s21_bank_round(decimal *value) {
+    int res = OK;
+    // Банковское только для ровно х.5
+    // TODO случаи с 0.5000 и т.д. Пока что использовать только после reduce_scale
+    if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
+        res = s21_truncate(*value, value);
+        if (value->bits[0] % 2 == 1 && !res) {
+            decimal one = {{1, 0, 0, 0}};
+            res = s21_add(*value, one,value);
+        }
+    } else {
+        res = s21_round(*value, value);
+    }
+    return res;
+}
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     init_0((uint32_t *) result->bits, 4);
     uint32_t val1[7] = {0};
