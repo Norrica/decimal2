@@ -259,6 +259,42 @@ void init_0(uint32_t *arr, int size) {
     }
 }
 
+int cmp(uint32_t *a, uint32_t *b, size_t size) {
+    for (int i = size - 1; i >= 0; i--) {
+        if (a[i] == b[i] && i > 0)
+            continue;
+        if (a[i] > b[i])
+            return 1;
+        if (a[i] < b[i])
+            return -1;
+    }
+    return 0;
+}
+
+void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
+    //TODO сразу остаток
+    uint32_t *acc = calloc(size, sizeof(uint32_t));
+    uint32_t *rb = calloc(size, sizeof(uint32_t));
+    uint32_t *buf = calloc(size, sizeof(uint32_t));
+    uint32_t *one = calloc(size, sizeof(uint32_t));
+    one[0] = 1;
+    init_0(res, size);
+    setBits(&(rb[size - 1]), 1, 31, 1);  /*rb = 0x80000000*/
+    while (!is_0(rb, size)) {
+        shiftl1(acc, size);
+        AND(rb, arr1, buf, size);
+        if (!is_0(buf, size))
+            OR(acc, one, acc, size);
+        int cmp_res = cmp(acc,arr2,size);
+        if (cmp_res==1 || cmp_res==0) {
+            bit_sub_arr(acc, arr2, size);
+            OR(res,rb,res,size);
+        }
+        shiftr1(rb, size); /*rb >>= 1*/
+    }
+}
+
+
 int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
     copyArray((uint32_t *) num->bits, x, 3);
@@ -302,10 +338,10 @@ int eq_scale(decimal *x, decimal *y) {
 int reduce_scale(decimal *x) {
     int scale = getDecimalExp(*x);
     uint32_t buf[3];
-    copyArray((uint32_t*)x->bits, buf, 3);
+    copyArray((uint32_t *) x->bits, buf, 3);
 
     reduce_scale_arr(buf, 3, &scale);
-    copyArray(buf, (uint32_t*)x->bits, 3);
+    copyArray(buf, (uint32_t *) x->bits, 3);
     setDecimalExp(x, scale);
     return 0;
 }
@@ -607,7 +643,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
             s21_negate(*result, result);
             return res;
         } else {
-            init_0((uint32_t*)result->bits, 4);
+            init_0((uint32_t *) result->bits, 4);
             return OK;
         }
     }
