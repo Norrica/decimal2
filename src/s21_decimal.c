@@ -253,11 +253,6 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     free(borrow);
     free(tmp);
 }
-void init_0(uint32_t *arr, int size) {
-    for (int i = 0; i < size; ++i) {
-        arr[i] = 0;
-    }
-}
 
 int cmp(uint32_t *a, uint32_t *b, size_t size) {
     for (int i = size - 1; i >= 0; i--) {
@@ -271,8 +266,37 @@ int cmp(uint32_t *a, uint32_t *b, size_t size) {
     return 0;
 }
 
+void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
+    while (!is_0(val2, 7)) {
+        if (getBits(val2, 0, 1)) {
+            bit_add_arr(res, val1, 7);
+        }
+        shiftl1(val1, 7);
+        shiftr1(val2, 7);
+    }
+}
+
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
-    //TODO сразу остаток
+    /*unsigned int fun2 ( unsigned int a, unsigned int b )
+{
+    unsigned int res;
+    unsigned int acc;
+    unsigned int rb;
+
+    res=0;
+    acc=0;
+    for(rb=0x80000000;rb;rb>>=1)
+    {
+        acc<<=1;
+        if(rb&a) acc|=1;
+        if(acc>=b)
+        {
+            acc-=b;
+            res|=rb;
+        }
+    }
+    return(res);
+}*/
     uint32_t *acc = calloc(size, sizeof(uint32_t));
     uint32_t *rb = calloc(size, sizeof(uint32_t));
     uint32_t *buf = calloc(size, sizeof(uint32_t));
@@ -285,15 +309,34 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
         AND(rb, arr1, buf, size);
         if (!is_0(buf, size))
             OR(acc, one, acc, size);
-        int cmp_res = cmp(acc,arr2,size);
-        if (cmp_res==1 || cmp_res==0) {
+        int cmp_res = cmp(acc, arr2, size);
+        if (cmp_res == 1 || cmp_res == 0) {
             bit_sub_arr(acc, arr2, size);
-            OR(res,rb,res,size);
+            OR(res, rb, res, size);
         }
         shiftr1(rb, size); /*rb >>= 1*/
     }
 }
 
+void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
+    uint32_t *div = calloc(size, sizeof(uint32_t));
+    uint32_t *mul = calloc(size, sizeof(uint32_t));
+    uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    copyArray(arr1, a1, size);
+    uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    copyArray(arr2, a2, size);
+
+    bit_div_arr(a1, a2, div, size);
+    bit_mul_arr(a2, div, mul, size);
+    bit_sub_arr(a1, mul, size);
+    copyArray(a1, res, size);
+}
+
+void init_0(uint32_t *arr, int size) {
+    for (int i = 0; i < size; ++i) {
+        arr[i] = 0;
+    }
+}
 
 int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
@@ -864,13 +907,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t res[7] = {0};
     copyArray((uint32_t *) value_1.bits, val1, 3);
     copyArray((uint32_t *) value_2.bits, val2, 3);
-    while (!is_0(val2, 7)) {
-        if (getBits(val2, 0, 1)) {
-            bit_add_arr(res, val1, 7);
-        }
-        shiftl1(val1, 7);
-        shiftr1(val2, 7);
-    }
+    bit_mul_arr(val1, val2, res, 7);
     if (getDecimalSign(value_1) != getDecimalSign(value_2))
         setDecimalSign(result, 1);
     if (res[3] || res[4] || res[5] || res[6]) {
@@ -886,4 +923,5 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     return OK;
 }
+
 

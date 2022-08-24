@@ -79,13 +79,15 @@ int is_0(void *arr, size_t size);
 
 int cmp(uint32_t *a, uint32_t *b, size_t size);
 
-void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
-
 void bit_add(void *value_1, uint32_t number, size_t arr_size);
 
 void bit_add_arr(void *res_arr, void *number, size_t arr_size);
 
 void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size);
+
+void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
+
+void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
 
 void OR(void *arr1, void *arr2, void *res, size_t size);
 
