@@ -249,6 +249,9 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
 }
 
 int cmp(uint32_t *a, uint32_t *b, size_t size) {
+    // 1 - >
+    // 0 - ==
+    // -1 - <
     for (int i = size - 1; i >= 0; i--) {
         if (a[i] == b[i] && i > 0)
             continue;
@@ -261,13 +264,18 @@ int cmp(uint32_t *a, uint32_t *b, size_t size) {
 }
 
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
-    while (!is_0(val2, 7)) {
-        if (getBits(val2, 0, 1)) {
-            bit_add_arr(res, val1, 7);
+    uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    copyArray(val1,a1,size);
+    uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    copyArray(val2,a2,size);
+    while (!is_0(a2, size)) {
+        if (getBits(a2, 0, 1)) {
+            bit_add_arr(res, a1, size);
         }
-        shiftl1(val1, 7);
-        shiftr1(val2, 7);
+        shiftl1(a1, size);
+        shiftr1(a2, size);
     }
+
 }
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
@@ -324,6 +332,20 @@ void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     bit_mul_arr(a2, div, mul, size);
     bit_sub_arr(a1, mul, size);
     copyArray(a1, res, size);
+}
+
+void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size) {
+    //uint32_t *div = calloc(size, sizeof(uint32_t));
+    uint32_t *mul = calloc(size, sizeof(uint32_t));
+    uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    copyArray(arr1, a1, size);
+    uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    copyArray(arr2, a2, size);
+
+    bit_div_arr(a1, a2, div, size);
+    bit_mul_arr(a2, div, mul, size);
+    bit_sub_arr(a1, mul, size);
+    copyArray(a1, mod, size);
 }
 
 void init_0(uint32_t *arr, int size) {
@@ -938,27 +960,57 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
     uint32_t *res = calloc(size, sizeof(uint32_t));
+    uint32_t *mod = calloc(size, sizeof(uint32_t));
+    uint32_t *buf = calloc(size, sizeof(uint32_t));
     copyArray((uint32_t *) &(value_1.bits), a1, 3);
     copyArray((uint32_t *) &(value_2.bits), a2, 3);
     int new_scale = eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
-    bit_div_arr(a1, a2, res, 12);
     //алгоритм
+/*    // while делимое<делитель :
+    //     делимое*=10
+    //     res.exp++
     // делим целые
     // записываем целое в res
-    // берем остаток
-    // while остаток !=0 или count<96(наверное){
-    // остаток*=10
-    // остаток = остаток/делитель
-    // res += остаток
-    // res.exp +=1
-    // }
+    // берем остаток (делимое - res*делитель)*/
 
-    // 1234 13
-    // 94 1222 12
-    // 9 120 13
+    /*// while остаток !=0 или count<96(наверное)
+    // {
+    //      res*=10
+    //      res += остаток
+    //      остаток*=10
+    //      остаток = остаток/делитель
+    //      res.exp++
+    // }*/
+    /*
+    // высчитываем новую экспоненту.
+    // reduce scale если нужно*/
+
+    /*// 225/200 - 1d 25m
+    // 250
+    //
+    //
+    // 100+25
+    // 1*/
+    int res_exp = 0; // возможно res_exp = new_scale
+    while (cmp(a1, a2, size) < 0) {
+        mul10(a1, size);
+        res_exp++;
+    }
+    bit_div_mod_arr(a1, a2, res, mod, size);
+    int count = 0;
+    while (!is_0(mod, size) && count < 96) {
+        mul10(res, size);
+        bit_add_arr(res, mod, size);
+        mul10(mod, size);
+        bit_div_arr(mod, a2, buf, size);
+        copyArray(buf, mod, size);
+        res_exp++;
+        count++;
+    }
+    copyArray(res,result->bits,3);
 }
 
-int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result){
+int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     //TODO забить на отрицательные, вертеру насрать
 }
 
