@@ -12,11 +12,9 @@
 #include <string.h>
 
 //#ifndef uint32_t
-//#define uint32_t unsigned int
+//typedef unsigned int uint32_t;
 //#endif
 
-#define signMask INT32_MIN
-/*#define signMaskPos 0*/
 
 #define OK 0
 #define CE 1  // Conversion Error
