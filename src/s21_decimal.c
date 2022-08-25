@@ -984,68 +984,66 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     size_t size = 12;
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    copyArray((uint32_t *) &(value_1.bits), a1, 3);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    copyArray((uint32_t *) &(value_2.bits), a2, 3);
     uint32_t *res = calloc(size, sizeof(uint32_t));
     uint32_t *mod = calloc(size, sizeof(uint32_t));
-    uint32_t *buf = calloc(size, sizeof(uint32_t));
-    copyArray((uint32_t *) &(value_1.bits), a1, 3);
-    copyArray((uint32_t *) &(value_2.bits), a2, 3);
+    uint32_t *div = calloc(size, sizeof(uint32_t));
     int new_scale = eq_scale_arr(a1,
                                  a2,
                                  getDecimalExp(value_1),
                                  getDecimalExp(value_2),
                                  size);
     // алгоритм
-    /*// while делимое<делитель :
-    //     делимое*=10
-    //     res.exp++
-    // делим целые
-    // записываем целое в res
-    // берем остаток (делимое - res*делитель)*/
-
-    /*// while остаток !=0 или count<96(наверное)
-    // {
-    //      res*=10
-    //      res += остаток
-    //      остаток*=10
-    //      остаток = остаток/делитель
-    //      res.exp++
-    // }*/
     /*
-    // высчитываем новую экспоненту.
-    // reduce scale если нужно*/
+    st = 0
+    for i in range(29):
+        d = a // b
+        m = a % b
+        a = m*10
+        st += d
+        st *= 10
+        res = st
+    reduce scale если нужно
+    */
 
     int res_exp = 0; // возможно res_exp = new_scale
     while (cmp(a1, a2, size) < 0) {
         mul10(a1, size);
         res_exp++;
     }
-    int count = 0;
-    // Это ужасно, я знаю.
+
     bit_div_mod_arr(a1, a2, res, mod, size);
+
     if (!is_0(res, size) && is_0(mod, size)) {
         if (!res[3] && res_exp <= 28) {
             copyArray(res, result->bits, 3);
             setDecimalExp(result, res_exp);
+            setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
             return OK;
         }
     } else {
         init_0(res, size);
     }
+
+    int count = 0;
     while (!is_0(mod, size) && count < 28) {
-        bit_div_mod_arr(a1, a2, buf, mod, size);
+        bit_div_mod_arr(a1, a2, div, mod, size);
         mul10(mod, size);
         copyArray(mod, a1, size);
-        bit_add_arr(res, buf, size);
+        bit_add_arr(res, div, size);
         mul10(res, size);
         res_exp++;
         count++;
     }
 
     reduce_scale_arr(res, size, &res_exp);
+
     if (!res[3] && res_exp <= 28) {
         copyArray(res, result->bits, 3);
         setDecimalExp(result, res_exp);
+        setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
         return OK;
     } else {
         return TOOSMALL;//TODO toolarge
