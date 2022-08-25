@@ -265,9 +265,9 @@ int cmp(uint32_t *a, uint32_t *b, size_t size) {
 
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
-    copyArray(val1,a1,size);
+    copyArray(val1, a1, size);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
-    copyArray(val2,a2,size);
+    copyArray(val2, a2, size);
     while (!is_0(a2, size)) {
         if (getBits(a2, 0, 1)) {
             bit_add_arr(res, a1, size);
@@ -275,7 +275,6 @@ void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
         shiftl1(a1, size);
         shiftr1(a2, size);
     }
-
 }
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
@@ -299,6 +298,8 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     }
     return(res);
 }*/
+    uint32_t *a2 = calloc(size, sizeof(uint32_t));
+    copyArray(arr2, a2, size);
     uint32_t *acc = calloc(size, sizeof(uint32_t));
     uint32_t *rb = calloc(size, sizeof(uint32_t));
     uint32_t *buf = calloc(size, sizeof(uint32_t));
@@ -311,9 +312,9 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
         AND(rb, arr1, buf, size);
         if (!is_0(buf, size))
             OR(acc, one, acc, size);
-        int cmp_res = cmp(acc, arr2, size);
+        int cmp_res = cmp(acc, a2, size);
         if (cmp_res == 1 || cmp_res == 0) {
-            bit_sub_arr(acc, arr2, size);
+            bit_sub_arr(acc, a2, size);
             OR(res, rb, res, size);
         }
         shiftr1(rb, size); /*rb >>= 1*/
@@ -404,12 +405,34 @@ int reduce_scale(decimal *x) {
     setDecimalExp(x, scale);
     return 0;
 }
+
 int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
-    while (arr[0] % 10 == 0 && *scale > 0) {
-        div10(arr, size);
-        (*scale)--;
+    // TODO не работает
+    //  10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
+    //  00000000000000000000000000000000 10001001111010000000000000000000 - не делится на 10
+    // while (arr[0] % 10 == 0 && *scale > 0) {
+    //     div10(arr, size);
+    //     (*scale)--;
+    // }
+    // return 0;
+    // TODO по-тупому
+    uint32_t *buf = calloc(size, sizeof(uint32_t));
+    uint32_t *ten = calloc(size, sizeof(uint32_t));
+    ten[0] = 10;
+    copyArray(arr, buf, size);
+    while (*scale > 0) {
+        //printf("%d\t", *scale);
+        //printBits(size * 4, arr, 8);
+        bit_div_arr(arr, ten, buf, size);
+        mul10(buf, size);
+        if (cmp(arr, buf, size) == 0) {
+            bit_div_arr(buf, ten, arr, size);
+            (*scale)--;
+        } else {
+            break;
+        }
     }
-    return 0;
+    return OK;
 }
 
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) {
@@ -956,6 +979,9 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 }
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    if (is_0(value_2.bits, 3)) {
+        return DIVBY0;
+    }
     size_t size = 12;
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
@@ -964,7 +990,11 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t *buf = calloc(size, sizeof(uint32_t));
     copyArray((uint32_t *) &(value_1.bits), a1, 3);
     copyArray((uint32_t *) &(value_2.bits), a2, 3);
-    int new_scale = eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
+    int new_scale = eq_scale_arr(a1,
+                                 a2,
+                                 getDecimalExp(value_1),
+                                 getDecimalExp(value_2),
+                                 size);
     //алгоритм
 /*    // while делимое<делитель :
     //     делимое*=10
@@ -985,12 +1015,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     // высчитываем новую экспоненту.
     // reduce scale если нужно*/
 
-    /*// 225/200 - 1d 25m
-    // 250
-    //
-    //
-    // 100+25
-    // 1*/
     int res_exp = 0; // возможно res_exp = new_scale
     while (cmp(a1, a2, size) < 0) {
         mul10(a1, size);
@@ -998,16 +1022,17 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     bit_div_mod_arr(a1, a2, res, mod, size);
     int count = 0;
-    while (!is_0(mod, size) && count < 96) {
+    while (!is_0(mod, size) && count < 28) {
         mul10(res, size);
         bit_add_arr(res, mod, size);
         mul10(mod, size);
-        bit_div_arr(mod, a2, buf, size);
+        bit_mod_arr(mod, a2, buf, size);
         copyArray(buf, mod, size);
         res_exp++;
         count++;
     }
-    copyArray(res,result->bits,3);
+    copyArray(res, result->bits, 3);
+    setDecimalExp(result, res_exp);
 }
 
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
