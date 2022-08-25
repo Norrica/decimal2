@@ -995,8 +995,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                  getDecimalExp(value_1),
                                  getDecimalExp(value_2),
                                  size);
-    //алгоритм
-/*    // while делимое<делитель :
+    // алгоритм
+    /*// while делимое<делитель :
     //     делимое*=10
     //     res.exp++
     // делим целые
@@ -1020,19 +1020,36 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         mul10(a1, size);
         res_exp++;
     }
-    bit_div_mod_arr(a1, a2, res, mod, size);
     int count = 0;
+    // Это ужасно, я знаю.
+    bit_div_mod_arr(a1, a2, res, mod, size);
+    if (!is_0(res, size) && is_0(mod, size)) {
+        if (!res[3] && res_exp <= 28) {
+            copyArray(res, result->bits, 3);
+            setDecimalExp(result, res_exp);
+            return OK;
+        }
+    } else {
+        init_0(res, size);
+    }
     while (!is_0(mod, size) && count < 28) {
-        mul10(res, size);
-        bit_add_arr(res, mod, size);
+        bit_div_mod_arr(a1, a2, buf, mod, size);
         mul10(mod, size);
-        bit_mod_arr(mod, a2, buf, size);
-        copyArray(buf, mod, size);
+        copyArray(mod, a1, size);
+        bit_add_arr(res, buf, size);
+        mul10(res, size);
         res_exp++;
         count++;
     }
-    copyArray(res, result->bits, 3);
-    setDecimalExp(result, res_exp);
+
+    reduce_scale_arr(res, size, &res_exp);
+    if (!res[3] && res_exp <= 28) {
+        copyArray(res, result->bits, 3);
+        setDecimalExp(result, res_exp);
+        return OK;
+    } else {
+        return TOOSMALL;//TODO toolarge
+    }
 }
 
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
