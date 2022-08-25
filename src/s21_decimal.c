@@ -1039,8 +1039,12 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (is_0(value_2.bits, 3)) {
         return DIVBY0;
     }
-    //TODO забить на отрицательные, вертеру насрать
+    //забить на отрицательные, вертеру насрать
+    int s2 = getDecimalExp(value_2);
+    int s1 = getDecimalExp(value_1);
+    int scale = s1 > s2 ? s1 : s2;
     bit_mod_arr(value_1.bits, value_2.bits, result->bits, 3);
+    setDecimalExp(result, scale);
     return OK;
 }
 
