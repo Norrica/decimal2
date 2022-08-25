@@ -1036,6 +1036,11 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 }
 
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    if (is_0(value_2.bits, 3)) {
+        return DIVBY0;
+    }
     //TODO забить на отрицательные, вертеру насрать
+    bit_mod_arr(value_1.bits, value_2.bits, result->bits, 3);
+    return OK;
 }
 
