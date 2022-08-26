@@ -8,7 +8,6 @@
 #include "s21_decimal.h"
 #include "s21_arrays.h"
 
-
 /*Поможет смотреть внутрь массива*/
 void printBits(const size_t size, const void *ptr, int sep_n) {
     unsigned char *b = (unsigned char *) ptr;

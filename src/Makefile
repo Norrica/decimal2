@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra -std=c11
 TEST_LIBS = -lcheck -lm -lpthread #-lsubunit
-OBJECTS = s21_decimal.o
+OBJECTS = s21_decimal.o s21_arrays.o
 SOURSES = s21_decimal.c s21_arrays.c
 GCOVFLAGS = -fprofile-arcs -ftest-coverage
 

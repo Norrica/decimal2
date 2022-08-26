@@ -43,6 +43,10 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size);
 
 void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size);
 
+void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
+
+void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size);
+
 int cmp(const uint32_t *a, const uint32_t *b, size_t size);
 
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
