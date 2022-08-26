@@ -47,67 +47,15 @@ void setDecimalExp(decimal *d, int exp);
 
 void setDecimalSign(decimal *d, int sign);
 
-void init_0(uint32_t *arr, int size);
-
 void printDecimalValue(s21_decimal d);
 
 void printBits(size_t size, const void *ptr, int sep_n);
 
-uint32_t getBits(const void *ptr, int offset, int n);
-
-void setBits(const void *dest, uint32_t bits, int offset, int n);
-
-void copyBits(const void *dest, const void *src, int start, int end);
-
-void mul10(uint32_t *x, int size);
-
-void div10(uint32_t *x, size_t size);
-
-void copyArray(const uint32_t *from, uint32_t *to, size_t len);
-
 int move_scale(int cycles, s21_decimal *num);
-
-void move_scale_arr(int cycles, uint32_t *arr, size_t size);
 
 int eq_scale(decimal *x, decimal *y);
 
 int reduce_scale(decimal *x);
-
-int reduce_scale_arr(uint32_t *arr, size_t size, int *scale);
-
-int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size);
-
-void flipBits(uint32_t *i);
-
-int shiftl(void *object, size_t size, int n);
-
-int shiftr(void *object, size_t size, int n);
-
-void shiftl1(uint32_t *object, size_t size);
-
-void shiftr1(uint32_t *object, size_t size);
-
-int is_0(void *arr, size_t size);
-
-int cmp(const uint32_t *a, const uint32_t *b, size_t size);
-
-void bit_add(void *value_1, uint32_t number, size_t arr_size);
-
-void bit_add_arr(void *res_arr, void *number, size_t arr_size);
-
-void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size);
-
-void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
-
-void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
-
-void OR(void *arr1, void *arr2, void *res, size_t size);
-
-void XOR(void *arr1, void *arr2, void *res, size_t size);
-
-void AND(void *arr1, void *arr2, void *res, size_t size);
-
-void NOT(void *arr, void *res, size_t size);
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
