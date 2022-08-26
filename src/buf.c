@@ -1,6 +1,4 @@
-//
-// Created by Gladis Ariane on 7/30/22.
-//
+
 
 #include <stdlib.h>
 #include "s21_decimal.h"
@@ -8,80 +6,40 @@
 #include <string.h>
 #include <limits.h>
 #include <float.h>
+#include <time.h>
 
-void Foo();
+void Foo() {
+    decimal a = {1, 0, 0, 0};
+    setDecimalExp(&a, 1);
+    decimal b = {2, 0, 0, 0};
+    setDecimalExp(&b, 1);
+    decimal r = {0, 0, 0, 0};
+    time_t t = clock();
 
+    s21_mod(a, b, &r);
 
-void test(){
+    time_t t2 = clock();
+    printf("%lf\n", (double) (t2 - t) / CLOCKS_PER_SEC);
 
-    decimal d={{0}};
-    printBits(16,&d,4);
-    setDecimalSign(&d,1);
-    printBits(16,&d,4);
-    setDecimalExp(&d,28);
-    printBits(16,&d,4);
-
-
+    printBits(16, &r, 4);
+    printf("%d\n", getDecimalExp(r));
 }
-
-
-
-
-uint64_t divu10(uint64_t n) {
-    uint64_t q, r,tmp;
-    q = (n >> 1) + (n >> 2);
-
-    printBits(8,&q,4);
-    q += (q >> 4);
-    printBits(8,&q,4);
-    q += (q >> 8);
-    printBits(8,&q,4);
-    q += (q >> 16);
-    printBits(8,&q,4);
-
-    q = q >> 3;
-    printBits(8,&q,4);
-    tmp = q + (q << 2);
-    printBits(8,&tmp,4);
-    r = n - (tmp << 1);
-    printBits(8,&r,4);
-    //printf("%u\n",r);
-    uint64_t res = q + (r > 9);
-    printBits(8,&res,4);
-    return res;
+void check() {
+    uint32_t a[2] = {150000, 0};
+    int scale = 20;
+    printBits(8, &a, 8);
+    reduce_scale_arr(a, 2, &scale);
+    printBits(8, &a, 8);
+    printf("%d\n", scale);
 }
-void ud10(){
-    uint64_t i = 30;
-    printBits(8,&i,4);
-    //printf("%lu\n",i);
-    uint64_t r= divu10(i);
-    printBits(8,&r,4);
-    //printf("%lu\n",r);
+void Bar() {
+    uint32_t a = UINT32_MAX - 1;
+    printf("%u\n", a);
+    printBits(4, &a, 8);
+    a /= 2;
+    printf("%u\n", a);
+    printBits(4, &a, 8);
 }
-
-void d10(){
-    decimal d = {0,UINT32_MAX/2,0,0};
-    printBits(8,&d,4);
-    div10((uint32_t*)d.bits,3);
-    printBits(8,&d,4);
-    printf("%lu\n",*(d.bits));
-}
-
-void check_test(){
-    decimal d1 = {{UINT32_MAX,UINT32_MAX,UINT32_MAX,0}};
-    setDecimalExp(&d1,20);
-    decimal d2 = {{UINT32_MAX,UINT32_MAX,0,0}};
-    setDecimalExp(&d2,20);
-    decimal d3;
-    s21_add(d1,d2,&d3);
-    printBits(16,&d3,4);
-}
-
-
 int main() {
-    test();
-    //Bar();
-    //ud10();
-    //printf("%lu\n",div5exact(10));
-    //d10();
+    Foo();
 }

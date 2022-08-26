@@ -1,5 +1,5 @@
 //
-// Created by Gladis Ariane on 7/3/22.
+//  Created by Gladis Ariane on 7/3/22.
 //
 
 #include "s21_decimal.h"
@@ -73,7 +73,7 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     uint32_t mask = 0xFFFFFFFF >> (32 - n);
     mask <<= offset;
     bits <<= offset;
-    bits &= mask;  // Зануляет ненужные биты
+    bits &= mask;  //  Зануляет ненужные биты
     *(uint32_t *) dest &= ~mask;
     *(uint32_t *) dest |= bits;
 }
@@ -189,7 +189,7 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        //printf("%d\n",is_0(carry, arr_size));
+        // printf("%d\n",is_0(carry, arr_size));
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -201,7 +201,7 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
 
 void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
-    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
+    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     copyArray(number, y, arr_size);
     uint32_t *sum = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     uint32_t *carry = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
@@ -216,7 +216,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        //printf("%d\n",is_0(carry, arr_size));
+        // printf("%d\n",is_0(carry, arr_size));
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -228,18 +228,18 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
 
 void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
-    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));// (uint32_t *) number;
+    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     copyArray(number, y, arr_size);
     uint32_t *borrow = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     uint32_t *tmp = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     while (!is_0(y, arr_size)) {
-        // https://iq.opengenus.org/bitwise-subtraction/
-        // step 1: get the borrow bit
+        //  https:// iq.opengenus.org/bitwise-subtraction/
+        //  step 1: get the borrow bit
         NOT(x, tmp, arr_size);
         AND(tmp, y, borrow, arr_size);
-        // step 2: get the difference using XOR
+        //  step 2: get the difference using XOR
         XOR(x, y, x, arr_size);
-        // step 3: left shift borrow by 1
+        //  step 3: left shift borrow by 1
         copyArray(borrow, y, arr_size);
         shiftl(y, arr_size, 1);
     }
@@ -249,9 +249,9 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
 }
 
 int cmp(uint32_t *a, uint32_t *b, size_t size) {
-    // 1 - >
-    // 0 - ==
-    // -1 - <
+    //  1 - >
+    //  0 - ==
+    //  -1 - <
     for (int i = size - 1; i >= 0; i--) {
         if (a[i] == b[i] && i > 0)
             continue;
@@ -336,7 +336,7 @@ void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
 }
 
 void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size) {
-    //uint32_t *div = calloc(size, sizeof(uint32_t));
+    // uint32_t *div = calloc(size, sizeof(uint32_t));
     uint32_t *mul = calloc(size, sizeof(uint32_t));
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray(arr1, a1, size);
@@ -359,13 +359,13 @@ int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
     copyArray((uint32_t *) num->bits, x, 3);
     for (int i = 0; i < cycles; ++i) {
-        //init_0(tmp, 4);
-        //copyArray(num->bits, x, 4);
-        //shiftl(x, 4, 1);
-        //bit_add_arr(tmp, x, 4);
-        //shiftl(x, 4, 2);
-        //bit_add_arr(tmp, x, 4);
-        //copyArray(tmp, num->bits, 3);
+        // init_0(tmp, 4);
+        // copyArray(num->bits, x, 4);
+        // shiftl(x, 4, 1);
+        // bit_add_arr(tmp, x, 4);
+        // shiftl(x, 4, 2);
+        // bit_add_arr(tmp, x, 4);
+        // copyArray(tmp, num->bits, 3);
         mul10(x, 4);
     }
     int new_scale = getDecimalExp(*num) + cycles;
@@ -407,22 +407,22 @@ int reduce_scale(decimal *x) {
 }
 
 int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
-    // TODO не работает
-    //  10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
-    //  00000000000000000000000000000000 10001001111010000000000000000000 - не делится на 10
-    // while (arr[0] % 10 == 0 && *scale > 0) {
-    //     div10(arr, size);
-    //     (*scale)--;
-    // }
-    // return 0;
-    // TODO по-тупому
+    //  не работает
+    //   10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
+    //   00000000000000000000000000000000 10001001111010000000000000000000 - не делится на 10
+    //  while (arr[0] % 10 == 0 && *scale > 0) {
+    //      div10(arr, size);
+    //      (*scale)--;
+    //  }
+    //  return 0;
+    //  по-тупому
     uint32_t *buf = calloc(size, sizeof(uint32_t));
     uint32_t *ten = calloc(size, sizeof(uint32_t));
     ten[0] = 10;
     copyArray(arr, buf, size);
     while (*scale > 0) {
-        //printf("%d\t", *scale);
-        //printBits(size * 4, arr, 8);
+        // printf("%d\t", *scale);
+        // printBits(size * 4, arr, 8);
         bit_div_arr(arr, ten, buf, size);
         mul10(buf, size);
         if (cmp(arr, buf, size) == 0) {
@@ -450,10 +450,10 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) 
 }
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
-    memset(dst, 0, sizeof(s21_decimal)); // Иначе забивается мусор
+    memset(dst, 0, sizeof(s21_decimal));  //   Иначе забивается мусор
 
     if (src < 0) {
-        dst->bits[3] = INT32_MIN;  // Задаст 31й бит в 1
+        dst->bits[3] = INT32_MIN;  //  Задаст 31й бит в 1
     }
     dst->bits[0] = abs(src);
 
@@ -470,7 +470,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
         else
             *dst = -1 * value;
     } else {
-        if (getBits(src.bits, 31, 1)) {  // 31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
+        if (getBits(src.bits, 31, 1)) {  //  31й хранит знак(в int), если там не 0 значит у нас оверфлоу.
             return CE;
         }
         *dst = value;
@@ -498,35 +498,35 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         uint32_t bit = getBits(&mant, 22 - curr_bit_pos++, 1);
         result = bit * pow(2, bin_exp);
         printf("%lu\n", result);
-        // TODO Проверить что использовать 3 вместо 4 можно
+        //   Проверить что использовать 3 вместо 4 можно
         bit_add(dst->bits, result, 3);
         bin_exp--;
     }
-    //result = 0;
+    // result = 0;
     int last_whole_bit_pos = curr_bit_pos;
     int last_dec_bit_pos = curr_bit_pos;
     int dec_exp;
     double buf_res;
     int power = 10;
-    for (; curr_bit_pos <= 23; ++curr_bit_pos) { // Проверить , < or <=.
+    for (; curr_bit_pos <= 23; ++curr_bit_pos) { //  Проверить , < or <=.
         uint32_t bit = getBits(&mant, 23 - curr_bit_pos, 1);
         if (bit == 1) {
             last_dec_bit_pos = curr_bit_pos;
         }
         buf_res = bit * pow(2, bin_exp);
-        buf_res *= power; //Todo 10,100,1000...
-        result *= 10; //Todo 10,100,1000...
+        buf_res *= power;  //   10,100,1000...
+        result *= 10;  //   10,100,1000...
 
         result += (uint64_t) buf_res;
         printf("%lu\n", result);
         power *= 10;
         bin_exp--;
     }
-    //bit_add(dst->bits, result, 3);
+    // bit_add(dst->bits, result, 3);
     dec_exp = last_dec_bit_pos - last_whole_bit_pos;
     bit_add(dst->bits, result, 3);
-    setBits(&dst->bits[3], dec_exp, 16, 8); // Todo - Вынести это в отдельные функции
-    setBits(&dst->bits[3], sign, 31, 1); // Todo - Вынести это в отдельные функции
+    setBits(&dst->bits[3], dec_exp, 16, 8);  //    - Вынести это в отдельные функции
+    setBits(&dst->bits[3], sign, 31, 1);  //    - Вынести это в отдельные функции
     return OK;*/
     int sign = getBits(&src, 31, 1);
     if (sign) {
@@ -534,14 +534,14 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     }
     char ch[100];
 
-    sprintf(ch, "%.6f", src);
+    snprintf(ch, sizeof(ch), "%.6f", src);
     if (strcmp("inf", ch) == 0 || strcmp("nan", ch) == 0 || strcmp("-inf", ch) == 0)
         return CE;
-    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1; //TODO проверить нужен ли -1
+    int exp = strlen(ch) - (strchr(ch, '.') - ch) - 1;  //   проверить нужен ли -1
     for (int i = strlen(ch) - exp - 1; (size_t) i < strlen(ch); ++i) {
         ch[i] = ch[i + 1];
     }
-    // exponent-- ch/=10
+    //  exponent-- ch/=10
     for (size_t i = strlen(ch) - 1; i > 0 && ch[i] == '0' && exp > 0; --i) {
         exp--;
         ch[i] = '\0';
@@ -573,7 +573,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
         }
         p++;
     }
-    //res -= 1; // я не знаю почему, но так надо. Но не всегда.
+    // res -= 1;  //   я не знаю почему, но так надо. Но не всегда.
     int _exp = getDecimalExp(src);
     res /= pow(10.0, _exp);
     if (res > MAXFLOAT) {
@@ -582,11 +582,11 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     }
     res *= getDecimalSign(src) ? -1 : 1;
     *dst = (float) res;
-    // decimal d
-    // t = truncate(d)
-    // res +=t
-    // d -= t
-    // res +=d
+    //  decimal d
+    //  t = truncate(d)
+    //  res +=t
+    //  d -= t
+    //  res +=d
     return OK;
 }
 
@@ -604,16 +604,16 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
-//unsigned divu10(unsigned n) {
-//    unsigned q, r;
-//    q = (n >> 1) + (n >> 2);
-//    q = q + (q >> 4);
-//    q = q + (q >> 8);
-//    q = q + (q >> 16);
-//    q = q >> 3;
-//    r = n - (((q << 2) + q) << 1);
-//    return q + (r > 9);
-//}
+// unsigned divu10(unsigned n) {
+//     unsigned q, r;
+//     q = (n >> 1) + (n >> 2);
+//     q = q + (q >> 4);
+//     q = q + (q >> 8);
+//     q = q + (q >> 16);
+//     q = q >> 3;
+//     r = n - (((q << 2) + q) << 1);
+//     return q + (r > 9);
+// }
 uint32_t *make_arr(size_t size) {
     uint32_t *q = malloc(sizeof(uint32_t) * size);
     memset(q, 0, sizeof(uint32_t) * size);
@@ -621,17 +621,17 @@ uint32_t *make_arr(size_t size) {
 }
 
 void div10(uint32_t *x, size_t size) {
-    //TODO use bit_div_arr
-    //    unsigned q, r,tmp;
-    //    q = (x >> 1) + (x >> 2);
-    //    q += (q >> 4);
-    //    q += (q >> 8);
-    //    q += (q >> 16);
-    //    q = q >> 3;
-    //    tmp = q + (q << 2);
-    //    r = x - (tmp << 1);
-    //    //printf("%u\n",r);
-    //    return q + (r > 9);
+    //  use bit_div_arr
+    //     unsigned q, r,tmp;
+    //     q = (x >> 1) + (x >> 2);
+    //     q += (q >> 4);
+    //     q += (q >> 8);
+    //     q += (q >> 16);
+    //     q = q >> 3;
+    //     tmp = q + (q << 2);
+    //     r = x - (tmp << 1);
+    //     // printf("%u\n",r);
+    //     return q + (r > 9);
 
     uint32_t *q = make_arr(size);
     uint32_t *q2 = make_arr(size);
@@ -642,40 +642,40 @@ void div10(uint32_t *x, size_t size) {
     uint32_t *r = make_arr(size);
     uint32_t *x1 = make_arr(size);
     uint32_t *x2 = make_arr(size);
-    // q = (n >> 1) + (n >> 2);
+    //  q = (n >> 1) + (n >> 2);
     copyArray(x, x1, size);
     copyArray(x, x2, size);
     shiftr(x1, size, 1);
     shiftr(x2, size, 2);
     bit_add_arr(x2, x1, size);
     copyArray(x2, q, size);
-    // q += (q >> 4);
+    //  q += (q >> 4);
     copyArray(q, q4, size);
     shiftr(q4, size, 4);
     bit_add_arr(q, q4, size);
-    // q += (q >> 8);
+    //  q += (q >> 8);
     copyArray(q, q8, size);
     shiftr(q8, size, 8);
     bit_add_arr(q, q8, size);
-    // q += (q >> 16);
+    //  q += (q >> 16);
     copyArray(q, q16, size);
     shiftr(q16, size, 16);
     bit_add_arr(q, q16, size);
-    // q = q >> 3;
+    //  q = q >> 3;
     shiftr(q, size, 3);
-    // tmp = q + (q << 2);
+    //  tmp = q + (q << 2);
     uint32_t *tmp = make_arr(size);
     copyArray(q, q2, size);
     shiftl(q2, size, 2);
     bit_add_arr(tmp, q, size);
     bit_add_arr(tmp, q2, size);
-    // r = x - (tmp << 1);
+    //  r = x - (tmp << 1);
     uint32_t *tmp1l = make_arr(size);
     copyArray(tmp, tmp1l, size);
     shiftl1(tmp1l, size);
     copyArray(x, r, size);
     bit_sub_arr(r, tmp1l, size);
-    //return q + (r > 9);
+    // return q + (r > 9);
     int more9 = 0;
     for (size_t i = size - 1; i >= 1; --i) {
         if (r[i] > 0) {
@@ -701,7 +701,7 @@ void div10(uint32_t *x, size_t size) {
     free(tmp1l);
 }
 
-int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // TODO вызывать sub когда надо
+int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  //  вызывать sub когда надо
     eq_scale(&value_1, &value_2);
     init_0((uint32_t *) result->bits, 4);
     int s1 = getDecimalSign(value_1);
@@ -738,7 +738,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
     int exp_x = getDecimalExp(value_1);
     int exp_y = getDecimalExp(value_2);
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
-    // TODO scale reduction
+    //   scale reduction
     bit_add_arr(x, y, 7);
     reduce_scale_arr(x, 7, &max_scale);
     setDecimalSign(result, s1 & s2);
@@ -750,24 +750,24 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) { // 
         }
     } else {
         copyArray(x, (uint32_t *) result->bits, 3);
-        //for (int i = 0; i < 3; ++i)
-        //    result->bits[i] = x[i];
+        // for (int i = 0; i < 3; ++i)
+        //     result->bits[i] = x[i];
         setDecimalExp(result, max_scale);
     }
 
     return res;
 }
 
-//int reduce_scale(decimal *d) {
-//    int exp = getDecimalExp(*d);
-//
-//    return OK;
-//}
+// int reduce_scale(decimal *d) {
+//     int exp = getDecimalExp(*d);
+
+//     return OK;
+// }
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
     init_0((uint32_t *) result->bits, 4);
-    if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) { // одинаковый +
+    if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) {  //  одинаковый +
         if (s21_is_equal(value_1, value_2)) {
             return 0;
         } else if (s21_is_greater(value_1, value_2)) {
@@ -781,30 +781,30 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                          7);
             bit_sub_arr(x, y, 7);
             reduce_scale_arr(x, 7, &max_scale);
-            copyArray(x, (uint32_t *) result->bits, 3); // result!!
-            setDecimalExp(result, max_scale); // result!!
-            //reduce_scale(result);
+            copyArray(x, (uint32_t *) result->bits, 3);  //   result!!
+            setDecimalExp(result, max_scale);  //   result!!
+            // reduce_scale(result);
             return ret;
         } else {
             ret = s21_sub(value_2, value_1, result);
             s21_negate(*result, result);
         }
-    } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) { //одинаковый -
-        if (s21_is_greater(value_1, value_2)) { // -1 - (-10)
+    } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) {  // одинаковый -
+        if (s21_is_greater(value_1, value_2)) {  //  -1 - (-10)
             s21_negate(value_2, &value_2);
             s21_negate(value_1, &value_1);
             ret = s21_sub(value_2, value_1, result);
-        } else if (s21_is_greater(value_2, value_1)) { // -10 - (-1)
+        } else if (s21_is_greater(value_2, value_1)) {  //  -10 - (-1)
             s21_negate(value_2, &value_2);
             s21_negate(value_1, &value_1);
             ret = s21_sub(value_1, value_2, result);
             setDecimalSign(result, 1);
         }
-    } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) { //отрицательное, минус положительное
+    } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) {  // отрицательное, минус положительное
         s21_negate(value_1, &value_1);
         ret = s21_add(value_1, value_2, result);
         s21_negate(*result, result);
-    } else { //положительное минус отрицательное
+    } else {  // положительное минус отрицательное
         s21_negate(value_2, &value_2);
         ret = s21_add(value_1, value_2, result);
         s21_negate(*result, result);
@@ -881,7 +881,7 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
     int sign = getDecimalSign(value);
     *result = value;
     if (exp != 0) {
-        uint64_t u_num;  // 18,446,744,073,709,551,615
+        uint64_t u_num;  //  18,446,744,073,709,551,615
         int tmp_int = 0;
         for (int i = 0; i < exp; i++) {
             u_num = result->bits[2];
@@ -910,7 +910,6 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
         if (sign)
             setDecimalSign(result, 0);
         s21_truncate(*result, result);
-        //TODO
         if (sign) {
             s21_decimal tmp = {{1, 0, 0, 0}};
             s21_add(*result, tmp, result);
@@ -941,8 +940,8 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 }
 int s21_bank_round(decimal *value) {
     int res = OK;
-    // Банковское только для ровно х.5
-    // TODO случаи с 0.5000 и т.д. Пока что использовать только после reduce_scale
+    //  Банковское только для ровно х.5
+    //   случаи с 0.5000 и т.д. Пока что использовать только после reduce_scale
     if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
         res = s21_truncate(*value, value);
         if (value->bits[0] % 2 == 1 && !res) {
@@ -983,7 +982,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         return DIVBY0;
     }
     size_t size = 12;
-    //TODO использовать статические, когда определимся с нужным значением
+    //  использовать статические, когда определимся с нужным значением
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray((uint32_t *) &(value_1.bits), a1, 3);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
@@ -993,11 +992,11 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     uint32_t *mod = calloc(size, sizeof(uint32_t));
     uint32_t *div = calloc(size, sizeof(uint32_t));
     eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
-    // алгоритм
+    //  алгоритм
     /*
     st = 0
     for i in range(29):
-        d = a // b
+        d = a //  b
         m = a % b
         a = m*10
         st += d
@@ -1013,7 +1012,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
 
     int count = 0;
-    do { // Это исторический момент, мне впервые пригодился do while
+    do {  //  Это исторический момент, мне впервые пригодился do while
         bit_div_mod_arr(a1, a2, div, mod, size);
         mul10(mod, size);
         copyArray(mod, a1, size);
@@ -1031,7 +1030,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
         return OK;
     } else {
-        return TOOSMALL;//TODO toolarge
+        return TOOSMALL;  //  toolarge
     }
 }
 
@@ -1039,7 +1038,7 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (is_0(value_2.bits, 3)) {
         return DIVBY0;
     }
-    //забить на отрицательные, вертеру насрать
+    // забить на отрицательные, вертеру насрать
     int s2 = getDecimalExp(value_2);
     int s1 = getDecimalExp(value_1);
     int scale = s1 > s2 ? s1 : s2;
@@ -1047,4 +1046,3 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     setDecimalExp(result, scale);
     return OK;
 }
-

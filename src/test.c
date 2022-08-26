@@ -1,5 +1,5 @@
 //
-// Created by Gladis Ariane on 7/31/22.
+//  Created by Gladis Ariane on 7/31/22.
 //
 #include <check.h>
 #include <stdio.h>
@@ -14,7 +14,7 @@ START_TEST(SUB_TEST) {
     ck_assert_int_eq(res, 0);
 
     test2.bits[3] = 0;
-    //test1.bits[3] = 0;
+    // test1.bits[3] = 0;
     res = s21_sub(test1, test2, &result);
     ck_assert_int_eq(res, 2);
 
@@ -44,9 +44,9 @@ START_TEST(SUB_TEST) {
             decimal rr;
 
             s21_from_int_to_decimal(a, &aa);
-            //s21_from_decimal_to_int(aa, &a);
+            // s21_from_decimal_to_int(aa, &a);
             s21_from_int_to_decimal(b, &bb);
-            //s21_from_decimal_to_int(bb, &b);
+            // s21_from_decimal_to_int(bb, &b);
             s21_sub(aa, bb, &rr);
             s21_from_decimal_to_int(rr, &r);
             if (r != a - b) {
@@ -66,18 +66,18 @@ START_TEST(SUB_TEST) {
             decimal rr;
 
             s21_from_float_to_decimal(a, &aa);
-            //s21_from_decimal_to_float(aa, &a);
+            // s21_from_decimal_to_float(aa, &a);
             s21_from_float_to_decimal(b, &bb);
-            //s21_from_decimal_to_float(bb, &b);
+            // s21_from_decimal_to_float(bb, &b);
             s21_sub(aa, bb, &rr);
             s21_from_decimal_to_float(rr, &r);
             if (fabsf(r - (a - b)) > 0.0001) {
                 printf("%f != (%f) - (%f) == (%f)\n", r, a, b, a - b);
                 ck_assert_float_eq_tol(r, a - b, 0.0001);
             }
-            //printf("a - %d\n",a);
-            //printf("b - %d\n",b);
-            //printf("r - %d\n",r);
+            // printf("a - %d\n",a);
+            // printf("b - %d\n",b);
+            // printf("r - %d\n",r);
         }
     }
 }
@@ -185,7 +185,7 @@ START_TEST(MUL_TEST) {
     test2.bits[0] = 1;
     setDecimalExp(&test2, 28);
     res = s21_mul(test1, test2, &result);
-    ck_assert_int_eq(result.bits[3], 28 << 15);
+    ck_assert_int_eq(result.bits[3], 28 << 16);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
@@ -201,9 +201,9 @@ START_TEST(MUL_TEST) {
             decimal rr;
 
             s21_from_int_to_decimal(a, &aa);
-            //s21_from_decimal_to_int(aa, &a);
+            // s21_from_decimal_to_int(aa, &a);
             s21_from_int_to_decimal(b, &bb);
-            //s21_from_decimal_to_int(bb, &b);
+            // s21_from_decimal_to_int(bb, &b);
             s21_mul(aa, bb, &rr);
             s21_from_decimal_to_int(rr, &r);
             if (r != a * b) {
@@ -222,18 +222,18 @@ START_TEST(MUL_TEST) {
             decimal rr;
 
             s21_from_float_to_decimal(a, &aa);
-            //s21_from_decimal_to_float(aa, &a);
+            // s21_from_decimal_to_float(aa, &a);
             s21_from_float_to_decimal(b, &bb);
-            //s21_from_decimal_to_float(bb, &b);
+            // s21_from_decimal_to_float(bb, &b);
             s21_mul(aa, bb, &rr);
             s21_from_decimal_to_float(rr, &r);
             if (fabsf(r - (a * b)) > 0.001) {
                 printf("%f != (%f) * (%f) == (%f)\n", r, a, b, a * b);
                 ck_assert_float_eq_tol(r, a * b, 0.001);
             }
-            //printf("a - %d\n",a);
-            //printf("b - %d\n",b);
-            //printf("r - %d\n",r);
+            // printf("a - %d\n",a);
+            // printf("b - %d\n",b);
+            // printf("r - %d\n",r);
         }
     }
 }
@@ -249,8 +249,8 @@ Suite *f_example_suite_create() {
     tcase_add_test(p_case, ADD_TEST);
     tcase_add_test(p_case, GREATER_TEST);
     tcase_add_test(p_case, EQUAL_TEST);
-    //tcase_add_test(p_case, DIV_TEST);
-    //tcase_add_test(p_case, MOD_TEST);
+    // tcase_add_test(p_case, DIV_TEST);
+    // tcase_add_test(p_case, MOD_TEST);
     tcase_add_test(p_case, MUL_TEST);
     tcase_add_test(p_case, NEGATE_TEST);
     tcase_add_test(p_case, TO_FROM_INT);
@@ -260,7 +260,7 @@ Suite *f_example_suite_create() {
 
 int main() {
     Suite *s1 = f_example_suite_create();
-    // Runner
+    //  Runner
     SRunner *runner = srunner_create(s1);
     int number_failed;
     srunner_run_all(runner, CK_NORMAL);
