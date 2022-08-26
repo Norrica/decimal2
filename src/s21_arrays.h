@@ -47,11 +47,11 @@ void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
 
 void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size);
 
-int cmp(const uint32_t *a, const uint32_t *b, size_t size);
-
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
+
+int cmp(const uint32_t *a, const uint32_t *b, size_t size);
 
 void init_0(uint32_t *arr, int size);
 
@@ -66,6 +66,5 @@ void copyArray(const uint32_t *from, uint32_t *to, size_t len);
 void mul10(uint32_t *x, int size);
 
 void div10(uint32_t *x, size_t size);
-
 
 #endif  //  SRC_S21_ARRAYS_H_

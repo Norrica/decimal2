@@ -18,9 +18,11 @@ int getDecimalExp(decimal d) {
 void setDecimalExp(decimal *d, int exp) {
     setBits(&d->bits[3], exp, 16, 8);
 }
+
 int getDecimalSign(decimal d) {
     return getBits(&d.bits[3], 31, 1);
 }
+
 void setDecimalSign(decimal *d, int sign) {
     setBits(&d->bits[3], sign, 31, 1);
 }
@@ -80,6 +82,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
 
     return OK;
 }
+
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     if (src.bits[1] || src.bits[2]) {
         return CE;
@@ -448,6 +451,7 @@ int s21_round(s21_decimal value, s21_decimal *result) {
     }
     return 0;
 }
+
 int s21_bank_round(decimal *value) {
     int res = OK;
     //  Банковское только для ровно х.5
@@ -463,6 +467,7 @@ int s21_bank_round(decimal *value) {
     }
     return res;
 }
+
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     init_0((uint32_t *) result->bits, 4);
     uint32_t val1[7] = {0};

@@ -23,6 +23,7 @@ void printBits(const size_t size, const void *ptr, int sep_n) {
     }
     puts("");
 }
+
 int s21_get_bit(s21_decimal d, int i) {
     int bit = 0;
     unsigned int mask = 1u << (i % 32);
@@ -30,6 +31,7 @@ int s21_get_bit(s21_decimal d, int i) {
         bit = 1;
     return bit;
 }
+
 void s21_set_bit(s21_decimal *value, int place, int bit) {
     unsigned int mask = 1u << (place % 32);
     if (bit) {
@@ -38,6 +40,7 @@ void s21_set_bit(s21_decimal *value, int place, int bit) {
         value->bits[place / 32] &= ~mask;
     }
 }
+
 uint32_t getBits(const void *ptr, int offset, int n) {
     uint32_t num = *(uint32_t *) ptr;
     uint32_t buf = num;
@@ -46,10 +49,12 @@ uint32_t getBits(const void *ptr, int offset, int n) {
     buf &= mask;
     return buf >> offset;
 }
+
 void copyBits(const void *dest, const void *src, int offset, int n) {
     uint32_t src_num = getBits(src, offset, n);
     setBits(dest, src_num, offset, n);
 }
+
 void setBits(const void *dest, uint32_t bits, int offset, int n) {
     uint32_t mask = 0xFFFFFFFF >> (32 - n);
     mask <<= offset;
@@ -58,6 +63,7 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     *(uint32_t *) dest &= ~mask;
     *(uint32_t *) dest |= bits;
 }
+
 void flipBits(uint32_t *i) {
     uint32_t j = 0;
     for (int k = 0; k < 32; k++) {
@@ -65,6 +71,7 @@ void flipBits(uint32_t *i) {
     }
     *i = j;
 }
+
 int shiftl(void *object, size_t size, int n) {
     if ((size_t) n > 32 * size) {
         puts("dont shift more than arr size");
@@ -75,6 +82,7 @@ int shiftl(void *object, size_t size, int n) {
     }
     return 0;
 }
+
 int shiftr(void *object, size_t size, int n) {
     if ((size_t) n > (size * 32)) {
         puts("fuk you from shiftr");
@@ -85,6 +93,7 @@ int shiftr(void *object, size_t size, int n) {
     }
     return 0;
 }
+
 void shiftl1(uint32_t *arr, size_t size) {
     for (size_t i = size - 1; i >= 1; --i) {
         arr[i] <<= 1;
@@ -92,6 +101,7 @@ void shiftl1(uint32_t *arr, size_t size) {
     }
     arr[0] <<= 1;
 }
+
 void shiftr1(uint32_t *arr, size_t size) {
     for (size_t i = 0; i < size - 1; ++i) {
         arr[i] >>= 1;
@@ -99,6 +109,7 @@ void shiftr1(uint32_t *arr, size_t size) {
     }
     arr[size - 1] >>= 1;
 }
+
 void OR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -107,6 +118,7 @@ void OR(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] | a2[i];
     }
 }
+
 void XOR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -115,6 +127,7 @@ void XOR(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] ^ a2[i];
     }
 }
+
 void AND(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
@@ -123,6 +136,7 @@ void AND(void *arr1, void *arr2, void *res, size_t size) {
         r[i] = a1[i] & a2[i];
     }
 }
+
 void NOT(void *arr, void *res, size_t size) {
     uint32_t *a = (uint32_t *) arr;
     uint32_t *r = (uint32_t *) res;
@@ -130,6 +144,7 @@ void NOT(void *arr, void *res, size_t size) {
         r[i] = ~a[i];
     }
 }
+
 int is_0(void *arr, size_t size) {
     uint32_t *a = (uint32_t *) arr;
     for (size_t i = 0; i < size; i++) {
@@ -139,6 +154,7 @@ int is_0(void *arr, size_t size) {
     }
     return 1;
 }
+
 void bit_add(void *value_1, uint32_t number, size_t arr_size) {
     uint32_t *x = (uint32_t *) value_1;
     uint32_t *y = malloc(sizeof(uint32_t) * arr_size);
@@ -168,6 +184,7 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
     free(sum);
     free(y);
 }
+
 void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
@@ -194,6 +211,7 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(carry);
     free(sum);
 }
+
 void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
@@ -215,6 +233,7 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     free(borrow);
     free(tmp);
 }
+
 int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
     //  1 - >
     //  0 - ==
@@ -229,6 +248,7 @@ int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
     }
     return 0;
 }
+
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray(val1, a1, size);
@@ -242,6 +262,7 @@ void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
         shiftr1(a2, size);
     }
 }
+
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     /*unsigned int fun2 ( unsigned int a, unsigned int b )
 {
@@ -285,6 +306,7 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
         shiftr1(rb, size); /*rb >>= 1*/
     }
 }
+
 void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     uint32_t *div = calloc(size, sizeof(uint32_t));
     uint32_t *mul = calloc(size, sizeof(uint32_t));
@@ -298,6 +320,7 @@ void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     bit_sub_arr(a1, mul, size);
     copyArray(a1, res, size);
 }
+
 void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size) {
     // uint32_t *div = calloc(size, sizeof(uint32_t));
     uint32_t *mul = calloc(size, sizeof(uint32_t));
@@ -311,16 +334,19 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mo
     bit_sub_arr(a1, mul, size);
     copyArray(a1, mod, size);
 }
+
 void init_0(uint32_t *arr, int size) {
     for (int i = 0; i < size; ++i) {
         arr[i] = 0;
     }
 }
+
 void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
     for (int i = 0; i < cycles; ++i) {
         mul10(arr, size);
     }
 }
+
 int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
     //  не работает
     //   10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
@@ -349,6 +375,7 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
     }
     return OK;
 }
+
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) {
     int maxscale;
     if (scalex > scaley) {
@@ -362,11 +389,13 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) 
     }
     return maxscale;
 }
+
 void copyArray(const uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
         to[i] = from[i];
     }
 }
+
 void mul10(uint32_t *x, int size) {
     uint32_t *tmp = malloc(size * sizeof(uint32_t));
     copyArray(x, tmp, size);
@@ -375,6 +404,7 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
+
 // unsigned divu10(unsigned n) {
 //     unsigned q, r;
 //     q = (n >> 1) + (n >> 2);
@@ -390,6 +420,7 @@ uint32_t *make_arr(size_t size) {
     memset(q, 0, sizeof(uint32_t) * size);
     return q;
 }
+
 void div10(uint32_t *x, size_t size) {
     //  use bit_div_arr
     //     unsigned q, r,tmp;
