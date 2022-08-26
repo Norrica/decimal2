@@ -41,6 +41,21 @@ void Bar() {
     printf("%u\n", a);
     printBits(4, &a, 8);
 }
+void leaks(){
+    decimal a = {1,0,0,0};
+    decimal b = {1,0,0,0};
+    decimal r = {0,0,0,0};
+    s21_add(a,b,&r);
+    s21_sub(a,b,&r);
+    s21_mul(a,b,&r);
+    s21_div(a,b,&r);
+    s21_mod(a,b,&r);
+    s21_truncate(a,&r);
+    s21_floor(a,&r);
+    s21_round(a,&r);
+    s21_negate(a,&r);
+
+}
 int main() {
-    Foo();
+    leaks();
 }

@@ -157,14 +157,10 @@ int is_0(void *arr, size_t size) {
 
 void bit_add(void *value_1, uint32_t number, size_t arr_size) {
     uint32_t *x = (uint32_t *) value_1;
-    uint32_t *y = malloc(sizeof(uint32_t) * arr_size);
-    memset(y, 0, arr_size * sizeof(*y));
+    uint32_t *y = calloc(arr_size, sizeof(uint32_t));
     y[0] = number;
-
-    uint32_t *sum = malloc(sizeof(uint32_t) * arr_size);
-    uint32_t *carry = malloc(sizeof(uint32_t) * arr_size);
-    memset(sum, 0, arr_size * sizeof(*y));
-    memset(carry, 0, arr_size * sizeof(*y));
+    uint32_t *sum = calloc(arr_size, sizeof(uint32_t));
+    uint32_t *carry = calloc(arr_size, sizeof(uint32_t));
     XOR(x, y, sum, arr_size);
     AND(x, y, carry, arr_size);
     while (!is_0(carry, arr_size)) {
@@ -261,6 +257,8 @@ void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
         shiftl1(a1, size);
         shiftr1(a2, size);
     }
+    free(a1);
+    free(a2);
 }
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
@@ -305,6 +303,11 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
         }
         shiftr1(rb, size); /*rb >>= 1*/
     }
+    free(a2);
+    free(acc);
+    free(rb);
+    free(buf);
+    free(one);
 }
 
 void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
@@ -319,10 +322,14 @@ void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     bit_mul_arr(a2, div, mul, size);
     bit_sub_arr(a1, mul, size);
     copyArray(a1, res, size);
+
+    free(div);
+    free(mul);
+    free(a1);
+    free(a2);
 }
 
 void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size) {
-    // uint32_t *div = calloc(size, sizeof(uint32_t));
     uint32_t *mul = calloc(size, sizeof(uint32_t));
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray(arr1, a1, size);
@@ -333,6 +340,9 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mo
     bit_mul_arr(a2, div, mul, size);
     bit_sub_arr(a1, mul, size);
     copyArray(a1, mod, size);
+    free(mul);
+    free(a1);
+    free(a2);
 }
 
 void init_0(uint32_t *arr, int size) {
@@ -373,6 +383,8 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
             break;
         }
     }
+    free(buf);
+    free(ten);
     return OK;
 }
 
@@ -403,101 +415,4 @@ void mul10(uint32_t *x, int size) {
     shiftl(tmp, size, 1);
     bit_add_arr(x, tmp, size);
     free(tmp);
-}
-
-// unsigned divu10(unsigned n) {
-//     unsigned q, r;
-//     q = (n >> 1) + (n >> 2);
-//     q = q + (q >> 4);
-//     q = q + (q >> 8);
-//     q = q + (q >> 16);
-//     q = q >> 3;
-//     r = n - (((q << 2) + q) << 1);
-//     return q + (r > 9);
-// }
-uint32_t *make_arr(size_t size) {
-    uint32_t *q = malloc(sizeof(uint32_t) * size);
-    memset(q, 0, sizeof(uint32_t) * size);
-    return q;
-}
-
-void div10(uint32_t *x, size_t size) {
-    //  use bit_div_arr
-    //     unsigned q, r,tmp;
-    //     q = (x >> 1) + (x >> 2);
-    //     q += (q >> 4);
-    //     q += (q >> 8);
-    //     q += (q >> 16);
-    //     q = q >> 3;
-    //     tmp = q + (q << 2);
-    //     r = x - (tmp << 1);
-    //     // printf("%u\n",r);
-    //     return q + (r > 9);
-
-    uint32_t *q = make_arr(size);
-    uint32_t *q2 = make_arr(size);
-    uint32_t *q4 = make_arr(size);
-    uint32_t *q8 = make_arr(size);
-    uint32_t *q16 = make_arr(size);
-    uint32_t *q3 = make_arr(size);
-    uint32_t *r = make_arr(size);
-    uint32_t *x1 = make_arr(size);
-    uint32_t *x2 = make_arr(size);
-    //  q = (n >> 1) + (n >> 2);
-    copyArray(x, x1, size);
-    copyArray(x, x2, size);
-    shiftr(x1, size, 1);
-    shiftr(x2, size, 2);
-    bit_add_arr(x2, x1, size);
-    copyArray(x2, q, size);
-    //  q += (q >> 4);
-    copyArray(q, q4, size);
-    shiftr(q4, size, 4);
-    bit_add_arr(q, q4, size);
-    //  q += (q >> 8);
-    copyArray(q, q8, size);
-    shiftr(q8, size, 8);
-    bit_add_arr(q, q8, size);
-    //  q += (q >> 16);
-    copyArray(q, q16, size);
-    shiftr(q16, size, 16);
-    bit_add_arr(q, q16, size);
-    //  q = q >> 3;
-    shiftr(q, size, 3);
-    //  tmp = q + (q << 2);
-    uint32_t *tmp = make_arr(size);
-    copyArray(q, q2, size);
-    shiftl(q2, size, 2);
-    bit_add_arr(tmp, q, size);
-    bit_add_arr(tmp, q2, size);
-    //  r = x - (tmp << 1);
-    uint32_t *tmp1l = make_arr(size);
-    copyArray(tmp, tmp1l, size);
-    shiftl1(tmp1l, size);
-    copyArray(x, r, size);
-    bit_sub_arr(r, tmp1l, size);
-    // return q + (r > 9);
-    int more9 = 0;
-    for (size_t i = size - 1; i >= 1; --i) {
-        if (r[i] > 0) {
-            more9 = 1;
-        }
-    }
-    if (r[0] > 9) {
-        more9 = 1;
-    }
-    if (more9)
-        bit_add(q, 1, size);
-    copyArray(q, x, size);
-    free(q);
-    free(q2);
-    free(q4);
-    free(q8);
-    free(q16);
-    free(q3);
-    free(r);
-    free(x1);
-    free(x2);
-    free(tmp);
-    free(tmp1l);
 }
