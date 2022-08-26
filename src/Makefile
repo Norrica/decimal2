@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Werror -Wextra -std=c11
 TEST_LIBS = -lcheck -lm -lpthread #-lsubunit
 OBJECTS = s21_decimal.o
-SOURSES = s21_decimal.c
+SOURSES = s21_decimal.c s21_arrays.c
 GCOVFLAGS = -fprofile-arcs -ftest-coverage
 
 
@@ -52,7 +52,7 @@ python_test:
 	lcov -t "python_test" -o gcov_test.info --no-external -c -d .
 	genhtml -o report/ gcov_test.info
 buf:
-	gcc -g s21_decimal.c buf.c -lm -o buf.out
+	gcc -g s21_decimal.c s21_arrays.c buf.c -lm -o buf.out
 
 fub:
-	gcc -g s21_decimal.c fub.c -lm -o fub.out
+	gcc -g s21_decimal.c s21_arrays.c fub.c -lm -o fub.out

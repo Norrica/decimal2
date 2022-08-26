@@ -4,6 +4,7 @@
 #include <check.h>
 #include <stdio.h>
 #include "s21_decimal.h"
+#include "s21_arrays.h"
 
 START_TEST(SUB_TEST) {
     s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};

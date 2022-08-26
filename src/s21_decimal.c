@@ -3,6 +3,7 @@
 //
 
 #include "s21_decimal.h"
+#include "s21_arrays.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -24,21 +25,6 @@ void setDecimalSign(decimal *d, int sign) {
     setBits(&d->bits[3], sign, 31, 1);
 }
 
-/*Поможет смотреть внутрь массива*/
-void printBits(const size_t size, const void *ptr, int sep_n) {
-    unsigned char *b = (unsigned char *) ptr;
-    unsigned char byte;
-    int i, j;
-
-    for (i = size - 1; i >= 0; i--) {
-        for (j = 7; j >= 0; j--) {
-            byte = (b[i] >> j) & 1;
-            printf("%u", byte);
-        }
-        if (!(i % sep_n)) printf(" ");
-    }
-    puts("");
-}
 int s21_get_bit(s21_decimal d, int i) {
     int bit = 0;
     unsigned int mask = 1u << (i % 32);
@@ -248,7 +234,7 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     free(tmp);
 }
 
-int cmp(uint32_t *a, uint32_t *b, size_t size) {
+int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
     //  1 - >
     //  0 - ==
     //  -1 - <
@@ -590,7 +576,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     return OK;
 }
 
-void copyArray(uint32_t *from, uint32_t *to, size_t len) {
+void copyArray(const uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
         to[i] = from[i];
     }
@@ -881,9 +867,9 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
     int sign = getDecimalSign(value);
     *result = value;
     if (exp != 0) {
-        uint64_t u_num;  //  18,446,744,073,709,551,615
-        int tmp_int = 0;
+        int tmp_int;
         for (int i = 0; i < exp; i++) {
+            uint64_t u_num;  //  18,446,744,073,709,551,615
             u_num = result->bits[2];
             for (int j = 2; j >= 0; j--) {
                 if (j == 0) {

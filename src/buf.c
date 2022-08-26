@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "s21_decimal.h"
+#include "s21_arrays.h"
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>

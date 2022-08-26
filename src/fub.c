@@ -6,6 +6,7 @@
 #include <sys/times.h>
 #include <time.h>
 #include "s21_decimal.h"
+#include "s21_arrays.h"
 
 unsigned int fun1(unsigned int a, unsigned int b) {
     unsigned int c;

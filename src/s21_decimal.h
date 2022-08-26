@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 
-//#ifndef uint32_t
-//typedef unsigned int uint32_t;
-//#endif
+// #ifndef uint32_t
+// typedef unsigned int uint32_t;
+// #endif
 
 
 #define OK 0
@@ -22,23 +22,23 @@
 #define TOOLARGE 1
 #define TOOSMALL 2
 #define DIVBY0 3
-//typedef union {
-//  uint32_t bits[4];
-//  struct {
-//    uint32_t mntsa[3];  // 96bit
-//    uint32_t zeros : 16;
-//    uint32_t exp : 8;  // mntsa*10^-exp
-//    uint32_t zeros2 : 7;
-//    uint32_t sign : 1;
-//  };
-//} s21_decimal;
+// typedef union {
+//   uint32_t bits[4];
+//   struct {
+//     uint32_t mntsa[3];  // 96bit
+//     uint32_t zeros : 16;
+//     uint32_t exp : 8;  // mntsa*10^-exp
+//     uint32_t zeros2 : 7;
+//     uint32_t sign : 1;
+//   };
+// } s21_decimal;
 
 typedef struct {
   uint32_t bits[4];
 } s21_decimal;
 
 #define decimal s21_decimal
-#define printDecimal(D) (printBits(sizeof(int) * 4, D,4))
+#define printDecimal(D) (printBits(sizeof(int) * 4, D, 4))
 int getDecimalSign(decimal d);
 
 int getDecimalExp(decimal d);
@@ -63,7 +63,7 @@ void mul10(uint32_t *x, int size);
 
 void div10(uint32_t *x, size_t size);
 
-void copyArray(uint32_t *from, uint32_t *to, size_t len);
+void copyArray(const uint32_t *from, uint32_t *to, size_t len);
 
 int move_scale(int cycles, s21_decimal *num);
 
@@ -89,7 +89,7 @@ void shiftr1(uint32_t *object, size_t size);
 
 int is_0(void *arr, size_t size);
 
-int cmp(uint32_t *a, uint32_t *b, size_t size);
+int cmp(const uint32_t *a, const uint32_t *b, size_t size);
 
 void bit_add(void *value_1, uint32_t number, size_t arr_size);
 
