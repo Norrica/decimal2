@@ -282,6 +282,8 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     }
     return(res);
 }*/
+    uint32_t *a1 = calloc(size, sizeof(uint32_t));
+    copyArray(arr1, a1, size);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
     copyArray(arr2, a2, size);
     uint32_t *acc = calloc(size, sizeof(uint32_t));
@@ -293,7 +295,7 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     setBits(&(rb[size - 1]), 1, 31, 1);  /*rb = 0x80000000*/
     while (!is_0(rb, size)) { /*for*/
         shiftl1(acc, size);
-        AND(rb, arr1, buf, size);
+        AND(rb, a1, buf, size);
         if (!is_0(buf, size))
             OR(acc, one, acc, size);
         int cmp_res = cmp(acc, a2, size);
@@ -414,5 +416,11 @@ void mul10(uint32_t *x, int size) {
     shiftl(x, size, 3);
     shiftl(tmp, size, 1);
     bit_add_arr(x, tmp, size);
+    free(tmp);
+}
+void div10(uint32_t*x,size_t size) {
+    uint32_t *tmp = calloc(size,sizeof(uint32_t));
+    tmp[0]=10;
+    bit_div_arr(x,tmp,x,size);
     free(tmp);
 }

@@ -65,4 +65,6 @@ void copyArray(const uint32_t *from, uint32_t *to, size_t len);
 
 void mul10(uint32_t *x, int size);
 
+void div10(uint32_t *x, size_t size);
+
 #endif  //  SRC_S21_ARRAYS_H_
