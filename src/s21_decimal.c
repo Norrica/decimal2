@@ -513,7 +513,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     for i in range(29):
         d = a //  b
         m = a % b
-        a = m*10
+        a = m * 10
         st += d
         st *= 10
     res = st
@@ -538,14 +538,15 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     } while (!is_0(mod, size) && count < 28);
 
     reduce_scale_arr(res, size, &res_exp);
-    int ret = 0;
+    int ret;
     if (!res[3] && res_exp <= 28) {
         copyArray(res, result->bits, 3);
         setDecimalExp(result, res_exp);
         setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
         ret = OK;
     } else {
-        ret = TOOSMALL;  //  toolarge
+        /*Если знаки разные, res отрицательный*/
+        ret = (getDecimalSign(value_1) ^ getDecimalSign(value_2)) == 0 ? TOOSMALL : TOOLARGE;
     }
     free(a1);
     free(a2);

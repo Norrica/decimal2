@@ -34,12 +34,10 @@ void check() {
     printf("%d\n", scale);
 }
 void Bar() {
-    uint32_t a = UINT32_MAX - 1;
-    printf("%u\n", a);
-    printBits(4, &a, 8);
-    a /= 2;
-    printf("%u\n", a);
-    printBits(4, &a, 8);
+    uint32_t a =1;
+    uint32_t b =0;
+    printf("%u\n",a^b);
+
 }
 void leaks(){
     decimal a = {1,0,0,0};
@@ -57,5 +55,5 @@ void leaks(){
 
 }
 int main() {
-    leaks();
+    Bar();
 }
