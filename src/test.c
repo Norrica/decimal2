@@ -20,7 +20,7 @@ START_TEST(SUB_TEST) {
     ck_assert_int_eq(res, 2);
 
     res = s21_sub(test2, test1, &result);
-    ck_assert_int_eq(res, 2);
+    ck_assert_int_eq(res, 1);
 
     init_0((uint32_t *) test1.bits, 3);
     init_0((uint32_t *) test2.bits, 3);
@@ -29,14 +29,14 @@ START_TEST(SUB_TEST) {
     test1.bits[0] = 1;
     test2.bits[2] = 1;
 
-    printBits(16,&test2,4);
-    printBits(16,&test1,4);
+    //printBits(16,&test2,4);
+    //printBits(16,&test1,4);
     s21_sub(test2, test1, &result);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
 
     s21_sub(test1, test2, &result);
-    printBits(16,&result,4);
+    //printBits(16,&result,4);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[3], 1u << 31);
@@ -57,7 +57,11 @@ START_TEST(SUB_TEST) {
             s21_sub(aa, bb, &rr);
             s21_from_decimal_to_int(rr, &r);
             if (r != a - b) {
-                printf("%d != (%d) - (%d) == (%d)\n", r, a, b, a - b);
+                //printf("i=%d\tj=%d\n", i, j);
+                //printBits(16,&aa,12);
+                //printBits(16,&bb,12);
+                //printf("r=%d\n", r);
+                printf("res : %d != (%d) - (%d) == (%d)\n", r, a, b, a - b);
                 ck_assert_int_eq(r, a - b);
             }
         }
@@ -87,19 +91,6 @@ START_TEST(SUB_TEST) {
             // printf("r - %d\n",r);
         }
     }
-    // check bank rounding
-    decimal a = {UINT32_MAX,UINT32_MAX,UINT32_MAX,0};
-    decimal b = {0,0,0,0};
-    decimal r = {0,0,0,0};
-    a.bits[0]=UINT32_MAX;
-    b.bits[0]=5;
-    setDecimalExp(&a,0); // max_decimal
-    setDecimalExp(&b,0); // 0.5
-    s21_sub(a,b,&r);
-    printBits(16,&a,12);
-    printBits(16,&b,12);
-    printBits(16,&r,12);
-    printf("%d\n", getDecimalExp(r));
 }
 
 END_TEST
@@ -318,7 +309,7 @@ Suite *f_example_suite_create() {
 
     TCase *p_case = tcase_create("Core");
 
-    // tcase_set_timeout(p_case, 0);
+     tcase_set_timeout(p_case, 0);
     tcase_add_test(p_case, SUB_TEST);
     //tcase_add_test(p_case, ADD_TEST);
     //tcase_add_test(p_case, GREATER_TEST);
