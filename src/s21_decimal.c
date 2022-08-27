@@ -29,7 +29,7 @@ void setDecimalSign(decimal *d, int sign) {
 
 int move_scale(int cycles, s21_decimal *num) {
     uint32_t x[4] = {0};
-    copyArray( num->bits, x, 3);
+    copyArray(num->bits, x, 3);
     for (int i = 0; i < cycles; ++i) {
         // init_0(tmp, 4);
         // copyArray(num->bits, x, 4);
@@ -44,7 +44,7 @@ int move_scale(int cycles, s21_decimal *num) {
     if (x[3] > 0 || new_scale > 28) {
         return CE;
     }
-    copyArray(x,  num->bits, 3);
+    copyArray(x, num->bits, 3);
     setDecimalExp(num, new_scale);
     return OK;
 }
@@ -64,7 +64,7 @@ int eq_scale(decimal *x, decimal *y) {
 int reduce_scale(decimal *x) {
     int scale = getDecimalExp(*x);
     uint32_t buf[3];
-    copyArray( x->bits, buf, 3);
+    copyArray(x->bits, buf, 3);
     reduce_scale_arr(buf, 3, &scale);
     copyArray(buf, x->bits, 3);
     setDecimalExp(x, scale);
@@ -238,15 +238,15 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  //
             s21_negate(*result, result);
             return res;
         } else {
-            init_0( result->bits, 4);
+            init_0(result->bits, 4);
             return OK;
         }
     }
     uint32_t x[7] = {0};
     uint32_t y[7] = {0};
 
-    copyArray( value_1.bits, x, 3);
-    copyArray( value_2.bits, y, 3);
+    copyArray(value_1.bits, x, 3);
+    copyArray(value_2.bits, y, 3);
     int exp_x = getDecimalExp(value_1);
     int exp_y = getDecimalExp(value_2);
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
@@ -254,14 +254,14 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  //
     bit_add_arr(x, y, 7);
     reduce_scale_arr(x, 7, &max_scale);
     setDecimalSign(result, s1 & s2);
-    if (max_scale > 0b11111111 || x[3] > 0) {
+    if (max_scale > 28 || x[3] > 0) {
         if (getDecimalSign(*result)) {
             return TOOSMALL;
         } else {
             return TOOLARGE;
         }
     } else {
-        copyArray(x,  result->bits, 3);
+        copyArray(x, result->bits, 3);
         // for (int i = 0; i < 3; ++i)
         //     result->bits[i] = x[i];
         setDecimalExp(result, max_scale);
@@ -278,22 +278,22 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  //
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
-    init_0( result->bits, 4);
+    init_0(result->bits, 4);
     if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) {  //  одинаковый +
         if (s21_is_equal(value_1, value_2)) {
             return 0;
         } else if (s21_is_greater(value_1, value_2)) {
             uint32_t x[7] = {0};
             uint32_t y[7] = {0};
-            copyArray( value_1.bits, x, 3);
-            copyArray( value_2.bits, y, 3);
+            copyArray(value_1.bits, x, 3);
+            copyArray(value_2.bits, y, 3);
             int max_scale = eq_scale_arr(x, y,
                                          getDecimalExp(value_1),
                                          getDecimalExp(value_2),
                                          7);
             bit_sub_arr(x, y, 7);
             reduce_scale_arr(x, 7, &max_scale);
-            copyArray(x,  result->bits, 3);  //   result!!
+            copyArray(x, result->bits, 3);  //   result!!
             setDecimalExp(result, max_scale);  //   result!!
             // reduce_scale(result);
             return ret;
@@ -468,19 +468,19 @@ int s21_bank_round(decimal *value) {
 }
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    init_0( result->bits, 4);
+    init_0(result->bits, 4);
     uint32_t val1[7] = {0};
     uint32_t val2[7] = {0};
     uint32_t res[7] = {0};
-    copyArray( value_1.bits, val1, 3);
-    copyArray( value_2.bits, val2, 3);
+    copyArray(value_1.bits, val1, 3);
+    copyArray(value_2.bits, val2, 3);
     bit_mul_arr(val1, val2, res, 7);
     if (getDecimalSign(value_1) != getDecimalSign(value_2))
         setDecimalSign(result, 1);
     if (res[3] || res[4] || res[5] || res[6]) {
         return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
     } else {
-        copyArray(res,  result->bits, 3);
+        copyArray(res, result->bits, 3);
     }
     int exp = getDecimalExp(value_1) + getDecimalExp(value_2);
     if (exp > 28) {
@@ -498,9 +498,9 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     size_t size = 12;
     //  использовать статические, когда определимся с нужным значением
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
-    copyArray( value_1.bits, a1, 3);
+    copyArray(value_1.bits, a1, 3);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
-    copyArray( value_2.bits, a2, 3);
+    copyArray(value_2.bits, a2, 3);
 
     uint32_t *res = calloc(size, sizeof(uint32_t));
     uint32_t *mod = calloc(size, sizeof(uint32_t));

@@ -20,19 +20,25 @@ START_TEST(SUB_TEST) {
     ck_assert_int_eq(res, 2);
 
     res = s21_sub(test2, test1, &result);
-    ck_assert_int_eq(res, 1);
+    ck_assert_int_eq(res, 2);
 
     init_0((uint32_t *) test1.bits, 3);
     init_0((uint32_t *) test2.bits, 3);
+    test1.bits[3] = 0;
+    test2.bits[3] = 0;
     test1.bits[0] = 1;
     test2.bits[2] = 1;
+
+    printBits(16,&test2,4);
+    printBits(16,&test1,4);
     s21_sub(test2, test1, &result);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
 
     s21_sub(test1, test2, &result);
+    printBits(16,&result,4);
     ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
-    ck_assert_int_eq(result.bits[0], 0xFFFFFFFF - 1);
+    ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[3], 1u << 31);
 
     for (int i = -100; i < 100; ++i) {
@@ -81,7 +87,21 @@ START_TEST(SUB_TEST) {
             // printf("r - %d\n",r);
         }
     }
+    // check bank rounding
+    decimal a = {UINT32_MAX,UINT32_MAX,UINT32_MAX,0};
+    decimal b = {0,0,0,0};
+    decimal r = {0,0,0,0};
+    a.bits[0]=UINT32_MAX;
+    b.bits[0]=5;
+    setDecimalExp(&a,0); // max_decimal
+    setDecimalExp(&b,0); // 0.5
+    s21_sub(a,b,&r);
+    printBits(16,&a,12);
+    printBits(16,&b,12);
+    printBits(16,&r,12);
+    printf("%d\n", getDecimalExp(r));
 }
+
 END_TEST
 
 START_TEST(ADD_TEST) {
@@ -114,6 +134,7 @@ START_TEST(ADD_TEST) {
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[3], 1u << 31);
 }
+
 END_TEST
 
 START_TEST(TO_FROM_INT) {
@@ -128,6 +149,7 @@ START_TEST(TO_FROM_INT) {
         }
     }
 }
+
 END_TEST
 
 START_TEST(NEGATE_TEST) {
@@ -140,6 +162,7 @@ START_TEST(NEGATE_TEST) {
         ck_assert_int_eq(-i, check);
     }
 }
+
 END_TEST
 
 START_TEST(GREATER_TEST) {
@@ -155,6 +178,7 @@ START_TEST(GREATER_TEST) {
     res = s21_is_greater(test2, test1);
     ck_assert_int_eq(res, 0);
 }
+
 END_TEST
 
 START_TEST(EQUAL_TEST) {
@@ -169,6 +193,7 @@ START_TEST(EQUAL_TEST) {
     res = s21_is_equal(test2, test2);
     ck_assert_int_eq(res, 1);
 }
+
 END_TEST
 
 START_TEST(MUL_TEST) {
@@ -238,6 +263,54 @@ START_TEST(MUL_TEST) {
         }
     }
 }
+
+END_TEST
+
+START_TEST(DIV_TEST) {
+    decimal a = {1, 0, 0, 0};
+    decimal b = {1, 0, 0, 0};
+    decimal r = {0, 0, 0, 0};
+
+    // check exp/scale is correct
+    for (int i = 0; i < 29; i++) {
+        setDecimalExp(&a, i);
+        int err = s21_div(a, b, &r);
+        if (!err) {
+            ck_assert_int_eq(getDecimalExp(r), i);
+        }
+        else{
+            fail("FAIL div exp err");
+        }
+    }
+    setDecimalExp(&a, 0);
+    setDecimalExp(&a, 0);
+    for (int i = 0; i < 29; i++) {
+        setDecimalExp(&b, i);
+        int err = s21_div(a, b, &r);
+        if (!err) {
+            ck_assert_int_eq(getDecimalExp(r), 0);
+            //printBits(16, &r, 4);
+            //printf("%d\n", getDecimalExp(r));
+        }else{
+            fail("FAIL div exp err");
+        }
+    }
+    // check signs are correct
+    int signs[4][2] = {{0, 0}, {0, 1}, {1, 0}, {1, 1},};
+    for (int i = 0; i < 4; ++i) {
+        int s1 = signs[i][0];
+        int s2 = signs[i][1];
+        setDecimalSign(&a, s1);
+        setDecimalSign(&b, s2);
+        int err = s21_div(a, b, &r);
+        if (!err) {
+            ck_assert_int_eq(getDecimalSign(r), s1 != s2);
+        } else{
+            fail("FAIL div sign err");
+        }
+    }
+}
+
 END_TEST
 
 Suite *f_example_suite_create() {
@@ -245,16 +318,17 @@ Suite *f_example_suite_create() {
 
     TCase *p_case = tcase_create("Core");
 
-    tcase_set_timeout(p_case, 0);
+    // tcase_set_timeout(p_case, 0);
     tcase_add_test(p_case, SUB_TEST);
-    tcase_add_test(p_case, ADD_TEST);
-    tcase_add_test(p_case, GREATER_TEST);
-    tcase_add_test(p_case, EQUAL_TEST);
-    // tcase_add_test(p_case, DIV_TEST);
+    //tcase_add_test(p_case, ADD_TEST);
+    //tcase_add_test(p_case, GREATER_TEST);
+    //tcase_add_test(p_case, EQUAL_TEST);
+    //tcase_add_test(p_case, MUL_TEST);
+    //tcase_add_test(p_case, NEGATE_TEST);
+    //tcase_add_test(p_case, TO_FROM_INT);
+    //tcase_add_test(p_case, DIV_TEST);
     // tcase_add_test(p_case, MOD_TEST);
-    tcase_add_test(p_case, MUL_TEST);
-    tcase_add_test(p_case, NEGATE_TEST);
-    tcase_add_test(p_case, TO_FROM_INT);
+
     suite_add_tcase(s1, p_case);
     return s1;
 }
