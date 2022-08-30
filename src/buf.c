@@ -22,7 +22,7 @@ void Foo() {
     time_t t2 = clock();
     printf("%lf\n", (double) (t2 - t) / CLOCKS_PER_SEC);
 
-    printBits(16, &r, 4);
+    printBits(16, &r, 12);
     printf("%d\n", getDecimalExp(r));
 }
 void check() {
@@ -34,9 +34,8 @@ void check() {
     printf("%d\n", scale);
 }
 void Bar() {
-    uint32_t a =1;
-    uint32_t b =0;
-    printf("%u\n",a^b);
+    uint32_t a[5] = {0,10,0,0,10};
+    printf("%d\n", is_0(&a[3],2));
 
 }
 void leaks(){

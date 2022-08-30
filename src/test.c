@@ -311,14 +311,14 @@ Suite *f_example_suite_create() {
 
      tcase_set_timeout(p_case, 0);
     tcase_add_test(p_case, SUB_TEST);
-    //tcase_add_test(p_case, ADD_TEST);
-    //tcase_add_test(p_case, GREATER_TEST);
-    //tcase_add_test(p_case, EQUAL_TEST);
-    //tcase_add_test(p_case, MUL_TEST);
-    //tcase_add_test(p_case, NEGATE_TEST);
-    //tcase_add_test(p_case, TO_FROM_INT);
-    //tcase_add_test(p_case, DIV_TEST);
-    // tcase_add_test(p_case, MOD_TEST);
+    tcase_add_test(p_case, ADD_TEST);
+    tcase_add_test(p_case, GREATER_TEST);
+    tcase_add_test(p_case, EQUAL_TEST);
+    tcase_add_test(p_case, MUL_TEST);
+    tcase_add_test(p_case, NEGATE_TEST);
+    tcase_add_test(p_case, TO_FROM_INT);
+    tcase_add_test(p_case, DIV_TEST);
+//    tcase_add_test(p_case, MOD_TEST);
 
     suite_add_tcase(s1, p_case);
     return s1;

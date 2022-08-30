@@ -8,8 +8,7 @@
 #include "s21_decimal.h"
 #include "s21_arrays.h"
 
-/*Поможет смотреть внутрь массива*/
-void printBits(const size_t size, const void *ptr, int sep_n) {
+void printBits(const size_t size, const void *ptr, int sep_n) {   /*Поможет смотреть внутрь массива*/
     unsigned char *b = (unsigned char *) ptr;
     unsigned char byte;
     int i, j;
@@ -19,7 +18,8 @@ void printBits(const size_t size, const void *ptr, int sep_n) {
             byte = (b[i] >> j) & 1;
             printf("%u", byte);
         }
-        if (!(i % sep_n)) printf(" ");
+        if (!(i % sep_n))
+            printf(" ");
     }
     puts("");
 }
@@ -66,9 +66,8 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
 
 void flipBits(uint32_t *i) {
     uint32_t j = 0;
-    for (int k = 0; k < 32; k++) {
+    for (int k = 0; k < 32; k++)
         j |= ((*i >> k) & 0b1) << (31 - k);
-    }
     *i = j;
 }
 
@@ -77,9 +76,8 @@ int shiftl(void *object, size_t size, int n) {
         puts("dont shift more than arr size");
         return 1;
     }
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i)
         shiftl1(object, size);
-    }
     return 0;
 }
 
@@ -114,18 +112,16 @@ void OR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
     uint32_t *r = (uint32_t *) res;
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++)
         r[i] = a1[i] | a2[i];
-    }
 }
 
 void XOR(void *arr1, void *arr2, void *res, size_t size) {
     uint32_t *a1 = (uint32_t *) arr1;
     uint32_t *a2 = (uint32_t *) arr2;
     uint32_t *r = (uint32_t *) res;
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++)
         r[i] = a1[i] ^ a2[i];
-    }
 }
 
 void AND(void *arr1, void *arr2, void *res, size_t size) {
@@ -140,17 +136,15 @@ void AND(void *arr1, void *arr2, void *res, size_t size) {
 void NOT(void *arr, void *res, size_t size) {
     uint32_t *a = (uint32_t *) arr;
     uint32_t *r = (uint32_t *) res;
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++)
         r[i] = ~a[i];
-    }
 }
 
 int is_0(void *arr, size_t size) {
     uint32_t *a = (uint32_t *) arr;
     for (size_t i = 0; i < size; i++) {
-        if (a[i] > 0) {
+        if (a[i] > 0)
             return 0;
-        }
     }
     return 1;
 }
@@ -171,7 +165,6 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        // printf("%d\n",is_0(carry, arr_size));
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -198,7 +191,6 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        // printf("%d\n",is_0(carry, arr_size));
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -216,12 +208,9 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     uint32_t *tmp = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
     while (!is_0(y, arr_size)) {
         //  https:// iq.opengenus.org/bitwise-subtraction/
-        //  step 1: get the borrow bit
         NOT(x, tmp, arr_size);
         AND(tmp, y, borrow, arr_size);
-        //  step 2: get the difference using XOR
         XOR(x, y, x, arr_size);
-        //  step 3: left shift borrow by 1
         copyArray(borrow, y, arr_size);
         shiftl(y, arr_size, 1);
     }
@@ -231,9 +220,6 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
 }
 
 int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
-    //  1 - >
-    //  0 - ==
-    //  -1 - <
     for (int i = size - 1; i >= 0; i--) {
         if (a[i] == b[i] && i > 0)
             continue;
@@ -374,8 +360,6 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
     ten[0] = 10;
     copyArray(arr, buf, size);
     while (*scale > 0) {
-        // printf("%d\t", *scale);
-        // printBits(size * 4, arr, 8);
         bit_div_arr(arr, ten, buf, size);
         mul10(buf, size);
         if (cmp(arr, buf, size) == 0) {
@@ -418,9 +402,43 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
+
 void div10(uint32_t*x,size_t size) {
     uint32_t *tmp = calloc(size,sizeof(uint32_t));
     tmp[0]=10;
     bit_div_arr(x,tmp,x,size);
+    free(tmp);
+}
+
+void div_mod10(uint32_t *x, size_t size, int *exp) {
+    uint32_t *tmp = calloc(size,sizeof(uint32_t));
+    uint32_t mod = 0;
+    tmp[0] = 10;
+    for (int i = 0; i < *exp - 29; i++) {
+        bit_div_arr(x,tmp,x,size);
+    }
+    if (*exp > 28) *exp = 29;
+    if (!is_0(&x[4], size - 3) && *exp > 0) {
+        for (int i = 0;!is_0(&x[4], size - 3) && *exp > 0; i++) {
+            bit_div_mod_arr(x, tmp, x, &mod, size);
+            *exp--;
+        }
+    } else if (*exp == 29) {
+        bit_div_mod_arr(x, tmp, x, &mod, size);
+        *exp--;
+    }
+    if ((x[0] % 2 != 0 && mod == 5) || mod > 5) {
+        if (x[0] == 4294967295) {
+            x[0] = 0;
+            if (x[1] == 4294967295) {
+                x[1] = 0;
+                x[2] += 1;
+            } else {
+                x[1] += 1;
+            }
+        } else {
+            x[0] += 1;
+        }
+    }
     free(tmp);
 }
