@@ -51,6 +51,18 @@ void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
 
+void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size);
+
+void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size);
+
+void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod, size_t size);
+
+void bit_mul(uint32_t *val1, uint32_t number, uint32_t *res, size_t size);
+
+void bit_div(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size);
+
+int bank_round_arr(uint32_t *arr, int *scale, size_t size);
+
 int cmp(const uint32_t *a, const uint32_t *b, size_t size);
 
 void init_0(uint32_t *arr, int size);

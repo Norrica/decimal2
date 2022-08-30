@@ -59,7 +59,7 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     uint32_t mask = 0xFFFFFFFF >> (32 - n);
     mask <<= offset;
     bits <<= offset;
-    bits &= mask;  //  Зануляет ненужные биты
+    bits &= mask;
     *(uint32_t *) dest &= ~mask;
     *(uint32_t *) dest |= bits;
 }
@@ -171,7 +171,7 @@ void bit_add(void *value_1, uint32_t number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        // printf("%d\n",is_0(carry, arr_size));
+
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -198,7 +198,6 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
         }
         XOR(x, y, sum, arr_size);
         AND(x, y, carry, arr_size);
-        // printf("%d\n",is_0(carry, arr_size));
     }
     for (size_t i = 0; i < arr_size; i++) {
         x[i] = sum[i];
@@ -206,28 +205,6 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(y);
     free(carry);
     free(sum);
-}
-
-void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
-    uint32_t *x = (uint32_t *) res_arr;
-    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
-    copyArray(number, y, arr_size);
-    uint32_t *borrow = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
-    uint32_t *tmp = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
-    while (!is_0(y, arr_size)) {
-        //  https:// iq.opengenus.org/bitwise-subtraction/
-        //  step 1: get the borrow bit
-        NOT(x, tmp, arr_size);
-        AND(tmp, y, borrow, arr_size);
-        //  step 2: get the difference using XOR
-        XOR(x, y, x, arr_size);
-        //  step 3: left shift borrow by 1
-        copyArray(borrow, y, arr_size);
-        shiftl(y, arr_size, 1);
-    }
-    free(y);
-    free(borrow);
-    free(tmp);
 }
 
 int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
@@ -243,6 +220,25 @@ int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
             return -1;
     }
     return 0;
+}
+
+void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
+    uint32_t *x = (uint32_t *) res_arr;
+    uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    copyArray(number, y, arr_size);
+    uint32_t *borrow = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    uint32_t *tmp = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
+    while (!is_0(y, arr_size)) {
+        //  https:// iq.opengenus.org/bitwise-subtraction/
+        NOT(x, tmp, arr_size);
+        AND(tmp, y, borrow, arr_size);
+        XOR(x, y, x, arr_size);
+        copyArray(borrow, y, arr_size);
+        shiftl(y, arr_size, 1);
+    }
+    free(y);
+    free(borrow);
+    free(tmp);
 }
 
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
@@ -347,6 +343,41 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mo
     free(a2);
 }
 
+void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size) {
+    uint32_t *tmp = calloc(arr_size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_sub_arr(res_arr, tmp, arr_size);
+    free(tmp);
+}
+
+void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_sub_arr(res_arr, tmp, size);
+    free(tmp);
+}
+
+void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_div_mod_arr(arr1, tmp, div, mod, size);
+    free(tmp);
+}
+
+void bit_mul(uint32_t *val1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_mul_arr(val1, tmp, res, size);
+    free(tmp);
+}
+
+void bit_div(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_div_arr(arr1, tmp, res, size);
+    free(tmp);
+}
+
 void init_0(uint32_t *arr, int size) {
     for (int i = 0; i < size; ++i) {
         arr[i] = 0;
@@ -360,33 +391,19 @@ void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
 }
 
 int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
-    //  не работает
-    //   10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
-    //   00000000000000000000000000000000 10001001111010000000000000000000 - не делится на 10
-    //  while (arr[0] % 10 == 0 && *scale > 0) {
-    //      div10(arr, size);
-    //      (*scale)--;
-    //  }
-    //  return 0;
-    //  по-тупому
     uint32_t *buf = calloc(size, sizeof(uint32_t));
-    uint32_t *ten = calloc(size, sizeof(uint32_t));
-    ten[0] = 10;
     copyArray(arr, buf, size);
     while (*scale > 0) {
-        // printf("%d\t", *scale);
-        // printBits(size * 4, arr, 8);
-        bit_div_arr(arr, ten, buf, size);
+        bit_div(arr, 10, buf, size);
         mul10(buf, size);
         if (cmp(arr, buf, size) == 0) {
-            bit_div_arr(buf, ten, arr, size);
+            bit_div(buf, 10, arr, size);
             (*scale)--;
         } else {
             break;
         }
     }
     free(buf);
-    free(ten);
     return OK;
 }
 
@@ -404,6 +421,37 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) 
     return maxscale;
 }
 
+int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
+    uint32_t *buf = calloc(size, sizeof(uint32_t));
+    uint32_t *five = calloc(size, sizeof(uint32_t));
+    uint32_t *div = calloc(size, sizeof(uint32_t));
+    uint32_t *mod = calloc(size, sizeof(uint32_t));
+    five[0] = 5;
+    copyArray(arr, buf, size);
+    while (*scale > 29) {
+        bit_div(buf, 10, buf, size);
+        (*scale)--;
+    }
+    bit_div_mod(buf, 10, buf, mod, size);
+    if (cmp(mod, five, size) > 0) {
+        bit_add(buf, 1, size);
+    } else if (cmp(mod, five, size) == 0) {
+        if (mod[0] & 1) {
+            bit_add(buf, 1, size);
+        }
+    }
+
+    int ret = 0;
+    if (!is_0(&buf[3], size - 3)) {
+        ret = TOOLARGE;
+    }
+    free(buf);
+    free(five);
+    free(div);
+    free(mod);
+    return ret;
+}
+
 void copyArray(const uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
         to[i] = from[i];
@@ -418,9 +466,7 @@ void mul10(uint32_t *x, int size) {
     bit_add_arr(x, tmp, size);
     free(tmp);
 }
-void div10(uint32_t*x,size_t size) {
-    uint32_t *tmp = calloc(size,sizeof(uint32_t));
-    tmp[0]=10;
-    bit_div_arr(x,tmp,x,size);
-    free(tmp);
+
+void div10(uint32_t *x, size_t size) {
+    bit_div(x, 10, x, size);
 }
