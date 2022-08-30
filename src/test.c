@@ -92,6 +92,7 @@ START_TEST(SUB_TEST) {
         }
     }
 }
+
 END_TEST
 
 START_TEST(ADD_TEST) {
@@ -124,6 +125,7 @@ START_TEST(ADD_TEST) {
     ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
     ck_assert_int_eq(result.bits[3], 1u << 31);
 }
+
 END_TEST
 
 START_TEST(TO_FROM_INT) {
@@ -152,7 +154,33 @@ START_TEST(TO_FROM_INT) {
         ck_assert_int_eq(check, min);
     }
 }
+
 END_TEST
+
+START_TEST(TO_FROM_FLOAT) {
+    float f;
+    float check;
+    decimal res;
+    f = 0.5f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 1;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 18446744073709551616.0f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 79228162514264337593543950335.0f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 79228162514264337593543950336.0f;
+    int err = s21_from_float_to_decimal(f, &res);
+    ck_assert_int_eq(err, 1);
+}
 
 START_TEST(NEGATE_TEST) {
     s21_decimal d;
@@ -164,6 +192,7 @@ START_TEST(NEGATE_TEST) {
         ck_assert_int_eq(-i, check);
     }
 }
+
 END_TEST
 
 START_TEST(GREATER_TEST) {
@@ -199,6 +228,7 @@ START_TEST(GREATER_TEST) {
     res = s21_is_not_equal(test3, test4);
     ck_assert_int_eq(res, 0);
 }
+
 END_TEST
 
 START_TEST(EQUAL_TEST) {
@@ -218,6 +248,7 @@ START_TEST(EQUAL_TEST) {
     res = s21_is_equal(test3, test4);
     ck_assert_int_eq(res, 1);
 }
+
 END_TEST
 
 START_TEST(MUL_TEST) {
@@ -287,6 +318,7 @@ START_TEST(MUL_TEST) {
         }
     }
 }
+
 END_TEST
 
 START_TEST(DIV_TEST) {
@@ -332,6 +364,7 @@ START_TEST(DIV_TEST) {
         }
     }
 }
+
 END_TEST
 
 Suite *f_example_suite_create() {

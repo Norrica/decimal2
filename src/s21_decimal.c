@@ -113,7 +113,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         exp--;
         ch[i] = '\0';
     }
-    if (exp > 28 || fabsf(src) > powf(2, 96) - 1)
+    if (exp > 28 || fabsf(src) > 79228162514264337593543950335.0)
         return CE;
     char *end;
     int res = strtol(ch, &end, 10);
