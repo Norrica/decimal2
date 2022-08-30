@@ -131,7 +131,7 @@ END_TEST
 START_TEST(TO_FROM_INT) {
     decimal d;
     int check;
-    for (int i = -100; i < 100; i++) {
+    for (int i = -10; i < 10; i++) {
         s21_from_int_to_decimal(i, &d);
         s21_from_decimal_to_int(d, &check);
         if (check != i) {
@@ -139,9 +139,48 @@ START_TEST(TO_FROM_INT) {
             ck_assert_int_eq(check, i);
         }
     }
+    int max = INT32_MAX;
+    int min = INT32_MIN;
+    s21_from_int_to_decimal(max, &d);
+    s21_from_decimal_to_int(d, &check);
+    if (check != max) {
+        printf("%d != %d\n", check, max);
+        ck_assert_int_eq(check, max);
+    }
+    s21_from_int_to_decimal(min, &d);
+    s21_from_decimal_to_int(d, &check);
+    if (check != min) {
+        printf("%d != %d\n", check, min);
+        ck_assert_int_eq(check, min);
+    }
 }
 
 END_TEST
+
+START_TEST(TO_FROM_FLOAT) {
+    float f;
+    float check;
+    decimal res;
+    f = 0.5f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 1;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 18446744073709551616.0f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 79228162514264337593543950335.0f;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    ck_assert_float_eq_tol(f, check, 0.00005);
+    f = 79228162514264337593543950336.0f;
+    int err = s21_from_float_to_decimal(f, &res);
+    ck_assert_int_eq(err, 1);
+}
 
 START_TEST(NEGATE_TEST) {
     s21_decimal d;
@@ -168,6 +207,26 @@ START_TEST(GREATER_TEST) {
     s21_negate(test1, &test1);
     res = s21_is_greater(test2, test1);
     ck_assert_int_eq(res, 0);
+
+    decimal test3 = {11, 0, 0, 0};
+    decimal test4 = {10, 0, 0, 0};
+
+    res = s21_is_greater(test3, test4);
+    ck_assert_int_eq(res, 0);
+
+    res = s21_is_less(test4, test3);
+    ck_assert_int_eq(res, 1);
+
+    test3.bits[0] = 10;
+
+    res = s21_is_greater(test3, test4);
+    ck_assert_int_eq(res, 0);
+
+    res = s21_is_equal(test3, test4);
+    ck_assert_int_eq(res, 1);
+
+    res = s21_is_not_equal(test3, test4);
+    ck_assert_int_eq(res, 0);
 }
 
 END_TEST
@@ -182,6 +241,11 @@ START_TEST(EQUAL_TEST) {
     ck_assert_int_eq(res, 0);
 
     res = s21_is_equal(test2, test2);
+    ck_assert_int_eq(res, 1);
+
+    s21_decimal test3 = {{0, 0, 0, 1u << 31}};
+    s21_decimal test4 = {{0, 0, 0, 0}};
+    res = s21_is_equal(test3, test4);
     ck_assert_int_eq(res, 1);
 }
 
@@ -268,8 +332,7 @@ START_TEST(DIV_TEST) {
         int err = s21_div(a, b, &r);
         if (!err) {
             ck_assert_int_eq(getDecimalExp(r), i);
-        }
-        else{
+        } else {
             fail("FAIL div exp err");
         }
     }
@@ -282,7 +345,7 @@ START_TEST(DIV_TEST) {
             ck_assert_int_eq(getDecimalExp(r), 0);
             //printBits(16, &r, 4);
             //printf("%d\n", getDecimalExp(r));
-        }else{
+        } else {
             fail("FAIL div exp err");
         }
     }
@@ -296,7 +359,7 @@ START_TEST(DIV_TEST) {
         int err = s21_div(a, b, &r);
         if (!err) {
             ck_assert_int_eq(getDecimalSign(r), s1 != s2);
-        } else{
+        } else {
             fail("FAIL div sign err");
         }
     }
@@ -309,7 +372,7 @@ Suite *f_example_suite_create() {
 
     TCase *p_case = tcase_create("Core");
 
-     tcase_set_timeout(p_case, 0);
+    tcase_set_timeout(p_case, 0);
     tcase_add_test(p_case, SUB_TEST);
     tcase_add_test(p_case, ADD_TEST);
     tcase_add_test(p_case, GREATER_TEST);

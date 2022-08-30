@@ -59,7 +59,7 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
     uint32_t mask = 0xFFFFFFFF >> (32 - n);
     mask <<= offset;
     bits <<= offset;
-    bits &= mask;  //  Зануляет ненужные биты
+    bits &= mask;
     *(uint32_t *) dest &= ~mask;
     *(uint32_t *) dest |= bits;
 }
@@ -200,6 +200,21 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
     free(sum);
 }
 
+int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
+    //  1 - >
+    //  0 - ==
+    //  -1 - <
+    for (int i = size - 1; i >= 0; i--) {
+        if (a[i] == b[i] && i > 0)
+            continue;
+        if (a[i] > b[i])
+            return 1;
+        if (a[i] < b[i])
+            return -1;
+    }
+    return 0;
+}
+
 void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     uint32_t *x = (uint32_t *) res_arr;
     uint32_t *y = (uint32_t *) calloc(arr_size, sizeof(uint32_t));
@@ -219,18 +234,6 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
     free(tmp);
 }
 
-int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
-    for (int i = size - 1; i >= 0; i--) {
-        if (a[i] == b[i] && i > 0)
-            continue;
-        if (a[i] > b[i])
-            return 1;
-        if (a[i] < b[i])
-            return -1;
-    }
-    return 0;
-}
-
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray(val1, a1, size);
@@ -248,26 +251,6 @@ void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size) {
 }
 
 void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
-    /*unsigned int fun2 ( unsigned int a, unsigned int b )
-{
-    unsigned int res;
-    unsigned int acc;
-    unsigned int rb;
-
-    res=0;
-    acc=0;
-    for(rb=0x80000000;rb;rb>>=1)
-    {
-        acc<<=1;
-        if(rb&a) acc|=1;
-        if(acc>=b)
-        {
-            acc-=b;
-            res|=rb;
-        }
-    }
-    return(res);
-}*/
     uint32_t *a1 = calloc(size, sizeof(uint32_t));
     copyArray(arr1, a1, size);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
@@ -333,6 +316,41 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mo
     free(a2);
 }
 
+void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size) {
+    uint32_t *tmp = calloc(arr_size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_sub_arr(res_arr, tmp, arr_size);
+    free(tmp);
+}
+
+void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_mod_arr(arr1, tmp,res, size);
+    free(tmp);
+}
+
+void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_div_mod_arr(arr1, tmp, div, mod, size);
+    free(tmp);
+}
+
+void bit_mul(uint32_t *val1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_mul_arr(val1, tmp, res, size);
+    free(tmp);
+}
+
+void bit_div(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    tmp[0] = number;
+    bit_div_arr(arr1, tmp, res, size);
+    free(tmp);
+}
+
 void init_0(uint32_t *arr, int size) {
     for (int i = 0; i < size; ++i) {
         arr[i] = 0;
@@ -346,24 +364,13 @@ void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
 }
 
 int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
-    //  не работает
-    //   10001010110001110010001100000100 10001001111010000000000000000000 - делится на 10
-    //   00000000000000000000000000000000 10001001111010000000000000000000 - не делится на 10
-    //  while (arr[0] % 10 == 0 && *scale > 0) {
-    //      div10(arr, size);
-    //      (*scale)--;
-    //  }
-    //  return 0;
-    //  по-тупому
     uint32_t *buf = calloc(size, sizeof(uint32_t));
-    uint32_t *ten = calloc(size, sizeof(uint32_t));
-    ten[0] = 10;
     copyArray(arr, buf, size);
     while (*scale > 0) {
-        bit_div_arr(arr, ten, buf, size);
+        bit_div(arr, 10, buf, size);
         mul10(buf, size);
         if (cmp(arr, buf, size) == 0) {
-            bit_div_arr(buf, ten, arr, size);
+            bit_div(buf, 10, arr, size);
             (*scale)--;
         } else {
             break;
@@ -388,6 +395,37 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size) 
     return maxscale;
 }
 
+int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
+    uint32_t *buf = calloc(size, sizeof(uint32_t));
+    uint32_t *five = calloc(size, sizeof(uint32_t));
+    uint32_t *div = calloc(size, sizeof(uint32_t));
+    uint32_t *mod = calloc(size, sizeof(uint32_t));
+    five[0] = 5;
+    copyArray(arr, buf, size);
+    while (*scale > 29) {
+        bit_div(buf, 10, buf, size);
+        (*scale)--;
+    }
+    bit_div_mod(buf, 10, buf, mod, size);
+    if (cmp(mod, five, size) > 0) {
+        bit_add(buf, 1, size);
+    } else if (cmp(mod, five, size) == 0) {
+        if (mod[0] & 1) {
+            bit_add(buf, 1, size);
+        }
+    }
+
+    int ret = 0;
+    if (!is_0(&buf[3], size - 3)) {
+        ret = TOOLARGE;
+    }
+    free(buf);
+    free(five);
+    free(div);
+    free(mod);
+    return ret;
+}
+
 void copyArray(const uint32_t *from, uint32_t *to, size_t len) {
     for (size_t i = 0; i < len; ++i) {
         to[i] = from[i];
@@ -403,11 +441,8 @@ void mul10(uint32_t *x, int size) {
     free(tmp);
 }
 
-void div10(uint32_t*x,size_t size) {
-    uint32_t *tmp = calloc(size,sizeof(uint32_t));
-    tmp[0]=10;
-    bit_div_arr(x,tmp,x,size);
-    free(tmp);
+void div10(uint32_t *x, size_t size) {
+    bit_div(x, 10, x, size);
 }
 
 void div_mod10(uint32_t *x, size_t size, int *exp) {
