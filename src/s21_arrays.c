@@ -377,7 +377,6 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
         }
     }
     free(buf);
-    free(ten);
     return OK;
 }
 
@@ -456,11 +455,11 @@ void div_mod10(uint32_t *x, size_t size, int *exp) {
     if (!is_0(&x[4], size - 3) && *exp > 0) {
         for (int i = 0;!is_0(&x[4], size - 3) && *exp > 0; i++) {
             bit_div_mod_arr(x, tmp, x, &mod, size);
-            *exp--;
+            *exp -= 1;
         }
     } else if (*exp == 29) {
         bit_div_mod_arr(x, tmp, x, &mod, size);
-        *exp--;
+        *exp -= 1;
     }
     if ((x[0] % 2 != 0 && mod == 5) || mod > 5) {
         if (x[0] == 4294967295) {

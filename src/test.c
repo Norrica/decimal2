@@ -212,7 +212,7 @@ START_TEST(GREATER_TEST) {
     decimal test4 = {10, 0, 0, 0};
 
     res = s21_is_greater(test3, test4);
-    ck_assert_int_eq(res, 0);
+    ck_assert_int_eq(res, 1);
 
     res = s21_is_less(test4, test3);
     ck_assert_int_eq(res, 1);
