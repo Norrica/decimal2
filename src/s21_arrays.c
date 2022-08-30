@@ -353,7 +353,7 @@ void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size) {
 void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
     uint32_t *tmp = calloc(size, sizeof(uint32_t));
     tmp[0] = number;
-    bit_sub_arr(arr1, tmp, size);
+    bit_mod_arr(arr1, tmp,res, size);
     free(tmp);
 }
 
