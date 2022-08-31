@@ -11,19 +11,20 @@
 
 void Foo() {
     decimal a = {1, 0, 0, 0};
-    setDecimalExp(&a, 1);
-    decimal b = {2, 0, 0, 0};
-    setDecimalExp(&b, 1);
+    setDecimalExp(&a, 0);
+    decimal b = {1, 0, 0, 0};
+    setDecimalExp(&b, 2);
     decimal r = {0, 0, 0, 0};
     time_t t = clock();
 
-    s21_mod(a, b, &r);
+    s21_div(a, b, &r);
 
     time_t t2 = clock();
     printf("%lf\n", (double) (t2 - t) / CLOCKS_PER_SEC);
 
-    printBits(16, &r, 12);
-    printf("%d\n", getDecimalExp(r));
+    printBits(16, &r, 4);
+    printf("exp - %d\n", getDecimalExp(r));
+    printf("val - %u\n", r.bits[0]);
 }
 void check() {
     uint32_t a[2] = {150000, 0};
@@ -34,8 +35,7 @@ void check() {
     printf("%d\n", scale);
 }
 void Bar() {
-    uint32_t a[5] = {0,10,0,0,10};
-    printf("%d\n", is_0(&a[3],2));
+    printf("%f", powf(2,95)-1);
 
 }
 void leaks(){
@@ -53,6 +53,18 @@ void leaks(){
     s21_negate(a,&r);
 
 }
+void test(){
+    //float f = 18446744073709551616.0f;
+    float f = 18446744073709551616.0f*16;
+    float check;
+    decimal res;
+    s21_from_float_to_decimal(f, &res);
+    s21_from_decimal_to_float(res, &check);
+    printf("%20f\t%20f\n", f, check);
+    printBits(16,&res,12);
+    printBits(4,&f,4);
+    printBits(4,&check,4);
+}
 int main() {
-    Bar();
+    test();
 }

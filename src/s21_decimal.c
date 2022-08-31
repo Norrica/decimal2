@@ -95,8 +95,36 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
     return OK;
 }
 
-int s21_from_float_to_decimal(float src, s21_decimal *dst) {
+void reverse_string(char *str) {
+    /* skip null */
+    if (str == 0) {
+        return;
+    }
 
+    /* skip empty string */
+    if (*str == 0) {
+        return;
+    }
+
+    /* get range */
+    char *start = str;
+    char *end = start + strlen(str) - 1; /* -1 for \0 */
+    char temp;
+
+    /* reverse */
+    while (end > start) {
+        /* swap */
+        temp = *start;
+        *start = *end;
+        *end = temp;
+
+        /* move */
+        ++start;
+        --end;
+    }
+}
+
+int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     int sign = getBits(&src, 31, 1);
     if (sign) {
         src *= -1;
@@ -115,14 +143,39 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         exp--;
         ch[i] = '\0';
     }
-    if (exp > 28 || fabsf(src) > powf(2, 96) - 1)
+    if (exp > 28 || fabsf(src) > 79228162514264337593543950335.0f)
         return CE;
     char *end;
-    int res = strtol(ch, &end, 10);
-    s21_from_int_to_decimal(res, dst);
-    setBits(&(dst->bits[3]), exp, 16, 8);
-    if (sign)
-        setBits(&(dst->bits[3]), sign, 31, 1);
+    //int res = strtol(ch, &end, 10);
+
+    size_t digits_len = strlen(ch);
+    int base = 9;
+    size_t parts_len = digits_len / base + (digits_len % base > 0);
+    char **parts = calloc(parts_len, sizeof(char *));
+
+    reverse_string(ch);
+
+    for (size_t i = 0, j = 0; i < parts_len; ++i, j += base) {
+        parts[i] = calloc(base, sizeof(char));
+        strncpy(parts[i], &ch[j], base);
+        reverse_string(parts[i]);
+        puts(parts[i]);
+    }
+    uint32_t buf[3];
+    buf[2] = 0;
+    for (size_t i = 0; i < parts_len; ++i) {
+        uint64_t a = strtoul(parts[i], &end, base);
+        buf[0] = a;
+        buf[1] = a >> 32;
+        //printBits(8, buf, 4);
+        //printBits(8, &a, 4);
+
+        bit_add_arr(dst->bits, buf,3);
+
+    }
+
+    setDecimalExp(dst, exp);
+    setDecimalSign(dst, sign);
 
     return OK;
 }
@@ -151,10 +204,6 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     }
     res *= getDecimalSign(src) ? -1 : 1;
     *dst = (float) res;
-
-
-
-
 
     return OK;
 }
@@ -209,18 +258,11 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     } else {
         copyArray(x, result->bits, 3);
 
-
         setDecimalExp(result, max_scale);
     }
 
     return res;
 }
-
-
-
-
-
-
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int ret = 0;
