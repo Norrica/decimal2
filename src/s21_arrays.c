@@ -23,6 +23,11 @@ void printBits(const size_t size, const void *ptr, int sep_n) {   /*Поможе
     }
     puts("");
 }
+void printDec_an(s21_decimal dec) {
+    for (int i = 128; i > 96; i--) printf("%d", s21_get_bit(dec, i));
+    printf(" ");
+    for (int i = 96; i > -1; i--) printf("%d", s21_get_bit(dec, i));
+}
 
 int s21_get_bit(s21_decimal d, int i) {
     int bit = 0;
@@ -141,9 +146,9 @@ void NOT(void *arr, void *res, size_t size) {
 }
 
 int is_0(void *arr, size_t size) {
-    uint32_t *a = (uint32_t *) arr;
+    uint32_t *a = (uint32_t *)arr;
     for (size_t i = 0; i < size; i++) {
-        if (a[i] > 0)
+        if (a[i] != 0)
             return 0;
     }
     return 1;
@@ -306,7 +311,7 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mo
     copyArray(arr1, a1, size);
     uint32_t *a2 = calloc(size, sizeof(uint32_t));
     copyArray(arr2, a2, size);
-
+    init_0(mod, size);
     bit_div_arr(a1, a2, div, size);
     bit_mul_arr(a2, div, mul, size);
     bit_sub_arr(a1, mul, size);
@@ -445,34 +450,44 @@ void div10(uint32_t *x, size_t size) {
 }
 
 void div_mod10(uint32_t *x, size_t size, int *exp) {
-    uint32_t *tmp = calloc(size,sizeof(uint32_t));
-    uint32_t mod = 0;
+    uint32_t *tmp = calloc(size, sizeof(uint32_t));
+    uint32_t *tmp2 = calloc(size, sizeof(uint32_t));
+    uint32_t mod[size];
+    init_0(mod, size);
     tmp[0] = 10;
-    for (int i = 0; i < *exp - 29; i++) {
-        bit_div_arr(x,tmp,x,size);
+    printBits(size, x, 12);
+    for (int i = 0; i < *exp - 29; i++) { // Обрубаем всё до скейла 29, если надо
+        bit_div_arr(x, tmp, x, size);
+        (*exp) -= 1;
     }
-    if (*exp > 28) *exp = 29;
-    if (!is_0(&x[4], size - 3) && *exp > 0) {
-        for (int i = 0;!is_0(&x[4], size - 3) && *exp > 0; i++) {
-            bit_div_mod_arr(x, tmp, x, &mod, size);
-            *exp -= 1;
-        }
-    } else if (*exp == 29) {
-        bit_div_mod_arr(x, tmp, x, &mod, size);
-        *exp -= 1;
-    }
-    if ((x[0] % 2 != 0 && mod == 5) || mod > 5) {
-        if (x[0] == 4294967295) {
-            x[0] = 0;
-            if (x[1] == 4294967295) {
-                x[1] = 0;
-                x[2] += 1;
-            } else {
-                x[1] += 1;
+
+    do {
+        if (!is_0(x + 4, size - 4) && *exp > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
+            for (int i = 0; !is_0(x + 4, size - 3) && *exp > 0; i++) {
+                bit_div_mod_arr(x, tmp, x, mod, size);
+                (*exp) -= 1;
             }
-        } else {
-            x[0] += 1;
+        } else if (*exp == 29) {
+            tmp2 = x;
+            bit_div_arr(tmp2, tmp, tmp2, size);
+            mul10(tmp2, (int)size);
+            printBits(size, tmp2, 12);
+            bit_sub_arr(x, tmp2, size);
+            printBits(size, x, 12);
+
+            copyArray(x, mod, size);
+            copyArray(tmp2, x, size);
+            bit_div_arr(x, tmp, x, size);
+            (*exp) -= 1;
+            printf("работай ссссссука\n");
+            printf("lol %d\n", mod[0]);
         }
-    }
-    free(tmp);
+        tmp2[0] = 1;
+        if ((x[0] & 1 && mod[0] == 5) || mod[0] > 5) {
+            bit_add_arr(x, tmp2, size);
+            printf("работай ссссссука\n");
+        }
+    } while (!is_0(x + 4, size - 4) && *exp); // если после округления, всё равно не лезет, но скейл ещё есть, повторить
+    //free(tmp);
+    //free(tmp2);
 }

@@ -54,5 +54,9 @@ void leaks(){
 
 }
 int main() {
-    Bar();
+    decimal a = {7, 0, 0, 0};
+    decimal b = {3, 0, 0, 0};
+    decimal r = {0, 0, 0, 0};
+    int err = s21_div(a, b, &r);
+    //printDec_an(r);
 }

@@ -81,4 +81,8 @@ void div10(uint32_t *x, size_t size);
 
 void div_mod10(uint32_t *x, size_t size, int *exp);
 
+int s21_get_bit(s21_decimal d, int i);
+
+void printDec_an(s21_decimal dec);
+
 #endif  //  SRC_S21_ARRAYS_H_

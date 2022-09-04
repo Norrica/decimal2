@@ -20,7 +20,7 @@ void setDecimalExp(decimal *d, int exp) {
 }
 
 int getDecimalSign(decimal d) {
-    return getBits(&d.bits[3], 31, 1);
+    return (int)(d.bits[3] >> 31);
 }
 
 void setDecimalSign(decimal *d, int sign) {
@@ -480,18 +480,17 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         mul10(res, size);
         res_exp++;
         count++;
-    } while (!is_0(mod, size) && count < 28);
+    } while (!is_0(mod, size) && count < 29);
 
+    div_mod10(res, size, &res_exp);
     reduce_scale_arr(res, size, &res_exp);
-    int ret;
+    int ret = 0;
     if (!res[3] && res_exp <= 28) {
         copyArray(res, result->bits, 3);
         setDecimalExp(result, res_exp);
         setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
-        ret = OK;
     } else {
-
-        ret = (getDecimalSign(value_1) ^ getDecimalSign(value_2)) == 0 ? TOOSMALL : TOOLARGE;
+        ret = getDecimalSign(value_1) == getDecimalSign(value_2) ? TOOLARGE : TOOSMALL;
     }
     free(a1);
     free(a2);

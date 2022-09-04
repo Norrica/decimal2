@@ -325,11 +325,11 @@ START_TEST(DIV_TEST) {
     decimal a = {1, 0, 0, 0};
     decimal b = {1, 0, 0, 0};
     decimal r = {0, 0, 0, 0};
-
+    int err = 0;
     // check exp/scale is correct
     for (int i = 0; i < 29; i++) {
         setDecimalExp(&a, i);
-        int err = s21_div(a, b, &r);
+        err = s21_div(a, b, &r);
         if (!err) {
             ck_assert_int_eq(getDecimalExp(r), i);
         } else {
@@ -340,7 +340,7 @@ START_TEST(DIV_TEST) {
     setDecimalExp(&a, 0);
     for (int i = 0; i < 29; i++) {
         setDecimalExp(&b, i);
-        int err = s21_div(a, b, &r);
+        err = s21_div(a, b, &r);
         if (!err) {
             ck_assert_int_eq(getDecimalExp(r), 0);
             //printBits(16, &r, 4);
@@ -356,16 +356,64 @@ START_TEST(DIV_TEST) {
         int s2 = signs[i][1];
         setDecimalSign(&a, s1);
         setDecimalSign(&b, s2);
-        int err = s21_div(a, b, &r);
+        err = s21_div(a, b, &r);
         if (!err) {
             ck_assert_int_eq(getDecimalSign(r), s1 != s2);
         } else {
             fail("FAIL div sign err");
         }
     }
-}
 
+    init_0((uint32_t *)&a.bits, 4);
+    init_0((uint32_t *)&b.bits, 4);
+    a.bits[0] = 10;
+    b.bits[0] = 3;
+    err = s21_div(a, b, &r);
+    ck_assert_int_eq(err, 0);
+
+    init_0((uint32_t *)&a.bits, 4);
+    a.bits[0] = 0xFFFFFFFF;
+    a.bits[1] = 0xFFFFFFFF;
+    a.bits[2] = 0xFFFFFFFF;
+    init_0((uint32_t *)&b.bits, 4);
+    b.bits[0] = 1;
+    setDecimalExp(&b, 28);
+    err = s21_div(a, b, &r);
+    ck_assert_int_eq(err, 1);
+
+    setDecimalSign(&b, 1);
+    err = s21_div(a, b, &r);
+    ck_assert_int_eq(err, 2);
+}
 END_TEST
+
+START_TEST(MOD_TEST) {
+    decimal a = {10, 0, 0, 0};
+    decimal b = {3, 0, 0, 0};
+    decimal r = {0, 0, 0, 0};
+    int err;
+
+    err = s21_mod(a, b, &r);
+    ck_assert_int_eq(err, 0);
+    ck_assert_int_eq(r.bits[0], 1);
+
+    a.bits[0] = 256;
+    b.bits[0] = 240;
+    err = s21_mod(a, b, &r);
+    ck_assert_int_eq(err, 0);
+    ck_assert_int_eq(r.bits[0], 16);
+
+    a.bits[0] = 0xFFFFFFFF;
+    a.bits[1] = 0xFFFFFFFF;
+    a.bits[2] = 0xFFFFFFFF;
+    b.bits[0] = 1;
+    setDecimalExp(&b, 28);
+    err = s21_mod(b, a, &r);
+    ck_assert_int_eq(err, 0);
+    ck_assert_int_eq(s21_is_equal(b, r), 1);
+}
+END_TEST
+
 
 Suite *f_example_suite_create() {
     Suite *s1 = suite_create("Test_decimal");
@@ -373,15 +421,15 @@ Suite *f_example_suite_create() {
     TCase *p_case = tcase_create("Core");
 
     tcase_set_timeout(p_case, 0);
-    tcase_add_test(p_case, SUB_TEST);
-    tcase_add_test(p_case, ADD_TEST);
-    tcase_add_test(p_case, GREATER_TEST);
-    tcase_add_test(p_case, EQUAL_TEST);
-    tcase_add_test(p_case, MUL_TEST);
-    tcase_add_test(p_case, NEGATE_TEST);
-    tcase_add_test(p_case, TO_FROM_INT);
+//    tcase_add_test(p_case, SUB_TEST);
+//    tcase_add_test(p_case, ADD_TEST);
+//    tcase_add_test(p_case, GREATER_TEST);
+//    tcase_add_test(p_case, EQUAL_TEST);
+//    tcase_add_test(p_case, MUL_TEST);
+//    tcase_add_test(p_case, NEGATE_TEST);
+//    tcase_add_test(p_case, TO_FROM_INT);
     tcase_add_test(p_case, DIV_TEST);
-//    tcase_add_test(p_case, MOD_TEST);
+    tcase_add_test(p_case, MOD_TEST);
 
     suite_add_tcase(s1, p_case);
     return s1;
