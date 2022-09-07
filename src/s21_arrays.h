@@ -5,10 +5,10 @@
 #ifndef SRC_S21_ARRAYS_H_
 #define SRC_S21_ARRAYS_H_
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 uint32_t getBits(const void *ptr, int offset, int n);
@@ -45,7 +45,8 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size);
 
 void bit_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size);
 
-void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div, uint32_t *mod, size_t size);
+void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div,
+                     uint32_t *mod, size_t size);
 
 void bit_mul_arr(uint32_t *val1, uint32_t *val2, uint32_t *res, size_t size);
 
@@ -55,7 +56,8 @@ void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size);
 
 void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size);
 
-void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod, size_t size);
+void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod,
+                 size_t size);
 
 void bit_mul(uint32_t *val1, uint32_t number, uint32_t *res, size_t size);
 
