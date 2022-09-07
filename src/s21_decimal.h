@@ -5,16 +5,15 @@
 #ifndef SRC_S21_DECIMAL_H_
 #define SRC_S21_DECIMAL_H_
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // #ifndef uint32_t
 // typedef unsigned int uint32_t;
 // #endif
-
 
 #define OK 0
 #define CE 1  // Conversion Error
