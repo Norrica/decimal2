@@ -139,6 +139,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
         ch[i] = ch[i + 1];
     }
 
+
     for (size_t i = strlen(ch) - 1; i > 0 && ch[i] == '0' && exp > 0; --i) {
         exp--;
         ch[i] = '\0';
@@ -163,14 +164,23 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     }
     uint32_t buf[3];
     buf[2] = 0;
+
+    puts("");
     for (size_t i = 0; i < parts_len; ++i) {
+        //puts(parts[i]);
         uint64_t a = strtoul(parts[i], &end, base);
+        //printf("%lu\n",a);
         buf[0] = a;
         buf[1] = a >> 32;
-        //printBits(8, buf, 4);
+        shiftl(buf,3,32*i);
+        printBits(12, buf, 4);
+        //for (int j = 0; j < 33; ++j) {
+        //    printf(" ");
+        //}
         //printBits(8, &a, 4);
 
-        bit_add_arr(dst->bits, buf,3);
+        OR(dst->bits,buf,dst->bits,3);
+        //printBits(12, &dst, 12);
 
     }
 

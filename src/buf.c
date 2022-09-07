@@ -35,7 +35,8 @@ void check() {
     printf("%d\n", scale);
 }
 void Bar() {
-    printf("%f", powf(2,95)-1);
+    uint32_t a[5] = {0,10,0,0,10};
+    printf("%d\n", is_0(&a[3],2));
 
 }
 void leaks(){
@@ -54,8 +55,8 @@ void leaks(){
 
 }
 void test(){
-    //float f = 18446744073709551616.0f;
-    float f = 18446744073709551616.0f*16;
+    //float f = 81446744073709551616.0f;
+    float f = 1844674407370955161628f;
     float check;
     decimal res;
     s21_from_float_to_decimal(f, &res);
@@ -65,6 +66,43 @@ void test(){
     printBits(4,&f,4);
     printBits(4,&check,4);
 }
+
+void br(){
+    int scale = 2;
+    uint32_t a[4] = {150,0,0,0};
+    printBits(8,a,4);
+    bank_round_arr(a,&scale,4);
+    printBits(8,a,4);
+    printf("%d\n",scale);
+
+}
+void speed(){
+    uint32_t a[10] = {UINT32_MAX,0};
+    uint32_t b[10] = {UINT32_MAX,0};
+    clock_t st = clock();
+    div10(a,10);
+    clock_t end = clock();
+    double time_spent = (double)(end - st) / CLOCKS_PER_SEC;
+    printf("%lf\n",time_spent);
+    st = clock();
+    div10(a,10);
+    end = clock();
+    time_spent = (double)(end - st) / CLOCKS_PER_SEC;
+    printf("%lf\n",time_spent);
+}
+
+void foo(){
+    decimal a = {100, 0, 0, 0};
+    decimal b = {50, 0, 0, 0};
+    //setDecimalExp(&a,28);
+    decimal r = {0, 0, 0, 0};
+    int err = s21_div(a, b, &r);
+    printBits(16,&r,12);
+    printf("%d\n",err);
+
+}
+
 int main() {
     test();
+    //br();
 }
