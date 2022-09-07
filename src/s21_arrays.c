@@ -422,6 +422,9 @@ int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
     int ret = 0;
     if (!is_0(&buf[3], size - 3)) {
         ret = TOOLARGE;
+    } else{
+        copyArray(buf,arr,size);
+        (*scale)--;
     }
     free(buf);
     free(five);
