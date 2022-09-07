@@ -270,7 +270,9 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
     s21_decimal tmp_num1 = num1, tmp_num2 = num2;
-    eq_scale(&tmp_num1,&tmp_num2);
+    if (!eq_scale(&tmp_num1,&tmp_num2)){
+        return 0;
+    }
     int ret;
     int is_01 = is_0(num1.bits, 3);
     int is_02 = is_0(num2.bits, 3);
