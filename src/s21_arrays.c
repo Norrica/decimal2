@@ -23,6 +23,7 @@ void printBits(const size_t size, const void *ptr, int sep_n) {   /*Поможе
     }
     puts("");
 }
+
 void printDec_an(s21_decimal dec) {
     for (int i = 128; i > 96; i--) printf("%d", s21_get_bit(dec, i));
     printf(" ");
@@ -146,7 +147,7 @@ void NOT(void *arr, void *res, size_t size) {
 }
 
 int is_0(void *arr, size_t size) {
-    uint32_t *a = (uint32_t *)arr;
+    uint32_t *a = (uint32_t *) arr;
     for (size_t i = 0; i < size; i++) {
         if (a[i] != 0)
             return 0;
@@ -331,7 +332,7 @@ void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size) {
 void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
     uint32_t *tmp = calloc(size, sizeof(uint32_t));
     tmp[0] = number;
-    bit_mod_arr(arr1, tmp,res, size);
+    bit_mod_arr(arr1, tmp, res, size);
     free(tmp);
 }
 
@@ -372,10 +373,10 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
     uint32_t *buf = calloc(size, sizeof(uint32_t));
     copyArray(arr, buf, size);
     while (*scale > 0) {
-        bit_div(arr, 10, buf, size);
+        div10ret(arr,buf,size);
         mul10(buf, size);
         if (cmp(arr, buf, size) == 0) {
-            bit_div(buf, 10, arr, size);
+            div10ret(buf,arr,size);
             (*scale)--;
         } else {
             break;
@@ -422,8 +423,8 @@ int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
     int ret = 0;
     if (!is_0(&buf[3], size - 3)) {
         ret = TOOLARGE;
-    } else{
-        copyArray(buf,arr,size);
+    } else {
+        copyArray(buf, arr, size);
         (*scale)--;
     }
     free(buf);
@@ -449,10 +450,6 @@ void mul10(uint32_t *x, int size) {
 }
 
 void div10(uint32_t *x, size_t size) {
-    bit_div(x, 10, x, size);
-}
-
-void truncate_arr(uint32_t *x, int size) {
     int tmp_int;
     uint64_t u_num;
     u_num = x[size - 1];
@@ -467,18 +464,27 @@ void truncate_arr(uint32_t *x, int size) {
     }
 }
 
+void div10ret(uint32_t *x, uint32_t *res, size_t size) {
+    uint32_t tmp[size];
+    copyArray(x, tmp, size);
+    div10(tmp, size);
+    copyArray(tmp, res, size);
+}
+
 void div_mod10(uint32_t *x, size_t size, int *exp) {
     uint32_t tmp[size], tmp2[size];
-    init_0(tmp, (int)size);
-    init_0(tmp2, (int)size);
-    int mod = 0;
-    if (!is_0(x + 3, size - 3) && *exp > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
+    init_0(tmp, (int) size);
+    init_0(tmp2, (int) size);
+    //int mod = 0;
+    if (!is_0(x + 3, size - 3) && *exp
+        > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
         for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
             copyArray(x, tmp, size);
-            truncate_arr(x, (int)size);
+            div10(x, size);
             *exp -= 1;
         }
         copyArray(tmp, x, size);
+        *exp += 1;
         bank_round_arr(x, exp, size);
     } else if (*exp == 29) {
         bank_round_arr(x, exp, size);

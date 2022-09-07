@@ -54,15 +54,6 @@ int eq_scale(decimal *x, decimal *y) {
     return ret;
 }
 
-int reduce_scale(decimal *x) {
-    int scale = getDecimalExp(*x);
-    uint32_t buf[3];
-    copyArray(x->bits, buf, 3);
-    reduce_scale_arr(buf, 3, &scale);
-    copyArray(buf, x->bits, 3);
-    setDecimalExp(x, scale);
-    return 0;
-}
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
     memset(dst, 0, sizeof(s21_decimal));
@@ -198,7 +189,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
 
     bit_add_arr(x, y, 7);
-    reduce_scale_arr(x, 7, &max_scale);
+    div_mod10(x, 7, &max_scale);
     setDecimalSign(result, s1 & s2);
     if (max_scale > 28 || x[3] > 0) {
         if (getDecimalSign(*result)) {
@@ -238,7 +229,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                                          getDecimalExp(value_2),
                                          7);
             bit_sub_arr(x, y, 7);
-            reduce_scale_arr(x, 7, &max_scale);
+            div_mod10(x, 7, &max_scale);
             copyArray(x, result->bits, 3);
             setDecimalExp(result, max_scale);
 
@@ -279,6 +270,7 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
     s21_decimal tmp_num1 = num1, tmp_num2 = num2;
+    eq_scale(&tmp_num1,&tmp_num2);
     int ret;
     int is_01 = is_0(num1.bits, 3);
     int is_02 = is_0(num2.bits, 3);
@@ -483,7 +475,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     } while (!is_0(mod, size) && count < 29);
 
     div_mod10(res, size, &res_exp);
-    reduce_scale_arr(res, size, &res_exp);
+    div_mod10(res, size, &res_exp);
     int ret = 0;
     if (!res[3] && res_exp <= 28) {
         copyArray(res, result->bits, 3);

@@ -79,6 +79,8 @@ void mul10(uint32_t *x, int size);
 
 void div10(uint32_t *x, size_t size);
 
+void div10ret(uint32_t *x, uint32_t *res, size_t size);
+
 void div_mod10(uint32_t *x, size_t size, int *exp);
 
 int s21_get_bit(s21_decimal d, int i);

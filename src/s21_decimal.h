@@ -56,8 +56,6 @@ int move_scale(int cycles, s21_decimal *num);
 
 int eq_scale(decimal *x, decimal *y);
 
-int reduce_scale(decimal *x);
-
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
