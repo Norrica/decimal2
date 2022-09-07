@@ -27,9 +27,9 @@ void printBits(const size_t size, const void *ptr,
 }
 
 void printDec_an(s21_decimal dec) {
-    for (int i = 128; i > 96; i--) printf("%d", s21_get_bit(dec, i));
-    printf(" ");
-    for (int i = 96; i > -1; i--) printf("%d", s21_get_bit(dec, i));
+  for (int i = 128; i > 96; i--) printf("%d", s21_get_bit(dec, i));
+  printf(" ");
+  for (int i = 96; i > -1; i--) printf("%d", s21_get_bit(dec, i));
 }
 
 int s21_get_bit(s21_decimal d, int i) {
@@ -414,7 +414,7 @@ int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
     }
   }
 
-    int ret = 0;
+  int ret = 0;
   if (!is_0(&buf[3], size - 3)) {
     ret = TOOLARGE;
   } else {
@@ -445,30 +445,30 @@ void mul10(uint32_t *x, int size) {
 
 void div10(uint32_t *x, size_t size) { bit_div(x, 10, x, size); }
 
-
 void div10ret(uint32_t *x, uint32_t *res, size_t size) {
-    uint32_t tmp[size];
-    copyArray(x, tmp, size);
-    div10(tmp, size);
-    copyArray(tmp, res, size);
+  uint32_t tmp[size];
+  copyArray(x, tmp, size);
+  div10(tmp, size);
+  copyArray(tmp, res, size);
 }
 
 void div_mod10(uint32_t *x, size_t size, int *exp) {
-    uint32_t tmp[size], tmp2[size];
-    init_0(tmp, (int) size);
-    init_0(tmp2, (int) size);
-    //int mod = 0;
-    if (!is_0(x + 3, size - 3) && *exp
-        > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
-        for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
-            copyArray(x, tmp, size);
-            div10(x, size);
-            *exp -= 1;
-        }
-        copyArray(tmp, x, size);
-        *exp += 1;
-        bank_round_arr(x, exp, size);
-    } else if (*exp == 29) {
-        bank_round_arr(x, exp, size);
+  uint32_t tmp[size], tmp2[size];
+  init_0(tmp, (int)size);
+  init_0(tmp2, (int)size);
+  // int mod = 0;
+  if (!is_0(x + 3, size - 3) &&
+      *exp > 0) {  // Обрубаем скейл еще(до 28) и если число не влезает в
+                   // десимал после этого, отрубаем скейл дальше
+    for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
+      copyArray(x, tmp, size);
+      div10(x, size);
+      *exp -= 1;
     }
+    copyArray(tmp, x, size);
+    *exp += 1;
+    bank_round_arr(x, exp, size);
+  } else if (*exp == 29) {
+    bank_round_arr(x, exp, size);
+  }
 }

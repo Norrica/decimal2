@@ -490,22 +490,23 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     count++;
   } while (!is_0(mod, size) && count < 29);
 
-    div_mod10(res, size, &res_exp);
-    div_mod10(res, size, &res_exp);
-    int ret = 0;
-    if (!res[3] && res_exp <= 28) {
-        copyArray(res, result->bits, 3);
-        setDecimalExp(result, res_exp);
-        setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
-    } else {
-        ret = getDecimalSign(value_1) == getDecimalSign(value_2) ? TOOLARGE : TOOSMALL;
-    }
-    free(a1);
-    free(a2);
-    free(res);
-    free(mod);
-    free(div);
-    return ret;
+  div_mod10(res, size, &res_exp);
+  div_mod10(res, size, &res_exp);
+  int ret = 0;
+  if (!res[3] && res_exp <= 28) {
+    copyArray(res, result->bits, 3);
+    setDecimalExp(result, res_exp);
+    setDecimalSign(result, getDecimalSign(value_1) ^ getDecimalSign(value_2));
+  } else {
+    ret = getDecimalSign(value_1) == getDecimalSign(value_2) ? TOOLARGE
+                                                             : TOOSMALL;
+  }
+  free(a1);
+  free(a2);
+  free(res);
+  free(mod);
+  free(div);
+  return ret;
 }
 
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
