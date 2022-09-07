@@ -40,10 +40,10 @@ START_TEST(SUB_TEST) {
   // printBits(16,&result,4);
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3], 1u << 31);
+  ck_assert_uint_eq(result.bits[3], 1u << 31);
 
-  for (int i = -100; i < 100; ++i) {
-    for (int j = -100; j < 100; ++j) {
+  for (int i = -10; i < 10; ++i) {
+    for (int j = -10; j < 10; ++j) {
       int a = i;
       int b = j;
       int r;
@@ -68,8 +68,8 @@ START_TEST(SUB_TEST) {
     }
   }
 
-  for (float i = -100; i < 100; i += 0.3) {
-    for (float j = -100; j < 100; j += 0.3) {
+  for (float i = -10; i < 10; i += 0.3) {
+    for (float j = -10; j < 10; j += 0.3) {
       float a = i;
       float b = j;
       float r;
@@ -158,6 +158,8 @@ START_TEST(TO_FROM_INT) {
 
 END_TEST
 
+START_TEST(FLOAT_TO_INT) {}
+END_TEST
 START_TEST(TO_FROM_FLOAT) {
   float f;
   float check;
@@ -174,11 +176,11 @@ START_TEST(TO_FROM_FLOAT) {
   s21_from_float_to_decimal(f, &res);
   s21_from_decimal_to_float(res, &check);
   ck_assert_float_eq_tol(f, check, 0.00005);
-  f = 79228162514264337593543950335.0f;
+  f = 79228157791897854723898736640.0f;  // almost max (precisely)
   s21_from_float_to_decimal(f, &res);
   s21_from_decimal_to_float(res, &check);
   ck_assert_float_eq_tol(f, check, 0.00005);
-  f = 79228162514264337593543950336.0f;
+  f = 79228162514264337593543950336.0f;  // really max
   int err = s21_from_float_to_decimal(f, &res);
   ck_assert_int_eq(err, 1);
 }
@@ -220,14 +222,16 @@ START_TEST(GREATER_TEST) {
 
   test3.bits[0] = 10;
 
+  //printBits(16, &test3, 12);
+  //printBits(16, &test4, 12);
   res = s21_is_greater(test3, test4);
+  ck_assert_int_eq(res, 0);
+
+  res = s21_is_not_equal(test3, test4);
   ck_assert_int_eq(res, 0);
 
   res = s21_is_equal(test3, test4);
   ck_assert_int_eq(res, 1);
-
-  res = s21_is_not_equal(test3, test4);
-  ck_assert_int_eq(res, 0);
 }
 
 END_TEST
@@ -248,6 +252,44 @@ START_TEST(EQUAL_TEST) {
   s21_decimal test4 = {{0, 0, 0, 0}};
   res = s21_is_equal(test3, test4);
   ck_assert_int_eq(res, 1);
+
+  decimal test5 = {0, 0, 0, 0};
+  decimal test6 = {10, 0, 0, 0};
+  setDecimalExp(&test6, 1);
+  int scale = 1;
+  for (int i = 10; i < 10000000; i *= 10) {
+    test5.bits[0] = i;
+    setDecimalExp(&test5, scale);
+    scale++;
+    res = s21_is_equal(test5, test6);
+    ck_assert_int_eq(res, 1);
+  }
+  // 10**28
+  uint32_t a[] = {0b00100000010011111100111001011110,
+                  0b00111110001001010000001001100001,
+                  0b00010000000000000000000000000000};
+  // 10**27
+  uint32_t b[] = {0b00000011001110110010111000111100,
+                  0b10011111110100001000000000111100,
+                  0b11101000000000000000000000000000};
+
+  decimal test7={0};
+  decimal test8={0};
+  copyArray(a,test7.bits,3);
+  copyArray(b,test8.bits,3);
+  printBits(16,&test7,12);
+  printBits(16,&test8,12);
+  puts("");
+  setDecimalExp(&test7, 1);
+  res = s21_is_equal(test7, test8);
+  ck_assert_int_eq(res, 1);
+  mul10(test8.bits,3);
+  printBits(16,&test7,12);
+  printBits(16,&test8,12);
+  setDecimalExp(&test7, 0);
+  res = s21_is_equal(test7, test8);
+  ck_assert_int_eq(res, 1);
+
 }
 
 END_TEST
@@ -273,8 +315,8 @@ START_TEST(MUL_TEST) {
   ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
   ck_assert_int_eq(res, 0);
 
-  for (int i = -100; i < 100; ++i) {
-    for (int j = -100; j < 100; ++j) {
+  for (int i = -10; i < 10; ++i) {
+    for (int j = -10; j < 10; ++j) {
       int a = i;
       int b = j;
       int r;
@@ -294,8 +336,8 @@ START_TEST(MUL_TEST) {
       }
     }
   }
-  for (float i = -100; i < 100; i += 0.3) {
-    for (float j = -100; j < 100; j += 0.3) {
+  for (float i = -10; i < 10; i += 0.3) {
+    for (float j = -10; j < 10; j += 0.3) {
       float a = i;
       float b = j;
       float r;
@@ -429,16 +471,16 @@ Suite *f_example_suite_create() {
   TCase *p_case = tcase_create("Core");
 
   tcase_set_timeout(p_case, 0);
-  // tcase_add_test(p_case, SUB_TEST);
-  // tcase_add_test(p_case, ADD_TEST);
-  // tcase_add_test(p_case, GREATER_TEST);
-  // tcase_add_test(p_case, EQUAL_TEST);
-  // tcase_add_test(p_case, MUL_TEST);
-  // tcase_add_test(p_case, NEGATE_TEST);
-  // tcase_add_test(p_case, TO_FROM_INT);
+  tcase_add_test(p_case, SUB_TEST);
+  tcase_add_test(p_case, ADD_TEST);
+  tcase_add_test(p_case, GREATER_TEST);
+  tcase_add_test(p_case, EQUAL_TEST);
+  tcase_add_test(p_case, MUL_TEST);
+  tcase_add_test(p_case, NEGATE_TEST);
+  tcase_add_test(p_case, TO_FROM_INT);
   tcase_add_test(p_case, TO_FROM_FLOAT);
-  // tcase_add_test(p_case, MOD_TEST);
-  // tcase_add_test(p_case, DIV_TEST);
+  tcase_add_test(p_case, MOD_TEST);
+  tcase_add_test(p_case, DIV_TEST);
 
   suite_add_tcase(s1, p_case);
   return s1;

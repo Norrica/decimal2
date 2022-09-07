@@ -130,7 +130,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     exp--;
     ch[i] = '\0';
   }
-  if (exp > 28 || fabsf(src) > 79228162514264337593543950335.0f ||
+  if (exp > 28 || fabsf(src) >= 79228162514264337593543950336.0f ||
       fabsf(src) < 1e-28)
     return CE;
   size_t digits_len = strlen(ch);
