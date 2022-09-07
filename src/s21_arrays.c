@@ -449,45 +449,36 @@ void div10(uint32_t *x, size_t size) {
     bit_div(x, 10, x, size);
 }
 
-void div_mod10(uint32_t *x, size_t size, int *exp) {
-    uint32_t *tmp = calloc(size, sizeof(uint32_t));
-    uint32_t *tmp2 = calloc(size, sizeof(uint32_t));
-    uint32_t mod[size];
-    init_0(mod, size);
-    tmp[0] = 10;
-    printBits(size, x, 12);
-    for (int i = 0; i < *exp - 29; i++) { // Обрубаем всё до скейла 29, если надо
-        bit_div_arr(x, tmp, x, size);
-        (*exp) -= 1;
+void truncate_arr(uint32_t *x, int size, int *mod) {
+    int tmp_int;
+    uint64_t u_num;
+    u_num = x[size - 1];
+    for (int j = size - 1; j >= 0; j--) {
+        if (j == 0) {
+            *mod += u_num % 10;
+            x[j] = u_num / 10;
+        } else {
+            tmp_int = u_num % 10;
+            x[j] = u_num / 10;
+            u_num = tmp_int * (4294967296) + x[j - 1];
+        }
     }
+}
 
-    do {
-        if (!is_0(x + 4, size - 4) && *exp > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
-            for (int i = 0; !is_0(x + 4, size - 3) && *exp > 0; i++) {
-                bit_div_mod_arr(x, tmp, x, mod, size);
-                (*exp) -= 1;
-            }
-        } else if (*exp == 29) {
-            tmp2 = x;
-            bit_div_arr(tmp2, tmp, tmp2, size);
-            mul10(tmp2, (int)size);
-            printBits(size, tmp2, 12);
-            bit_sub_arr(x, tmp2, size);
-            printBits(size, x, 12);
-
-            copyArray(x, mod, size);
-            copyArray(tmp2, x, size);
-            bit_div_arr(x, tmp, x, size);
-            (*exp) -= 1;
-            printf("работай ссссссука\n");
-            printf("lol %d\n", mod[0]);
+void div_mod10(uint32_t *x, size_t size, int *exp) {
+    uint32_t tmp[size], tmp2[size];
+    init_0(tmp, (int)size);
+    init_0(tmp2, (int)size);
+    int mod = 0;
+    if (!is_0(x + 3, size - 3) && *exp > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
+        for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
+            copyArray(x, tmp, size);
+            truncate_arr(x, (int)size, &mod);
+            *exp -= 1;
         }
-        tmp2[0] = 1;
-        if ((x[0] & 1 && mod[0] == 5) || mod[0] > 5) {
-            bit_add_arr(x, tmp2, size);
-            printf("работай ссссссука\n");
-        }
-    } while (!is_0(x + 4, size - 4) && *exp); // если после округления, всё равно не лезет, но скейл ещё есть, повторить
-    //free(tmp);
-    //free(tmp2);
+        copyArray(tmp, x, size);
+        bank_round_arr(x, exp, size);
+    } else if (*exp == 29) {
+        bank_round_arr(x, exp, size);
+    }
 }
