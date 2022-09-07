@@ -449,13 +449,12 @@ void div10(uint32_t *x, size_t size) {
     bit_div(x, 10, x, size);
 }
 
-void truncate_arr(uint32_t *x, int size, int *mod) {
+void truncate_arr(uint32_t *x, int size) {
     int tmp_int;
     uint64_t u_num;
     u_num = x[size - 1];
     for (int j = size - 1; j >= 0; j--) {
         if (j == 0) {
-            *mod += u_num % 10;
             x[j] = u_num / 10;
         } else {
             tmp_int = u_num % 10;
@@ -473,7 +472,7 @@ void div_mod10(uint32_t *x, size_t size, int *exp) {
     if (!is_0(x + 3, size - 3) && *exp > 0) { // Обрубаем скейл еще(до 28) и если число не влезает в десимал после этого, отрубаем скейл дальше
         for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
             copyArray(x, tmp, size);
-            truncate_arr(x, (int)size, &mod);
+            truncate_arr(x, (int)size);
             *exp -= 1;
         }
         copyArray(tmp, x, size);
