@@ -109,6 +109,7 @@ void reverse_string(char *str) {
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
+  memset(dst, 0, sizeof(s21_decimal));
   int sign = getBits(&src, 31, 1);
   if (sign) {
     src *= -1;

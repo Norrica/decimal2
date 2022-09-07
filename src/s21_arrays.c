@@ -26,12 +26,6 @@ void printBits(const size_t size, const void *ptr,
   puts("");
 }
 
-void printDec_an(s21_decimal dec) {
-  for (int i = 128; i > 96; i--) printf("%d", s21_get_bit(dec, i));
-  printf(" ");
-  for (int i = 96; i > -1; i--) printf("%d", s21_get_bit(dec, i));
-}
-
 int s21_get_bit(s21_decimal d, int i) {
   int bit = 0;
   unsigned int mask = 1u << (i % 32);
