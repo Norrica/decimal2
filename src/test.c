@@ -157,7 +157,6 @@ START_TEST(TO_FROM_INT) {
 }
 END_TEST
 
-
 START_TEST(FLOAT_TO_INT) {
   decimal a = {15, 0, 0, 0};
   setDecimalExp(&a, 1);
@@ -275,27 +274,27 @@ START_TEST(EQUAL_TEST) {
     ck_assert_int_eq(res, 1);
   }
   // 10**28
-  uint32_t a[] = {0b00100000010011111100111001011110,
-                  0b00111110001001010000001001100001,
-                  0b00010000000000000000000000000000};
+  uint32_t a[] = {
+      0b00010000000000000000000000000000,
+      0b00111110001001010000001001100001,
+      0b00100000010011111100111001011110,
+  };
   // 10**27
-  uint32_t b[] = {0b00000011001110110010111000111100,
-                  0b10011111110100001000000000111100,
-                  0b11101000000000000000000000000000};
-
+  uint32_t b[] = {
+      0b11101000000000000000000000000000,
+      0b10011111110100001000000000111100,
+      0b00000011001110110010111000111100,
+  };
+  // a 10000000000000000000000000000
+  // b 1000000000000000000000000000
   decimal test7 = {0};
   decimal test8 = {0};
   copyArray(a, test7.bits, 3);
   copyArray(b, test8.bits, 3);
-  printBits(16, &test7, 12);
-  printBits(16, &test8, 12);
-  puts("");
   setDecimalExp(&test7, 1);
   res = s21_is_equal(test7, test8);
   ck_assert_int_eq(res, 1);
   mul10(test8.bits, 3);
-  printBits(16, &test7, 12);
-  printBits(16, &test8, 12);
   setDecimalExp(&test7, 0);
   res = s21_is_equal(test7, test8);
   ck_assert_int_eq(res, 1);
