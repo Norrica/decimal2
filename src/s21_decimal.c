@@ -383,7 +383,7 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
       s21_decimal tmp = {{1, 0, 0, 0}};
       s21_add(*result, tmp, result);
     }
-    if (sign) setDecimalSign(result, 0);
+    if (sign) setDecimalSign(result, 1);
   }
   return 0;
 }
@@ -394,12 +394,12 @@ int s21_round(s21_decimal value, s21_decimal *result) {
   if (exp > 0) {
     int sign = getDecimalSign(*result);
     if (sign) setDecimalSign(result, 0);
-    result->bits[3] -= 1 << 15;
+    result->bits[3] -= 1 << 16;
     s21_truncate(*result, result);
     s21_decimal last_digit = {{0, 0, 0, 0}};
     s21_decimal ten = {{10, 0, 0, 0}};
     s21_mod(*result, ten, &last_digit);
-    result->bits[3] += 1 << 15;
+    result->bits[3] += 1 << 16;
     s21_truncate(*result, result);
     if (last_digit.bits[0] >= 5) {
       s21_decimal tmp = {{1, 0, 0, 0}};

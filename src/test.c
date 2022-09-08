@@ -158,7 +158,7 @@ START_TEST(TO_FROM_INT) {
 END_TEST
 
 START_TEST(FLOAT_TO_INT) {
-  decimal a = {15, 0, 0, 0};
+  decimal a = {{15, 0, 0, 0}};
   setDecimalExp(&a, 1);
   int dst;
   s21_from_decimal_to_int(a, &dst);
@@ -490,12 +490,30 @@ START_TEST(TRUNCATE_TEST) {
 END_TEST
 
 START_TEST(ROUND_TEST) {
-  decimal a = {{150, 0, 0, 0}};
-  decimal b = {{0, 345678, 0, 0}};
+  decimal a = {{15, 0, 0, 0}};
+  decimal b = {{1500000, 0, 0, 0}};
   decimal r = {{0, 0, 0, 0}};
-  setDecimalExp(&a, 2);
+  setDecimalExp(&a, 1);
   s21_round(a, &r);
   ck_assert_int_eq(r.bits[0], 2);
+  setDecimalExp(&b, 6);
+  s21_round(b, &r);
+  ck_assert_int_eq(r.bits[0], 2);
+}
+END_TEST
+
+START_TEST(FLOOR_TEST) {
+  decimal a = {{15, 0, 0, 0}};
+  decimal b = {{1900000, 0, 0, 0}};
+  decimal r = {{0, 0, 0, 0}};
+  setDecimalExp(&a, 1);
+  s21_floor(a, &r);
+  ck_assert_int_eq(r.bits[0], 1);
+  setDecimalExp(&b, 6);
+  setDecimalSign(&b, 1);
+  s21_floor(b, &r);
+  ck_assert_int_eq(r.bits[0], 2);
+  ck_assert_int_eq(getDecimalSign(r), 1);
 }
 END_TEST
 
@@ -505,6 +523,7 @@ Suite *f_example_suite_create() {
   TCase *p_case = tcase_create("Core");
 
   tcase_set_timeout(p_case, 0);
+  tcase_add_test(p_case, FLOAT_TO_INT);
   tcase_add_test(p_case, SUB_TEST);
   tcase_add_test(p_case, ADD_TEST);
   tcase_add_test(p_case, GREATER_TEST);
@@ -517,6 +536,7 @@ Suite *f_example_suite_create() {
   tcase_add_test(p_case, DIV_TEST);
   tcase_add_test(p_case, TRUNCATE_TEST);
   tcase_add_test(p_case, ROUND_TEST);
+  tcase_add_test(p_case, FLOOR_TEST);
 
   suite_add_tcase(s1, p_case);
   return s1;
