@@ -27,6 +27,8 @@ typedef struct {
 } s21_decimal;
 
 #define decimal s21_decimal
+
+
 int getDecimalSign(decimal d);
 
 int getDecimalExp(decimal d);

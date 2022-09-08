@@ -1,6 +1,5 @@
 
 
-
 #ifndef SRC_S21_ARRAYS_H_
 #define SRC_S21_ARRAYS_H_
 
@@ -9,8 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void printBits(const size_t size, const void *ptr,
-               int sep_n);
+
 uint32_t getBits(const void *ptr, int offset, int n);
 
 void setBits(const void *dest, uint32_t bits, int offset, int n);

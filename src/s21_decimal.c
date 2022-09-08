@@ -1,7 +1,5 @@
 
 
-
-
 #include "s21_decimal.h"
 
 #include <math.h>
@@ -204,8 +202,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int ret = 0;
   init_0(result->bits, 4);
-  if (getDecimalSign(value_1) == 0 &&
-      getDecimalSign(value_2) == 0) {  
+  if (getDecimalSign(value_1) == 0 && getDecimalSign(value_2) == 0) {
     if (s21_is_equal(value_1, value_2)) {
       return 0;
     } else if (s21_is_greater(value_1, value_2)) {
@@ -225,27 +222,24 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       ret = s21_sub(value_2, value_1, result);
       s21_negate(*result, result);
     }
-  } else if (getDecimalSign(value_1) == 1 &&
-             getDecimalSign(value_2) == 1) {  
-    if (s21_is_greater(value_1, value_2)) {   
+  } else if (getDecimalSign(value_1) == 1 && getDecimalSign(value_2) == 1) {
+    if (s21_is_greater(value_1, value_2)) {
       s21_negate(value_2, &value_2);
       s21_negate(value_1, &value_1);
       ret = s21_sub(value_2, value_1, result);
-    } else if (s21_is_greater(value_2, value_1)) {  
+    } else if (s21_is_greater(value_2, value_1)) {
       s21_negate(value_2, &value_2);
       s21_negate(value_1, &value_1);
       ret = s21_sub(value_1, value_2, result);
       setDecimalSign(result, 1);
     }
-  } else if (getDecimalSign(value_1) &&
-             !getDecimalSign(value_2)) {  
+  } else if (getDecimalSign(value_1) && !getDecimalSign(value_2)) {
     s21_negate(value_1, &value_1);
     ret = s21_add(value_1, value_2, result);
     s21_negate(*result, result);
-  } else {  
+  } else {
     s21_negate(value_2, &value_2);
     ret = s21_add(value_1, value_2, result);
-    
   }
   if (ret != 0) ret = getDecimalSign(*result) ? 2 : 1;
   return ret;
@@ -412,7 +406,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
   init_0(result->bits, 4);
   size_t size = 12;
-  
+
   uint32_t *a1 = calloc(size, sizeof(uint32_t));
   copyArray(value_1.bits, a1, 3);
   uint32_t *a2 = calloc(size, sizeof(uint32_t));
@@ -422,8 +416,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   uint32_t *mod = calloc(size, sizeof(uint32_t));
   uint32_t *div = calloc(size, sizeof(uint32_t));
   eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
-  
-
 
   int res_exp = 0;
   while (cmp(a1, a2, size) < 0) {
