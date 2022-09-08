@@ -2,6 +2,7 @@
 
 #include "s21_decimal.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -124,7 +125,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     float d = getBits(x, 0, 1) * powf(2, p);
     res += d;
     shiftr1(x, 3);
-    if (res >= MAXFLOAT && !is_0(x, 3)) {
+    if (res >= FLT_MAX && !is_0(x, 3)) {
       *dst = 0;
       return getDecimalSign(src) ? TOOSMALL : TOOLARGE;
     }
@@ -133,7 +134,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
 
   int _exp = getDecimalExp(src);
   res /= pow(10.0, _exp);
-  if (res > MAXFLOAT) {
+  if (res > FLT_MAX) {
     *dst = 0;
     return getDecimalSign(src) ? TOOSMALL : TOOLARGE;
   }
@@ -265,11 +266,17 @@ int s21_is_equal(s21_decimal num1, s21_decimal num2) {
   } else if (getDecimalSign(num1) != getDecimalSign(num2)) {
     ret = 0;
   } else {
-    ret = tmp_num1.bits[0] != tmp_num2.bits[0]   ? 0
-          : tmp_num1.bits[1] != tmp_num2.bits[1] ? 0
-          : tmp_num1.bits[2] != tmp_num2.bits[2] ? 0
-          : tmp_num1.bits[0] != tmp_num2.bits[0] ? 0
-                                                 : 1;
+    if ((tmp_num1.bits[0] != tmp_num2.bits[0])) {
+      ret = 0;
+    } else if (tmp_num1.bits[1] != tmp_num2.bits[1]) {
+      ret = 0;
+    } else if (tmp_num1.bits[2] != tmp_num2.bits[2]) {
+      ret = 0;
+    } else if (tmp_num1.bits[3] != tmp_num2.bits[3]) {
+      ret = 0;
+    } else {
+      ret = 1;
+    }
   }
   return ret;
 }
