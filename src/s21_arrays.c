@@ -1,30 +1,11 @@
-//
-// Created by Gladis Ariane on 8/26/22.
-//
+
 
 #include "s21_arrays.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "s21_decimal.h"
-
-void printBits(const size_t size, const void *ptr,
-               int sep_n) { /*Поможет смотреть внутрь массива*/
-  unsigned char *b = (unsigned char *)ptr;
-  unsigned char byte;
-  int i, j;
-
-  for (i = size - 1; i >= 0; i--) {
-    for (j = 7; j >= 0; j--) {
-      byte = (b[i] >> j) & 1;
-      printf("%u", byte);
-    }
-    if (!(i % sep_n)) printf(" ");
-  }
-  puts("");
-}
 
 uint32_t getBits(const void *ptr, int offset, int n) {
   uint32_t num = *(uint32_t *)ptr;
@@ -158,9 +139,6 @@ void bit_add_arr(void *res_arr, void *number, size_t arr_size) {
 }
 
 int cmp(const uint32_t *a, const uint32_t *b, size_t size) {
-  //  1 - >
-  //  0 - ==
-  //  -1 - <
   for (int i = size - 1; i >= 0; i--) {
     if (a[i] == b[i] && i > 0) continue;
     if (a[i] > b[i]) return 1;
@@ -176,7 +154,6 @@ void bit_sub_arr(uint32_t *res_arr, uint32_t *number, size_t arr_size) {
   uint32_t *borrow = (uint32_t *)calloc(arr_size, sizeof(uint32_t));
   uint32_t *tmp = (uint32_t *)calloc(arr_size, sizeof(uint32_t));
   while (!is_0(y, arr_size)) {
-    //  https:// iq.opengenus.org/bitwise-subtraction/
     NOT(x, tmp, arr_size);
     AND(tmp, y, borrow, arr_size);
     XOR(x, y, x, arr_size);
@@ -297,23 +274,6 @@ void move_scale_arr(int cycles, uint32_t *arr, size_t size) {
   }
 }
 
-int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
-  uint32_t *buf = calloc(size, sizeof(uint32_t));
-  copyArray(arr, buf, size);
-  while (*scale > 0) {
-    bit_div(arr, 10, buf, size);
-    mul10(buf, size);
-    if (cmp(arr, buf, size) == 0) {
-      bit_div(buf, 10, arr, size);
-      (*scale)--;
-    } else {
-      break;
-    }
-  }
-  free(buf);
-  return OK;
-}
-
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley,
                  size_t size) {
   int maxscale;
@@ -336,15 +296,12 @@ int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
   uint32_t *mod = calloc(size, sizeof(uint32_t));
   five[0] = 5;
   copyArray(arr, buf, size);
-  while (*scale > 29) {
-    bit_div(buf, 10, buf, size);
-    (*scale)--;
-  }
+
   bit_div_mod(buf, 10, buf, mod, size);
   if (cmp(mod, five, size) > 0) {
     bit_add(buf, 1, size);
   } else if (cmp(mod, five, size) == 0) {
-    if (mod[0] & 1) {
+    if (buf[0] & 1) {
       bit_add(buf, 1, size);
     }
   }
@@ -384,10 +341,8 @@ void div_mod10(uint32_t *x, size_t size, int *exp) {
   uint32_t tmp[size], tmp2[size];
   init_0(tmp, (int)size);
   init_0(tmp2, (int)size);
-  // int mod = 0;
-  if (!is_0(x + 3, size - 3) &&
-      *exp > 0) {  // Обрубаем скейл еще(до 28) и если число не влезает в
-                   // десимал после этого, отрубаем скейл дальше
+
+  if (!is_0(x + 3, size - 3) && *exp > 0) {
     for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
       copyArray(x, tmp, size);
       div10(x, size);

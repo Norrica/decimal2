@@ -1,6 +1,5 @@
-//
-// Created by Gladis Ariane on 8/26/22.
-//
+
+
 
 #ifndef SRC_S21_ARRAYS_H_
 #define SRC_S21_ARRAYS_H_
@@ -10,7 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+void printBits(const size_t size, const void *ptr,
+               int sep_n);
 uint32_t getBits(const void *ptr, int offset, int n);
 
 void setBits(const void *dest, uint32_t bits, int offset, int n);
@@ -58,8 +58,6 @@ int cmp(const uint32_t *a, const uint32_t *b, size_t size);
 void init_0(uint32_t *arr, int size);
 
 void move_scale_arr(int cycles, uint32_t *arr, size_t size);
-
-int reduce_scale_arr(uint32_t *arr, size_t size, int *scale);
 
 int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley, size_t size);
 

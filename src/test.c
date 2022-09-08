@@ -1,6 +1,6 @@
-//
-//  Created by Gladis Ariane on 7/31/22.
-//
+
+
+
 #include <check.h>
 #include <stdio.h>
 
@@ -16,7 +16,7 @@ START_TEST(SUB_TEST) {
   ck_assert_int_eq(res, 0);
 
   test2.bits[3] = 0;
-  // test1.bits[3] = 0;
+  
   res = s21_sub(test1, test2, &result);
   ck_assert_int_eq(res, 2);
 
@@ -30,14 +30,14 @@ START_TEST(SUB_TEST) {
   test1.bits[0] = 1;
   test2.bits[2] = 1;
 
-  // printBits(16,&test2,4);
-  // printBits(16,&test1,4);
+  
+  
   s21_sub(test2, test1, &result);
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
 
   s21_sub(test1, test2, &result);
-  // printBits(16,&result,4);
+  
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
   ck_assert_uint_eq(result.bits[3], 1u << 31);
@@ -52,16 +52,16 @@ START_TEST(SUB_TEST) {
       decimal rr;
 
       s21_from_int_to_decimal(a, &aa);
-      // s21_from_decimal_to_int(aa, &a);
+      
       s21_from_int_to_decimal(b, &bb);
-      // s21_from_decimal_to_int(bb, &b);
+      
       s21_sub(aa, bb, &rr);
       s21_from_decimal_to_int(rr, &r);
       if (r != a - b) {
-        // printf("i=%d\tj=%d\n", i, j);
-        // printBits(16,&aa,12);
-        // printBits(16,&bb,12);
-        // printf("r=%d\n", r);
+        
+        
+        
+        
         printf("res : %d != (%d) - (%d) == (%d)\n", r, a, b, a - b);
         ck_assert_int_eq(r, a - b);
       }
@@ -78,18 +78,18 @@ START_TEST(SUB_TEST) {
       decimal rr;
 
       s21_from_float_to_decimal(a, &aa);
-      // s21_from_decimal_to_float(aa, &a);
+      
       s21_from_float_to_decimal(b, &bb);
-      // s21_from_decimal_to_float(bb, &b);
+      
       s21_sub(aa, bb, &rr);
       s21_from_decimal_to_float(rr, &r);
       if (fabsf(r - (a - b)) > 0.0001) {
         printf("%f != (%f) - (%f) == (%f)\n", r, a, b, a - b);
         ck_assert_float_eq_tol(r, a - b, 0.0001);
       }
-      // printf("a - %d\n",a);
-      // printf("b - %d\n",b);
-      // printf("r - %d\n",r);
+      
+      
+      
     }
   }
 }
@@ -185,12 +185,18 @@ START_TEST(TO_FROM_FLOAT) {
   s21_from_float_to_decimal(f, &res);
   s21_from_decimal_to_float(res, &check);
   ck_assert_float_eq_tol(f, check, 0.00005);
-  f = 79228157791897854723898736640.0f;  // almost max (precisely)
+  f = 79228157791897854723898736640.0f;  
   s21_from_float_to_decimal(f, &res);
   s21_from_decimal_to_float(res, &check);
   ck_assert_float_eq_tol(f, check, 0.00005);
-  f = 79228162514264337593543950336.0f;  // really max
+  f = 79228162514264337593543950336.0f;  
   int err = s21_from_float_to_decimal(f, &res);
+  ck_assert_int_eq(err, 1);
+  f = INFINITY;  
+  err = s21_from_float_to_decimal(f, &res);
+  ck_assert_int_eq(err, 1);
+  f = NAN;  
+  err = s21_from_float_to_decimal(f, &res);
   ck_assert_int_eq(err, 1);
 }
 
@@ -231,8 +237,8 @@ START_TEST(GREATER_TEST) {
 
   test3.bits[0] = 10;
 
-  // printBits(16, &test3, 12);
-  // printBits(16, &test4, 12);
+  
+  
   res = s21_is_greater(test3, test4);
   ck_assert_int_eq(res, 0);
 
@@ -273,20 +279,20 @@ START_TEST(EQUAL_TEST) {
     res = s21_is_equal(test5, test6);
     ck_assert_int_eq(res, 1);
   }
-  // 10**28
+  
   uint32_t a[] = {
       0b00010000000000000000000000000000,
       0b00111110001001010000001001100001,
       0b00100000010011111100111001011110,
   };
-  // 10**27
+  
   uint32_t b[] = {
       0b11101000000000000000000000000000,
       0b10011111110100001000000000111100,
       0b00000011001110110010111000111100,
   };
-  // a 10000000000000000000000000000
-  // b 1000000000000000000000000000
+  
+  
   decimal test7 = {0};
   decimal test8 = {0};
   copyArray(a, test7.bits, 3);
@@ -353,9 +359,9 @@ START_TEST(MUL_TEST) {
       decimal rr;
 
       s21_from_int_to_decimal(a, &aa);
-      // s21_from_decimal_to_int(aa, &a);
+      
       s21_from_int_to_decimal(b, &bb);
-      // s21_from_decimal_to_int(bb, &b);
+      
       s21_mul(aa, bb, &rr);
       s21_from_decimal_to_int(rr, &r);
       if (r != a * b) {
@@ -374,18 +380,18 @@ START_TEST(MUL_TEST) {
       decimal rr;
 
       s21_from_float_to_decimal(a, &aa);
-      // s21_from_decimal_to_float(aa, &a);
+      
       s21_from_float_to_decimal(b, &bb);
-      // s21_from_decimal_to_float(bb, &b);
+      
       s21_mul(aa, bb, &rr);
       s21_from_decimal_to_float(rr, &r);
       if (fabsf(r - (a * b)) > 0.001) {
         printf("%f != (%f) * (%f) == (%f)\n", r, a, b, a * b);
         ck_assert_float_eq_tol(r, a * b, 0.001);
       }
-      // printf("a - %d\n",a);
-      // printf("b - %d\n",b);
-      // printf("r - %d\n",r);
+      
+      
+      
     }
   }
 }
@@ -397,7 +403,7 @@ START_TEST(DIV_TEST) {
   decimal b = {{1, 0, 0, 0}};
   decimal r = {{0, 0, 0, 0}};
   int err = 0;
-  // check exp/scale is correct
+  
   for (int i = 0; i < 29; i++) {
     setDecimalExp(&a, i);
     err = s21_div(a, b, &r);
@@ -415,15 +421,15 @@ START_TEST(DIV_TEST) {
     setDecimalExp(&b, i);
     err = s21_div(a, b, &r);
     if (!err) {
-      // printf("%d\n",i);
-      // printBits(16, &r, 12);
-      // printf("%d\n", getDecimalExp(r));
+      
+      
+      
       ck_assert_int_eq(getDecimalExp(r), 1);
     } else {
       ck_assert_int_eq(0, 1);
     }
   }
-  // check signs are correct
+  
   int signs[4][2] = {
       {0, 0},
       {0, 1},
@@ -463,6 +469,14 @@ START_TEST(DIV_TEST) {
   setDecimalSign(&b, 1);
   err = s21_div(a, b, &r);
   ck_assert_int_eq(err, 2);
+  
+  decimal del = {{10, 0, 0, 0}};
+  decimal div = {{0, 0, 0, 0}};
+  decimal res = {{0, 0, 0, 0}};
+  err = s21_div(del,div,&res);
+  ck_assert_int_eq(err,DIVBY0);
+  err = s21_mod(del,div,&res);
+  ck_assert_int_eq(err,DIVBY0);
 }
 END_TEST
 
@@ -537,26 +551,57 @@ START_TEST(FLOOR_TEST) {
 }
 END_TEST
 
+START_TEST(BANK_ROUND) {
+  decimal big = {{UINT32_MAX, UINT32_MAX, UINT32_MAX, 0}};
+  decimal big_m_1 = {{UINT32_MAX - 1, UINT32_MAX, UINT32_MAX, 0}};
+  decimal small = {{5, 0, 0, 0}};
+  decimal res = {{0, 0, 0, 0}};
+  setDecimalExp(&small, 3);
+  s21_sub(big, small, &res);
+  puts("");
+  int r = s21_is_equal(big, res);
+  ck_assert_int_eq(r, 1);
+  setDecimalExp(&small, 1);
+  s21_sub(big, small, &res);
+  r = s21_is_equal(big_m_1, res);
+  ck_assert_int_eq(r, 1);
+
+  
+  
+  
+  decimal two = {{2, 0, 0, 0}};
+  decimal big2 = {{UINT32_MAX, UINT32_MAX, UINT32_MAX, 0}};
+  s21_div(big2, two, &big2);
+  decimal zero_3 = {{3, 0, 0, 0}};
+  setDecimalExp(&zero_3, 2);
+  s21_add(big2, zero_3, &big2);
+  int err = s21_mul(big2,two,&res);
+  ck_assert_int_eq(err,1);
+
+}
+
 Suite *f_example_suite_create() {
   Suite *s1 = suite_create("Test_decimal");
 
   TCase *p_case = tcase_create("Core");
 
   tcase_set_timeout(p_case, 0);
-  tcase_add_test(p_case, FLOAT_TO_INT);
-  tcase_add_test(p_case, SUB_TEST);
-  tcase_add_test(p_case, ADD_TEST);
-  tcase_add_test(p_case, GREATER_TEST);
-  tcase_add_test(p_case, EQUAL_TEST);
-  tcase_add_test(p_case, MUL_TEST);
-  tcase_add_test(p_case, NEGATE_TEST);
-  tcase_add_test(p_case, TO_FROM_INT);
-  tcase_add_test(p_case, TO_FROM_FLOAT);
-  tcase_add_test(p_case, MOD_TEST);
-  tcase_add_test(p_case, DIV_TEST);
-  tcase_add_test(p_case, TRUNCATE_TEST);
-  tcase_add_test(p_case, ROUND_TEST);
-  tcase_add_test(p_case, FLOOR_TEST);
+   tcase_add_test(p_case, FLOAT_TO_INT);
+   tcase_add_test(p_case, SUB_TEST);
+   tcase_add_test(p_case, ADD_TEST);
+   tcase_add_test(p_case, GREATER_TEST);
+   tcase_add_test(p_case, EQUAL_TEST);
+   tcase_add_test(p_case, MUL_TEST);
+   tcase_add_test(p_case, NEGATE_TEST);
+   tcase_add_test(p_case, TO_FROM_INT);
+   tcase_add_test(p_case, TO_FROM_FLOAT);
+   tcase_add_test(p_case, MOD_TEST);
+   tcase_add_test(p_case, DIV_TEST);
+   tcase_add_test(p_case, TRUNCATE_TEST);
+   tcase_add_test(p_case, ROUND_TEST);
+   tcase_add_test(p_case, FLOOR_TEST);
+  tcase_add_test(p_case, BANK_ROUND);
+  tcase_add_test(p_case, LESS_OR_EQUAL_TEST);
 
   suite_add_tcase(s1, p_case);
   return s1;
@@ -564,7 +609,7 @@ Suite *f_example_suite_create() {
 
 int main() {
   Suite *s1 = f_example_suite_create();
-  //  Runner
+  
   SRunner *runner = srunner_create(s1);
   int number_failed;
   srunner_run_all(runner, CK_NORMAL);

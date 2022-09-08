@@ -1,6 +1,6 @@
-//
-//  Created by Gladis Ariane on 7/3/22.
-//
+
+
+
 
 #include "s21_decimal.h"
 
@@ -205,7 +205,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int ret = 0;
   init_0(result->bits, 4);
   if (getDecimalSign(value_1) == 0 &&
-      getDecimalSign(value_2) == 0) {  //  одинаковый +
+      getDecimalSign(value_2) == 0) {  
     if (s21_is_equal(value_1, value_2)) {
       return 0;
     } else if (s21_is_greater(value_1, value_2)) {
@@ -216,7 +216,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       int max_scale =
           eq_scale_arr(x, y, getDecimalExp(value_1), getDecimalExp(value_2), 7);
       bit_sub_arr(x, y, 7);
-      reduce_scale_arr(x, 7, &max_scale);
+      div_mod10(x, 7, &max_scale);
       copyArray(x, result->bits, 3);
       setDecimalExp(result, max_scale);
 
@@ -226,26 +226,26 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       s21_negate(*result, result);
     }
   } else if (getDecimalSign(value_1) == 1 &&
-             getDecimalSign(value_2) == 1) {  // одинаковый -
-    if (s21_is_greater(value_1, value_2)) {   //  -1 - (-10)
+             getDecimalSign(value_2) == 1) {  
+    if (s21_is_greater(value_1, value_2)) {   
       s21_negate(value_2, &value_2);
       s21_negate(value_1, &value_1);
       ret = s21_sub(value_2, value_1, result);
-    } else if (s21_is_greater(value_2, value_1)) {  //  -10 - (-1)
+    } else if (s21_is_greater(value_2, value_1)) {  
       s21_negate(value_2, &value_2);
       s21_negate(value_1, &value_1);
       ret = s21_sub(value_1, value_2, result);
       setDecimalSign(result, 1);
     }
   } else if (getDecimalSign(value_1) &&
-             !getDecimalSign(value_2)) {  // отрицательное, минус положительное
+             !getDecimalSign(value_2)) {  
     s21_negate(value_1, &value_1);
     ret = s21_add(value_1, value_2, result);
     s21_negate(*result, result);
-  } else {  // положительное минус отрицательное
+  } else {  
     s21_negate(value_2, &value_2);
     ret = s21_add(value_1, value_2, result);
-    // s21_negate(*result, result);
+    
   }
   if (ret != 0) ret = getDecimalSign(*result) ? 2 : 1;
   return ret;
@@ -361,7 +361,7 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
 
 int s21_round(s21_decimal value, s21_decimal *result) {
   int exp = getDecimalExp(value);
-  copyArray(value.bits, result->bits,4);
+  copyArray(value.bits, result->bits, 4);
   if (exp > 0) {
     int sign = getDecimalSign(*result);
     if (sign) setDecimalSign(result, 0);
@@ -381,20 +381,6 @@ int s21_round(s21_decimal value, s21_decimal *result) {
   return 0;
 }
 
-int s21_bank_round(decimal *value) {
-  int res = OK;
-  if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
-    res = s21_truncate(*value, value);
-    if (value->bits[0] % 2 == 1 && !res) {
-      decimal one = {{1, 0, 0, 0}};
-      res = s21_add(*value, one, value);
-    }
-  } else {
-    res = s21_round(*value, value);
-  }
-  return res;
-}
-
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   init_0(result->bits, 4);
   uint32_t val1[7] = {0};
@@ -411,6 +397,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     copyArray(res, result->bits, 3);
   }
   int exp = getDecimalExp(value_1) + getDecimalExp(value_2);
+  div_mod10(res, 7, &exp);
   if (exp > 28) {
     return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
   } else {
@@ -425,7 +412,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
   init_0(result->bits, 4);
   size_t size = 12;
-  //  использовать статические, когда определимся с нужным значением
+  
   uint32_t *a1 = calloc(size, sizeof(uint32_t));
   copyArray(value_1.bits, a1, 3);
   uint32_t *a2 = calloc(size, sizeof(uint32_t));
@@ -435,18 +422,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   uint32_t *mod = calloc(size, sizeof(uint32_t));
   uint32_t *div = calloc(size, sizeof(uint32_t));
   eq_scale_arr(a1, a2, getDecimalExp(value_1), getDecimalExp(value_2), size);
-  //  алгоритм
-  /*
-  st = 0
-  for i in range(29):
-      d = a //  b
-      m = a % b
-      a = m * 10
-      st += d
-      st *= 10
-  res = st
-  reduce scale если нужно
-  */
+  
+
 
   int res_exp = 0;
   while (cmp(a1, a2, size) < 0) {
@@ -465,7 +442,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     count++;
   } while (!is_0(mod, size) && count < 29);
 
-  div_mod10(res, size, &res_exp);
   div_mod10(res, size, &res_exp);
   int ret = 0;
   if (!res[3] && res_exp <= 28) {
@@ -489,7 +465,6 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return DIVBY0;
   }
   init_0(result->bits, 4);
-  // забить на отрицательные, вертеру насрать
   int s2 = getDecimalExp(value_2);
   int s1 = getDecimalExp(value_1);
   int scale = s1 > s2 ? s1 : s2;
