@@ -286,7 +286,7 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
   s21_decimal tmp_num1 = num1, tmp_num2 = num2;
-  if (!eq_scale(&tmp_num1, &tmp_num2)) {
+  if (eq_scale(&tmp_num1, &tmp_num2)) {
     return 0;
   }
   int ret;
@@ -395,9 +395,12 @@ int s21_round(s21_decimal value, s21_decimal *result) {
     if (sign) setDecimalSign(result, 0);
     result->bits[3] -= 1 << 15;
     s21_truncate(*result, result);
-    if (result->bits[0] & 1) {
-      result->bits[3] += 1 << 15;
-      s21_truncate(*result, result);
+    s21_decimal last_digit = {{0, 0, 0, 0}};
+    s21_decimal ten = {{10, 0, 0, 0}};
+    s21_mod(*result, ten, &last_digit);
+    result->bits[3] += 1 << 15;
+    s21_truncate(*result, result);
+    if (last_digit.bits[0] >= 5) {
       s21_decimal tmp = {{1, 0, 0, 0}};
       s21_add(*result, tmp, result);
     }

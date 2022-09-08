@@ -158,8 +158,8 @@ START_TEST(TO_FROM_INT) {
 
 END_TEST
 
-START_TEST(FLOAT_TO_INT) {}
-END_TEST
+/* START_TEST(FLOAT_TO_INT) {} */
+/* END_TEST */
 START_TEST(TO_FROM_FLOAT) {
   float f;
   float check;
@@ -211,8 +211,8 @@ START_TEST(GREATER_TEST) {
   res = s21_is_greater(test2, test1);
   ck_assert_int_eq(res, 0);
 
-  decimal test3 = {11, 0, 0, 0};
-  decimal test4 = {10, 0, 0, 0};
+  decimal test3 = {{11, 0, 0, 0}};
+  decimal test4 = {{10, 0, 0, 0}};
 
   res = s21_is_greater(test3, test4);
   ck_assert_int_eq(res, 1);
@@ -253,8 +253,8 @@ START_TEST(EQUAL_TEST) {
   res = s21_is_equal(test3, test4);
   ck_assert_int_eq(res, 1);
 
-  decimal test5 = {0, 0, 0, 0};
-  decimal test6 = {10, 0, 0, 0};
+  decimal test5 = {{0, 0, 0, 0}};
+  decimal test6 = {{10, 0, 0, 0}};
   setDecimalExp(&test6, 1);
   int scale = 1;
   for (int i = 10; i < 10000000; i *= 10) {
@@ -277,19 +277,13 @@ START_TEST(EQUAL_TEST) {
   decimal test8={0};
   copyArray(a,test7.bits,3);
   copyArray(b,test8.bits,3);
-  printBits(16,&test7,12);
-  printBits(16,&test8,12);
-  puts("");
   setDecimalExp(&test7, 1);
   res = s21_is_equal(test7, test8);
-  ck_assert_int_eq(res, 1);
+  ck_assert_int_eq(res, 0);
   mul10(test8.bits,3);
-  printBits(16,&test7,12);
-  printBits(16,&test8,12);
   setDecimalExp(&test7, 0);
   res = s21_is_equal(test7, test8);
-  ck_assert_int_eq(res, 1);
-
+  ck_assert_int_eq(res, 0);
 }
 
 END_TEST
@@ -365,9 +359,9 @@ START_TEST(MUL_TEST) {
 END_TEST
 
 START_TEST(DIV_TEST) {
-  decimal a = {1, 0, 0, 0};
-  decimal b = {1, 0, 0, 0};
-  decimal r = {0, 0, 0, 0};
+  decimal a = {{1, 0, 0, 0}};
+  decimal b = {{1, 0, 0, 0}};
+  decimal r = {{0, 0, 0, 0}};
   int err = 0;
   // check exp/scale is correct
   for (int i = 0; i < 29; i++) {
@@ -375,10 +369,10 @@ START_TEST(DIV_TEST) {
     err = s21_div(a, b, &r);
     if (!err) {
       if (!s21_is_equal(r, a)) {
-        fail("not equal");
+        ck_assert_int_eq(0, 1);
       }
     } else {
-      fail("FAIL div exp err");
+      ck_assert_int_eq(0, 1);
     }
   }
   setDecimalExp(&a, 0);
@@ -392,7 +386,7 @@ START_TEST(DIV_TEST) {
       // printf("%d\n", getDecimalExp(r));
       ck_assert_int_eq(getDecimalExp(r), 1);
     } else {
-      fail("FAIL div exp err");
+      ck_assert_int_eq(0, 1);
     }
   }
   // check signs are correct
@@ -411,7 +405,7 @@ START_TEST(DIV_TEST) {
     if (!err) {
       ck_assert_int_eq(getDecimalSign(r), s1 != s2);
     } else {
-      fail("FAIL div sign err");
+      ck_assert_int_eq(0, 1);
     }
   }
 
@@ -439,9 +433,9 @@ START_TEST(DIV_TEST) {
 END_TEST
 
 START_TEST(MOD_TEST) {
-  decimal a = {10, 0, 0, 0};
-  decimal b = {3, 0, 0, 0};
-  decimal r = {0, 0, 0, 0};
+  decimal a = {{10, 0, 0, 0}};
+  decimal b = {{3, 0, 0, 0}};
+  decimal r = {{0, 0, 0, 0}};
   int err;
 
   err = s21_mod(a, b, &r);
@@ -465,6 +459,32 @@ START_TEST(MOD_TEST) {
 }
 END_TEST
 
+START_TEST(TRUNCATE_TEST) {
+  decimal a = {{15000, 0, 0, 0}};
+  decimal b = {{345678, 0, 0, 0}};
+  decimal r = {{0, 0, 0, 0}};
+  setDecimalExp(&a, 4);
+  s21_truncate(a, &r);
+  ck_assert_int_eq(r.bits[0], 1);
+  setDecimalExp(&a, 5);
+  s21_truncate(a, &r);
+  ck_assert_int_eq(r.bits[0], 0);
+  setDecimalExp(&b, 5);
+  s21_truncate(b, &r);
+  ck_assert_int_eq(r.bits[0], 3);
+}
+END_TEST
+
+START_TEST(ROUND_TEST) {
+  decimal a = {{15, 0, 0, 0}};
+  decimal b = {{0, 345678, 0, 0}};
+  decimal r = {{0, 0, 0, 0}};
+  setDecimalExp(&a, 1);
+  s21_round(a, &r);
+  ck_assert_int_eq(r.bits[0], 2);
+}
+END_TEST
+
 Suite *f_example_suite_create() {
   Suite *s1 = suite_create("Test_decimal");
 
@@ -481,6 +501,8 @@ Suite *f_example_suite_create() {
   tcase_add_test(p_case, TO_FROM_FLOAT);
   tcase_add_test(p_case, MOD_TEST);
   tcase_add_test(p_case, DIV_TEST);
+  tcase_add_test(p_case, TRUNCATE_TEST);
+  tcase_add_test(p_case, ROUND_TEST);
 
   suite_add_tcase(s1, p_case);
   return s1;
