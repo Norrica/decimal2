@@ -50,7 +50,7 @@ int eq_scale(decimal *x, decimal *y) {
 }
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
-  memset(dst, 0, sizeof(s21_decimal));
+  init_0(dst->bits, 4);
   if (src < 0) {
     dst->bits[3] = INT32_MIN;
   }
@@ -110,7 +110,7 @@ void reverse_string(char *str) {
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-  memset(dst, 0, sizeof(s21_decimal));
+  init_0(dst->bits, 4);
   int sign = getBits(&src, 31, 1);
   if (sign) {
     src *= -1;
@@ -287,7 +287,7 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
   s21_decimal tmp_num1 = num1, tmp_num2 = num2;
-  if (!eq_scale(&tmp_num1, &tmp_num2)) {
+  if (eq_scale(&tmp_num1, &tmp_num2)) {
     return 0;
   }
   int ret;
@@ -449,6 +449,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  init_0(result->bits, 4);
   size_t size = 12;
   //  использовать статические, когда определимся с нужным значением
   uint32_t *a1 = calloc(size, sizeof(uint32_t));
@@ -513,6 +514,7 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  init_0(result->bits, 4);
   // забить на отрицательные, вертеру насрать
   int s2 = getDecimalExp(value_2);
   int s1 = getDecimalExp(value_1);
