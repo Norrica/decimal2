@@ -50,7 +50,7 @@ int eq_scale(decimal *x, decimal *y) {
 }
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
-  memset(dst, 0, sizeof(s21_decimal));
+  init_0(dst->bits, 4);
   if (src < 0) {
     dst->bits[3] = INT32_MIN;
   }
@@ -60,6 +60,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
 }
 
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
+  s21_truncate(src, &src);
   if (src.bits[1] || src.bits[2]) {
     return CE;
   }
@@ -109,7 +110,7 @@ void reverse_string(char *str) {
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-  memset(dst, 0, sizeof(s21_decimal));
+  init_0(dst->bits, 4);
   int sign = getBits(&src, 31, 1);
   if (sign) {
     src *= -1;
@@ -411,8 +412,6 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 
 int s21_bank_round(decimal *value) {
   int res = OK;
-  //  Банковское только для ровно х.5
-  //   случаи с 0.5000 и т.д. Пока что использовать только после reduce_scale
   if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
     res = s21_truncate(*value, value);
     if (value->bits[0] % 2 == 1 && !res) {
@@ -453,6 +452,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  init_0(result->bits, 4);
   size_t size = 12;
   //  использовать статические, когда определимся с нужным значением
   uint32_t *a1 = calloc(size, sizeof(uint32_t));
@@ -517,6 +517,7 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  init_0(result->bits, 4);
   // забить на отрицательные, вертеру насрать
   int s2 = getDecimalExp(value_2);
   int s1 = getDecimalExp(value_1);

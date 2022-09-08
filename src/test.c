@@ -155,11 +155,25 @@ START_TEST(TO_FROM_INT) {
     ck_assert_int_eq(check, min);
   }
 }
-
 END_TEST
 
+<<<<<<< HEAD
 /* START_TEST(FLOAT_TO_INT) {} */
 /* END_TEST */
+=======
+START_TEST(FLOAT_TO_INT) {
+  decimal a = {15, 0, 0, 0};
+  setDecimalExp(&a, 1);
+  int dst;
+  s21_from_decimal_to_int(a, &dst);
+  ck_assert_int_eq(dst, 1);
+  a.bits[0] = UINT32_MAX;
+  s21_from_decimal_to_int(a, &dst);
+  ck_assert_int_eq(dst, 429496729);
+}
+END_TEST
+
+>>>>>>> bd8cc778b1e55de0fb12295c3e39d5cbe2faeba6
 START_TEST(TO_FROM_FLOAT) {
   float f;
   float check;
@@ -222,8 +236,8 @@ START_TEST(GREATER_TEST) {
 
   test3.bits[0] = 10;
 
-  //printBits(16, &test3, 12);
-  //printBits(16, &test4, 12);
+  // printBits(16, &test3, 12);
+  // printBits(16, &test4, 12);
   res = s21_is_greater(test3, test4);
   ck_assert_int_eq(res, 0);
 
@@ -273,6 +287,7 @@ START_TEST(EQUAL_TEST) {
                   0b10011111110100001000000000111100,
                   0b11101000000000000000000000000000};
 
+<<<<<<< HEAD
   decimal test7={0};
   decimal test8={0};
   copyArray(a,test7.bits,3);
@@ -284,6 +299,24 @@ START_TEST(EQUAL_TEST) {
   setDecimalExp(&test7, 0);
   res = s21_is_equal(test7, test8);
   ck_assert_int_eq(res, 0);
+=======
+  decimal test7 = {0};
+  decimal test8 = {0};
+  copyArray(a, test7.bits, 3);
+  copyArray(b, test8.bits, 3);
+  printBits(16, &test7, 12);
+  printBits(16, &test8, 12);
+  puts("");
+  setDecimalExp(&test7, 1);
+  res = s21_is_equal(test7, test8);
+  ck_assert_int_eq(res, 1);
+  mul10(test8.bits, 3);
+  printBits(16, &test7, 12);
+  printBits(16, &test8, 12);
+  setDecimalExp(&test7, 0);
+  res = s21_is_equal(test7, test8);
+  ck_assert_int_eq(res, 1);
+>>>>>>> bd8cc778b1e55de0fb12295c3e39d5cbe2faeba6
 }
 
 END_TEST
