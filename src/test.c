@@ -302,6 +302,26 @@ START_TEST(EQUAL_TEST) {
 
 END_TEST
 
+START_TEST(LESS_OR_EQUAL_TEST) {
+  decimal a = {{0, 0, 0, 0}};
+  decimal b = {{0, 0, 0, 0}};
+  int res = s21_is_less_or_equal(a, b);
+  ck_assert_int_eq(res, 1);
+  b.bits[0] = 1;
+  res = s21_is_less_or_equal(a, b);
+  ck_assert_int_eq(res, 1);
+  a.bits[0] = 1;
+  b.bits[0] = 1;
+  setDecimalSign(&a, 1);
+  res = s21_is_less_or_equal(a, b);
+  ck_assert_int_eq(res, 1);
+  setDecimalSign(&b, 1);
+  setDecimalSign(&a, 0);
+  res = s21_is_less_or_equal(a, b);
+  ck_assert_int_eq(res, 0);
+}
+END_TEST
+
 START_TEST(MUL_TEST) {
   s21_decimal test1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 1u << 31}};
   s21_decimal test2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};

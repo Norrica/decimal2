@@ -26,22 +26,6 @@ void printBits(const size_t size, const void *ptr,
   puts("");
 }
 
-int s21_get_bit(s21_decimal d, int i) {
-  int bit = 0;
-  unsigned int mask = 1u << (i % 32);
-  if ((d.bits[i / 32] & mask) != 0) bit = 1;
-  return bit;
-}
-
-void s21_set_bit(s21_decimal *value, int place, int bit) {
-  unsigned int mask = 1u << (place % 32);
-  if (bit) {
-    value->bits[place / 32] |= mask;
-  } else {
-    value->bits[place / 32] &= ~mask;
-  }
-}
-
 uint32_t getBits(const void *ptr, int offset, int n) {
   uint32_t num = *(uint32_t *)ptr;
   uint32_t buf = num;
@@ -49,11 +33,6 @@ uint32_t getBits(const void *ptr, int offset, int n) {
   mask <<= offset;
   buf &= mask;
   return buf >> offset;
-}
-
-void copyBits(const void *dest, const void *src, int offset, int n) {
-  uint32_t src_num = getBits(src, offset, n);
-  setBits(dest, src_num, offset, n);
 }
 
 void setBits(const void *dest, uint32_t bits, int offset, int n) {
@@ -65,29 +44,12 @@ void setBits(const void *dest, uint32_t bits, int offset, int n) {
   *(uint32_t *)dest |= bits;
 }
 
-void flipBits(uint32_t *i) {
-  uint32_t j = 0;
-  for (int k = 0; k < 32; k++) j |= ((*i >> k) & 0b1) << (31 - k);
-  *i = j;
-}
-
 int shiftl(void *object, size_t size, int n) {
   if ((size_t)n > 32 * size) {
     puts("dont shift more than arr size");
     return 1;
   }
   for (int i = 0; i < n; ++i) shiftl1(object, size);
-  return 0;
-}
-
-int shiftr(void *object, size_t size, int n) {
-  if ((size_t)n > (size * 32)) {
-    puts("fuk you from shiftr");
-    return 1;
-  }
-  for (int i = 0; i < n; ++i) {
-    shiftr1(object, size);
-  }
   return 0;
 }
 
@@ -308,32 +270,11 @@ void bit_div_mod_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *div,
   free(a2);
 }
 
-void bit_sub(uint32_t *res_arr, uint32_t number, size_t arr_size) {
-  uint32_t *tmp = calloc(arr_size, sizeof(uint32_t));
-  tmp[0] = number;
-  bit_sub_arr(res_arr, tmp, arr_size);
-  free(tmp);
-}
-
-void bit_mod(uint32_t *arr1, uint32_t number, uint32_t *res, size_t size) {
-  uint32_t *tmp = calloc(size, sizeof(uint32_t));
-  tmp[0] = number;
-  bit_mod_arr(arr1, tmp, res, size);
-  free(tmp);
-}
-
 void bit_div_mod(uint32_t *arr1, uint32_t number, uint32_t *div, uint32_t *mod,
                  size_t size) {
   uint32_t *tmp = calloc(size, sizeof(uint32_t));
   tmp[0] = number;
   bit_div_mod_arr(arr1, tmp, div, mod, size);
-  free(tmp);
-}
-
-void bit_mul(uint32_t *val1, uint32_t number, uint32_t *res, size_t size) {
-  uint32_t *tmp = calloc(size, sizeof(uint32_t));
-  tmp[0] = number;
-  bit_mul_arr(val1, tmp, res, size);
   free(tmp);
 }
 
@@ -438,13 +379,6 @@ void mul10(uint32_t *x, int size) {
 }
 
 void div10(uint32_t *x, size_t size) { bit_div(x, 10, x, size); }
-
-void div10ret(uint32_t *x, uint32_t *res, size_t size) {
-  uint32_t tmp[size];
-  copyArray(x, tmp, size);
-  div10(tmp, size);
-  copyArray(tmp, res, size);
-}
 
 void div_mod10(uint32_t *x, size_t size, int *exp) {
   uint32_t tmp[size], tmp2[size];

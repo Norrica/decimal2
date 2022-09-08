@@ -80,35 +80,6 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   return OK;
 }
 
-void reverse_string(char *str) {
-  /* skip null */
-  if (str == 0) {
-    return;
-  }
-
-  /* skip empty string */
-  if (*str == 0) {
-    return;
-  }
-
-  /* get range */
-  char *start = str;
-  char *end = start + strlen(str) - 1; /* -1 for \0 */
-  char temp;
-
-  /* reverse */
-  while (end > start) {
-    /* swap */
-    temp = *start;
-    *start = *end;
-    *end = temp;
-
-    /* move */
-    ++start;
-    --end;
-  }
-}
-
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   init_0(dst->bits, 4);
   int sign = getBits(&src, 31, 1);
