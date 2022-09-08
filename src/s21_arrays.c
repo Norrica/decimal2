@@ -204,6 +204,7 @@ void bit_div_arr(uint32_t *arr1, uint32_t *arr2, uint32_t *res, size_t size) {
     }
     shiftr1(rb, size); /*rb >>= 1*/
   }
+  free(a1);
   free(a2);
   free(acc);
   free(rb);
