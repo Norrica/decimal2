@@ -7,7 +7,7 @@ GCOVFLAGS = -fprofile-arcs -ftest-coverage
 
 
 
-all: clean s21_decimal.a test buf fub
+all: clean s21_decimal.a
 
 s21_decimal.a: s21_decimal.o
 	$(CC) $(CFLAGS) -g -c  $(SOURSES)
