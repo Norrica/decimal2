@@ -60,6 +60,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
 }
 
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
+  s21_truncate(src, &src);
   if (src.bits[1] || src.bits[2]) {
     return CE;
   }
@@ -408,8 +409,6 @@ int s21_round(s21_decimal value, s21_decimal *result) {
 
 int s21_bank_round(decimal *value) {
   int res = OK;
-  //  Банковское только для ровно х.5
-  //   случаи с 0.5000 и т.д. Пока что использовать только после reduce_scale
   if (value->bits[0] % 5 == 0 && getDecimalExp(*value) == 1) {
     res = s21_truncate(*value, value);
     if (value->bits[0] % 2 == 1 && !res) {
