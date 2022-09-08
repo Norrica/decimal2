@@ -157,10 +157,7 @@ START_TEST(TO_FROM_INT) {
 }
 END_TEST
 
-<<<<<<< HEAD
-/* START_TEST(FLOAT_TO_INT) {} */
-/* END_TEST */
-=======
+
 START_TEST(FLOAT_TO_INT) {
   decimal a = {15, 0, 0, 0};
   setDecimalExp(&a, 1);
@@ -173,7 +170,6 @@ START_TEST(FLOAT_TO_INT) {
 }
 END_TEST
 
->>>>>>> bd8cc778b1e55de0fb12295c3e39d5cbe2faeba6
 START_TEST(TO_FROM_FLOAT) {
   float f;
   float check;
@@ -287,19 +283,6 @@ START_TEST(EQUAL_TEST) {
                   0b10011111110100001000000000111100,
                   0b11101000000000000000000000000000};
 
-<<<<<<< HEAD
-  decimal test7={0};
-  decimal test8={0};
-  copyArray(a,test7.bits,3);
-  copyArray(b,test8.bits,3);
-  setDecimalExp(&test7, 1);
-  res = s21_is_equal(test7, test8);
-  ck_assert_int_eq(res, 0);
-  mul10(test8.bits,3);
-  setDecimalExp(&test7, 0);
-  res = s21_is_equal(test7, test8);
-  ck_assert_int_eq(res, 0);
-=======
   decimal test7 = {0};
   decimal test8 = {0};
   copyArray(a, test7.bits, 3);
@@ -316,7 +299,6 @@ START_TEST(EQUAL_TEST) {
   setDecimalExp(&test7, 0);
   res = s21_is_equal(test7, test8);
   ck_assert_int_eq(res, 1);
->>>>>>> bd8cc778b1e55de0fb12295c3e39d5cbe2faeba6
 }
 
 END_TEST
@@ -509,10 +491,10 @@ START_TEST(TRUNCATE_TEST) {
 END_TEST
 
 START_TEST(ROUND_TEST) {
-  decimal a = {{15, 0, 0, 0}};
+  decimal a = {{150, 0, 0, 0}};
   decimal b = {{0, 345678, 0, 0}};
   decimal r = {{0, 0, 0, 0}};
-  setDecimalExp(&a, 1);
+  setDecimalExp(&a, 2);
   s21_round(a, &r);
   ck_assert_int_eq(r.bits[0], 2);
 }
