@@ -251,8 +251,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 int s21_negate(s21_decimal value, s21_decimal *result) {
   if (result != NULL) {
-    int sign = !getDecimalSign(value);
-    setDecimalSign(result, sign);
+    copyArray(value.bits, result->bits, 4);
+    setDecimalSign(result, !getDecimalSign(value));
     return OK;
   } else {
     return CE;
