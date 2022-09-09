@@ -46,8 +46,8 @@ rebuild: clean all
 prosto:
 	gcc -g s21_decimal.c prosto.c -o valg.out
 
-mini_grind:test
-	valgrind -q --leak-check=full --track-origins=yes ./test
+mini_grind:buf
+	valgrind -q --leak-check=full --track-origins=yes ./buf.out
 
 python_test:
 	gcc -c -fPIC $(SOURSES) --coverage

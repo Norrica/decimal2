@@ -48,9 +48,10 @@ START_TEST(decimal_plus_plus_4) {
   s21_decimal z = {{0, 0, 0, 0}};
   setDecimalSign(&y, 1);
   s21_add(x, y, &z);
-  char res1[1000], res2[1000] = "4294967295 0 0 0";
+  char res1[1000], res2[1000] = "4294967295 0 0 2147483648";
   snprintf(res1, sizeof(char) * 1000, "%u %u %u %u", z.bits[0], z.bits[1],
            z.bits[2], z.bits[3]);
+
   ck_assert_str_eq(res1, res2);
 }
 END_TEST
@@ -1640,7 +1641,7 @@ START_TEST(from_float_to_decimal_4) {
 END_TEST
 
 START_TEST(from_float_to_decimal_5) {
-  double src = 0;
+  float src = 0;
   s21_decimal z = {{0, 0, 0, 0}};
   int n1 = s21_from_float_to_decimal(src, &z);
   char res1[1000], res2[1000] = "0 0 0 0";
@@ -1652,7 +1653,7 @@ START_TEST(from_float_to_decimal_5) {
 END_TEST
 
 START_TEST(from_float_to_decimal_6) {
-  long double src = 0;
+  float src = 0;
   s21_decimal z = {{0, 0, 0, 0}};
   int n1 = s21_from_float_to_decimal(src, &z);
   char res1[1000], res2[1000] = "0 0 0 0";

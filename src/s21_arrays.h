@@ -2,12 +2,10 @@
 
 #ifndef SRC_S21_ARRAYS_H_
 #define SRC_S21_ARRAYS_H_
+//
 
-#include <math.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 uint32_t getBits(const void *ptr, int offset, int n);
 

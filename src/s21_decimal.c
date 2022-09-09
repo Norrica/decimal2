@@ -101,7 +101,8 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     exp--;
     ch[i] = '\0';
   }
-  if (exp > 28 || src >= 79228162514264337593543950336.0f || src < 1e-28)
+  if (exp > 28 || src >= 79228162514264337593543950336.0f ||
+      (0 < src && src < 1e-28))
     return CE;
   size_t digits_len = strlen(ch);
   for (size_t i = 0; i < digits_len; ++i) {
@@ -116,6 +117,9 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 }
 
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
+  if (dst == NULL) {
+    return CE;
+  }
   uint32_t x[3];
   copyArray(src.bits, x, 3);
   int p = 0;
@@ -247,7 +251,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 int s21_negate(s21_decimal value, s21_decimal *result) {
   if (result != NULL) {
-    setDecimalSign(result, !getDecimalSign(value));
+    int sign = !getDecimalSign(value);
+    setDecimalSign(result, sign);
     return OK;
   } else {
     return CE;
