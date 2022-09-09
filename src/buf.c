@@ -68,12 +68,41 @@
 
 void negate(){
   decimal a={0,0,0,0};
-  decimal *b = NULL;
-  int err = s21_negate(a,b);
-  printf("%d\n",err);
+  //decimal *b = NULL;
+  int err =s21_negate(a,&a);
+  if (err ==1){
+    puts("lol");
+  }
+  //printf("%d\n",err);
   //printBits(16,&a,12);
 }
+
+void dif(){
+  s21_decimal x = {{0, 0, 555555555, 0}};
+  s21_decimal y = {{1, 0, 0, 0}};
+  setDecimalExp(&y, 1);
+  s21_decimal z = {{0, 0, 0, 0}};
+  s21_mul(x, y, &z);
+  //printf("%d\n",n1);
+  //printf("%u\n",z.bits[0]);
+  printBits(16,&z,12);
+}
+
+void f(){
+  s21_decimal x = {{1050000, 0, 0, 0}};
+  //s21_decimal y = {{3, 0, 0, 0}};
+  //s21_decimal z = {{0, 0, 0, 0}};
+  //setDecimalExp(&y, 20);
+  //s21_div(x, y, &z);
+  //div10(z.bits,3);
+  //printf("%u\n",z.bits[0]);
+  int scale = 6;
+  reduce_scale_arr(x.bits,3,&scale);
+  setDecimalExp(&x,scale);
+  printBits(16,&x,2);
+}
+
 int main() {
-   negate();
+   dif();
 
 }

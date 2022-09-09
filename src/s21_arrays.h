@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+int reduce_scale_arr(uint32_t *arr, size_t size, int *scale);
 
 uint32_t getBits(const void *ptr, int offset, int n);
 

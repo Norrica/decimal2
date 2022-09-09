@@ -28,7 +28,7 @@ typedef struct {
 
 #define decimal s21_decimal
 
-
+void printBits(size_t size, const void *ptr, int sep_n);
 int getDecimalSign(decimal d);
 
 int getDecimalExp(decimal d);

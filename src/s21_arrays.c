@@ -338,12 +338,33 @@ void mul10(uint32_t *x, int size) {
 
 void div10(uint32_t *x, size_t size) { bit_div(x, 10, x, size); }
 
-void div_mod10(uint32_t *x, size_t size, int *exp) {
-  uint32_t tmp[size], tmp2[size];
-  init_0(tmp, (int)size);
-  init_0(tmp2, (int)size);
+int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
+  uint32_t *buf = calloc(size, sizeof(uint32_t));
+  uint32_t *ten = calloc(size, sizeof(uint32_t));
+  uint32_t *mod = calloc(size, sizeof(uint32_t));
+  ten[0] = 10;
+  copyArray(arr, buf, size);
+  while (*scale > 0) {
+    bit_div_mod_arr(buf, ten, buf, mod, size);
+    if (!is_0(mod, size)) {
+      mul10(buf,size);
+      bit_add_arr(buf, mod, size);
+      break;
+    }
+    (*scale)--;
+  }
+  copyArray(buf, arr, size);
+  free(buf);
+  free(ten);
+  free(mod);
+  return OK;
+}
 
-  if (!is_0(x + 3, size - 3) && *exp > 0) {
+void div_mod10(uint32_t *x, size_t size, int *exp) {
+  if (!is_0(x + 3, size - 3) && (*exp > 0)) {
+    uint32_t tmp[size], tmp2[size];
+    init_0(tmp, (int)size);
+    init_0(tmp2, (int)size);
     for (int i = 0; !is_0(x + 3, size - 3) && *exp > 0; i++) {
       copyArray(x, tmp, size);
       div10(x, size);

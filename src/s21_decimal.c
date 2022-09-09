@@ -8,7 +8,20 @@
 #include <string.h>
 
 #include "s21_arrays.h"
+void printBits(const size_t size, const void *ptr, int sep_n) {
+  unsigned char *b = (unsigned char *)ptr;
+  unsigned char byte;
+  int i, j;
 
+  for (i = size - 1; i >= 0; i--) {
+    for (j = 7; j >= 0; j--) {
+      byte = (b[i] >> j) & 1;
+      printf("%u", byte);
+    }
+    if (!(i % sep_n)) printf(" ");
+  }
+  puts("");
+}
 int getDecimalExp(decimal d) {
   int i = d.bits[3] << 1;
   int j = i >> 17;
@@ -186,6 +199,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int max_scale = eq_scale_arr(x, y, exp_x, exp_y, 7);
 
   bit_add_arr(x, y, 7);
+  reduce_scale_arr(x, 7, &max_scale);
   div_mod10(x, 7, &max_scale);
   setDecimalSign(result, s1 & s2);
   if (max_scale > 28 || x[3] > 0) {
@@ -217,6 +231,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       int max_scale =
           eq_scale_arr(x, y, getDecimalExp(value_1), getDecimalExp(value_2), 7);
       bit_sub_arr(x, y, 7);
+      reduce_scale_arr(x, 7, &max_scale);
       div_mod10(x, 7, &max_scale);
       copyArray(x, result->bits, 3);
       setDecimalExp(result, max_scale);
@@ -398,18 +413,19 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   copyArray(value_1.bits, val1, 3);
   copyArray(value_2.bits, val2, 3);
   bit_mul_arr(val1, val2, res, 7);
+  int exp = getDecimalExp(value_1) + getDecimalExp(value_2);
   if (getDecimalSign(value_1) != getDecimalSign(value_2))
     setDecimalSign(result, 1);
   if (res[3] || res[4] || res[5] || res[6]) {
     return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
   } else {
-    copyArray(res, result->bits, 3);
+    reduce_scale_arr(res, 7, &exp);
   }
-  int exp = getDecimalExp(value_1) + getDecimalExp(value_2);
-  div_mod10(res, 7, &exp);
   if (exp > 28) {
     return getDecimalSign(*result) ? TOOSMALL : TOOLARGE;
   } else {
+    div_mod10(res, 7, &exp);
+    copyArray(res, result->bits, 3);
     setDecimalExp(result, exp);
   }
   return OK;
@@ -420,7 +436,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return DIVBY0;
   }
   init_0(result->bits, 4);
-  size_t size = 12;
+  size_t size = 7;
 
   uint32_t *a1 = calloc(size, sizeof(uint32_t));
   copyArray(value_1.bits, a1, 3);
@@ -438,7 +454,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     res_exp++;
   }
 
-  int count = 0;
   do {
     bit_div_mod_arr(a1, a2, div, mod, size);
     mul10(mod, size);
@@ -446,9 +461,9 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     bit_add_arr(res, div, size);
     mul10(res, size);
     res_exp++;
-    count++;
-  } while (!is_0(mod, size) && count < 29);
+  } while (!is_0(mod, size) && res_exp <= 29);
 
+  reduce_scale_arr(res, size, &res_exp);
   div_mod10(res, size, &res_exp);
   int ret = 0;
   if (!res[3] && res_exp <= 28) {
@@ -471,11 +486,29 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  if(s21_is_less(value_1,value_2)) {
+    copyArray(value_1.bits,result->bits,4);
+    return OK;
+  }
   init_0(result->bits, 4);
   int s2 = getDecimalExp(value_2);
   int s1 = getDecimalExp(value_1);
   int scale = s1 > s2 ? s1 : s2;
-  bit_mod_arr(value_1.bits, value_2.bits, result->bits, 3);
+  size_t size = 6;
+  uint32_t *x = calloc(size,sizeof(uint32_t));
+  copyArray(value_1.bits,x,3);
+  uint32_t *y = calloc(size,sizeof(uint32_t));
+  copyArray(value_2.bits,y,3);
+  uint32_t *res = calloc(size,sizeof(uint32_t));
+  eq_scale_arr(x,y,s1,s2,size);
+
+  bit_mod_arr(x, y, res, size);
+  reduce_scale_arr(res,size,&scale);
+  copyArray(res,result->bits,3);
   setDecimalExp(result, scale);
+  setDecimalSign(result, getDecimalSign(value_2));
+  free(x);
+  free(y);
+  free(res);
   return OK;
 }
