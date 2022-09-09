@@ -87,7 +87,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   }
   char ch[100];
 
-  snprintf(ch, sizeof(ch), "%.6f", src);
+  snprintf(ch, sizeof(ch), "%.7f", src);
   src = atof(ch);
   if (strcmp("inf", ch) == 0 || strcmp("nan", ch) == 0 ||
       strcmp("-inf", ch) == 0)
@@ -101,13 +101,12 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     exp--;
     ch[i] = '\0';
   }
-  if (exp > 28 || fabsf(src) >= 79228162514264337593543950336.0f ||
-      fabsf(src) < 1e-28)
+  if (exp > 28 || src >= 79228162514264337593543950336.0f || src < 1e-28)
     return CE;
   size_t digits_len = strlen(ch);
   for (size_t i = 0; i < digits_len; ++i) {
+    mul10(dst->bits, 3);
     bit_add(dst->bits, ch[i] - '0', 3);
-    if (i < digits_len - 1) mul10(dst->bits, 3);
   }
 
   setDecimalExp(dst, exp);
@@ -247,7 +246,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 }
 
 int s21_negate(s21_decimal value, s21_decimal *result) {
-  if (result) {
+  if (result != NULL) {
     setDecimalSign(result, !getDecimalSign(value));
     return OK;
   } else {
