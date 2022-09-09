@@ -20,6 +20,10 @@ test: test.c s21_decimal.a
 	$(CC) -c test.c $(TEST_LIBS) -o test.o
 	$(CC) -g test.o s21_decimal.a $(TEST_LIBS) -o test
 
+other_test: other_test.c s21_decimal.a
+	$(CC) -c other_test.c $(TEST_LIBS) -o other_test.o
+	$(CC) -g other_test.o s21_decimal.a $(TEST_LIBS) -o other_test
+
 gcov_report: s21_decimal.a
 	$(CC) $(CFLAGS) --coverage test.c s21_decimal.c s21_decimal.a $(TEST_LIBS) -o gcov_test
 	chmod +x *
