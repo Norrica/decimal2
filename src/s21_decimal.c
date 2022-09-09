@@ -247,8 +247,12 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 }
 
 int s21_negate(s21_decimal value, s21_decimal *result) {
-  setDecimalSign(result, !getDecimalSign(value));
-  return OK;
+  if (result) {
+    setDecimalSign(result, !getDecimalSign(value));
+    return OK;
+  } else {
+    return CE;
+  }
 }
 
 int s21_is_equal(s21_decimal num1, s21_decimal num2) {
