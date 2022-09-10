@@ -16,11 +16,11 @@ s21_decimal.a: s21_decimal.o
 clean:
 	rm -rf ./*.o ./*.a ./a.out gcov_test *.html *.css ./GcovReport ./*.gcno ./*.gcda ./report ./*.info ./s21_decimal.so ./*.dSYM ./s21_decimal_test ./CPPLINT* test
 
-test: test.c s21_decimal.a
+test: clean test.c s21_decimal.a
 	$(CC) -c test.c $(TEST_LIBS) -o test.o
 	$(CC) -g test.o s21_decimal.a $(TEST_LIBS) -o test
 
-other_test: other_test.c s21_decimal.a
+other_test:clean other_test.c s21_decimal.a
 	$(CC) -c other_test.c $(TEST_LIBS) -o other_test.o
 	$(CC) -g other_test.o s21_decimal.a $(TEST_LIBS) -o other_test
 

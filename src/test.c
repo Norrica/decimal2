@@ -401,11 +401,13 @@ START_TEST(DIV_TEST) {
   }
   setDecimalExp(&a, 0);
   setDecimalExp(&b, 0);
-  for (int i = 0; i < 28; i++) {
+  for (int i = 0; i < 29; i++) {
     setDecimalExp(&b, i);
     err = s21_div(a, b, &r);
     if (!err) {
-      ck_assert_int_eq(getDecimalExp(r), 1);
+      //printf("%d\n",i);
+      //printBits(16,&r,);
+      ck_assert_int_eq(getDecimalExp(r), 0);
     } else {
       ck_assert_int_eq(0, 1);
     }
