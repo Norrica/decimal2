@@ -402,7 +402,7 @@ int s21_round(s21_decimal value, s21_decimal *result) {
       s21_decimal tmp = {{1, 0, 0, 0}};
       s21_add(*result, tmp, result);
     }
-    if (sign) setDecimalSign(result, 0);
+    if (sign) setDecimalSign(result, 1);
   }
   return 0;
 }
