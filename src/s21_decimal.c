@@ -435,6 +435,10 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
+  if (is_0(value_1.bits, 3)) {
+    init_0(result->bits, 4);
+    return OK;
+  }
   init_0(result->bits, 4);
   size_t size = 7;
 
