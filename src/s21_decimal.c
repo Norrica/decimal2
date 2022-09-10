@@ -175,16 +175,14 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     sign_diff = 1;
     s21_negate(value_1, &value_1);
   }
-  
   if (sign_diff) {
-    int cmp_res = cmp(value_1.bits, value_2.bits, 3);
-    if (cmp_res > 0) {
+    if (s21_is_greater(value_1, value_2)) {
       res = s21_sub(value_1, value_2, result);
-      setDecimalSign(result, s1);
+      s21_negate(*result, result);
       return res;
-    } else if (cmp_res < 0) {
+    } else if (s21_is_greater(value_2, value_1)) {
       res = s21_sub(value_2, value_1, result);
-      setDecimalSign(result, s2);
+      s21_negate(*result, result);
       return res;
     } else {
       init_0(result->bits, 4);
@@ -203,7 +201,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   bit_add_arr(x, y, 7);
   reduce_scale_arr(x, 7, &max_scale);
   div_mod10(x, 7, &max_scale);
-  setDecimalSign(result, s1);
+  setDecimalSign(result, s1 & s2);
   if (max_scale > 28 || x[3] > 0) {
     if (getDecimalSign(*result)) {
       return TOOSMALL;
