@@ -490,8 +490,8 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (is_0(value_2.bits, 3)) {
     return DIVBY0;
   }
-  if(s21_is_less(value_1,value_2)) {
-    copyArray(value_1.bits,result->bits,4);
+  if (s21_is_less(value_1, value_2)) {
+    copyArray(value_1.bits, result->bits, 4);
     return OK;
   }
   init_0(result->bits, 4);
@@ -499,16 +499,16 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int s1 = getDecimalExp(value_1);
   int scale = s1 > s2 ? s1 : s2;
   size_t size = 6;
-  uint32_t *x = calloc(size,sizeof(uint32_t));
-  copyArray(value_1.bits,x,3);
-  uint32_t *y = calloc(size,sizeof(uint32_t));
-  copyArray(value_2.bits,y,3);
-  uint32_t *res = calloc(size,sizeof(uint32_t));
-  eq_scale_arr(x,y,s1,s2,size);
+  uint32_t *x = calloc(size, sizeof(uint32_t));
+  copyArray(value_1.bits, x, 3);
+  uint32_t *y = calloc(size, sizeof(uint32_t));
+  copyArray(value_2.bits, y, 3);
+  uint32_t *res = calloc(size, sizeof(uint32_t));
+  eq_scale_arr(x, y, s1, s2, size);
 
   bit_mod_arr(x, y, res, size);
-  reduce_scale_arr(res,size,&scale);
-  copyArray(res,result->bits,3);
+  reduce_scale_arr(res, size, &scale);
+  copyArray(res, result->bits, 3);
   setDecimalExp(result, scale);
   setDecimalSign(result, getDecimalSign(value_2));
   free(x);

@@ -43,20 +43,10 @@ check: s21_decimal.a
 
 rebuild: clean all
 
-prosto:
-	gcc -g s21_decimal.c prosto.c -o valg.out
-
-mini_grind:buf
-	valgrind -q --leak-check=full --track-origins=yes ./buf.out
-
 python_test:
 	gcc -c -fPIC $(SOURSES) --coverage
 	gcc $(OBJECTS) --coverage -shared -o s21_decimallib.so
 	python3 test.py
 	lcov -t "python_test" -o gcov_test.info --no-external -c -d .
 	genhtml -o report/ gcov_test.info
-buf:
-	gcc -g s21_decimal.c s21_arrays.c buf.c -lm -o buf.out
 
-fub:
-	gcc -g s21_decimal.c s21_arrays.c fub.c -lm -o fub.out

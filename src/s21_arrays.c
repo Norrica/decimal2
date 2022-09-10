@@ -293,11 +293,9 @@ int eq_scale_arr(uint32_t *x, uint32_t *y, int scalex, int scaley,
 int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
   uint32_t *buf = calloc(size, sizeof(uint32_t));
   uint32_t *five = calloc(size, sizeof(uint32_t));
-  uint32_t *div = calloc(size, sizeof(uint32_t));
   uint32_t *mod = calloc(size, sizeof(uint32_t));
   five[0] = 5;
   copyArray(arr, buf, size);
-
   bit_div_mod(buf, 10, buf, mod, size);
   if (cmp(mod, five, size) > 0) {
     bit_add(buf, 1, size);
@@ -316,7 +314,6 @@ int bank_round_arr(uint32_t *arr, int *scale, size_t size) {
   }
   free(buf);
   free(five);
-  free(div);
   free(mod);
   return ret;
 }
@@ -347,7 +344,7 @@ int reduce_scale_arr(uint32_t *arr, size_t size, int *scale) {
   while (*scale > 0) {
     bit_div_mod_arr(buf, ten, buf, mod, size);
     if (!is_0(mod, size)) {
-      mul10(buf,size);
+      mul10(buf, size);
       bit_add_arr(buf, mod, size);
       break;
     }
