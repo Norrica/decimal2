@@ -78,15 +78,14 @@ void negate(){
 }
 
 void dif(){
-  s21_decimal x = {{5, 0, 0, 0}};
-  s21_decimal y = {{3, 0, 0, 0}};
+  s21_decimal x = {{0, 0, 555555555, 0}};
+  s21_decimal y = {{1, 0, 0, 0}};
+  setDecimalExp(&y, 1);
   s21_decimal z = {{0, 0, 0, 0}};
-  setDecimalExp(&y, 20);
-  int n1 = 0;
-  n1 = s21_div(x, y, &z);
+  s21_mul(x, y, &z);
+  //printf("%d\n",n1);
+  //printf("%u\n",z.bits[0]);
   printBits(16,&z,12);
-  printf("err=%d\n",n1);
-
 }
 
 void f(){

@@ -373,7 +373,7 @@ void div_mod10(uint32_t *x, size_t size, int *exp) {
     copyArray(tmp, x, size);
     *exp += 1;
     bank_round_arr(x, exp, size);
-  } else if (*exp == 30) {
+  } else if (*exp == 29) {
     bank_round_arr(x, exp, size);
   }
 }
